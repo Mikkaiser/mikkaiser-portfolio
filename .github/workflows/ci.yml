@@ -36,4 +36,4 @@ jobs:
           NEXT_TELEMETRY_DISABLED: "1"
 
       - name: Assert "/" is prerendered
-        run: test -f .next/server/app/index.html && echo "ok: / is static"
+        run: test -f .next/server/app/index.html && echo "prerendered / found"
