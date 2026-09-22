@@ -342,6 +342,9 @@
   .split, .awards__split { grid-template-columns: minmax(0,1fr); gap: var(--space-12); }
   .photocol { flex-direction: row; flex-wrap: wrap; align-self: auto; }
   .photofig { flex: 1 1 200px; }
+  /* The column no longer has a definite height to divide, so the flex:1 1 0 box
+     would collapse to zero. Let it size to the image instead. */
+  .photobox { flex: 0 0 auto; display: block; }
   .photobox img { aspect-ratio: 3/4; height: auto; }
   .portrait { max-width: 420px; }
   .ctgrid { grid-template-columns: minmax(0,1fr); gap: var(--space-8); }
