@@ -65,18 +65,24 @@ Node 20+ (see `.nvmrc`).
 
 ## CI/CD
 
-- **GitHub Actions** (`.github/workflows/ci.yml`) runs lint, type-check and a production build on
-  every push to `main` and every pull request, and asserts that `/` was prerendered.
-- **Vercel** builds and deploys from the connected GitHub repository: every push to `main` goes
-  to production, every pull request gets its own preview URL. `ANTHROPIC_API_KEY` lives in the
-  Vercel project's environment variables (never in the repo).
-- **Dependabot** opens weekly PRs for npm packages and GitHub Actions; CI validates them.
+- **CI** (`.github/workflows/ci.yml`): on every push to `main` and every pull request — `npm ci`,
+  lint, type-check (`next typegen && tsc --noEmit`), production build, and an assertion that `/`
+  was prerendered to static HTML.
+- **Deploy** (`.github/workflows/deploy.yml`): builds with the Vercel CLI and deploys — every push
+  to `main` goes to production, every pull request gets a preview deployment whose URL is posted
+  as a PR comment. Uses the `VERCEL_TOKEN`, `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` repository
+  secrets. (If the repo is later connected through Vercel's GitHub integration, delete this
+  workflow to avoid double deploys.)
+- **Dependabot** (`.github/dependabot.yml`): weekly PRs for npm packages (minor/patch grouped)
+  and GitHub Actions; CI and a preview deploy validate each one.
 
 ## Configuration
 
 | Variable | Where | Purpose |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Vercel → Settings → Environment Variables (Production), `.env.local` for dev | Enables `/api/ask`. Without it the UI shows a friendly "not configured" message. |
+| `VERCEL_TOKEN` | GitHub → Settings → Secrets → Actions | Lets the deploy workflow publish to Vercel (create at vercel.com/account/tokens). |
+| `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` | GitHub Actions secrets | Identify the Vercel project (values from `.vercel/project.json` after `vercel link`). |
 
 ## Licence
 
