@@ -56,7 +56,10 @@ export function Hero() {
               alt="Mikael Ribeiro Simoes speaking on stage with a microphone"
               width={1280}
               height={853}
-              sizes="(max-width: 760px) 420px, 320px"
+              // The 3:4 frame crops ~50% off this 3:2 source, so request roughly double the
+              // displayed width or the visible part ends up upscaled.
+              sizes="(max-width: 760px) 840px, 640px"
+              quality={90}
               priority
               className="portrait__img photo"
             />

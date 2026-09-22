@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
   images: {
     // Optimised images are keyed by URL, so let browsers keep them for a month.
     minimumCacheTTL: THIRTY_DAYS,
+    // 90 is used for the hero portrait, which is cropped hard and sits above the fold.
+    qualities: [75, 90],
   },
   async headers() {
     return [
