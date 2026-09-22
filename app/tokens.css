@@ -1,0 +1,117 @@
+/* Design tokens — Mikkaiser design system (bc77c093).
+   Mirrors _ds_bundle.css from the claude.ai/design project.
+   Fonts are self-hosted through next/font and exposed as --font-* variables in layout.tsx. */
+
+/* colors */
+:root {
+  color-scheme: dark;
+  --bg: #0A0A0A;
+  --raised: #171717;
+  --sunken: #1F1F1F;
+  --rule: #2E2E2E;
+  --faint: #8F8F8F;
+  --muted: #A1A1A1;
+  --ink-soft: #D4D4D4;
+  --ink: #FFFFFF;
+  --ink-hover: #E5E5E5;
+  --on-ink: #0A0A0A;
+  --signal: #FF6166;
+  --gold: #E3B341;
+  --icon-mono: #FFFFFF;
+  --icon-dotnet: #9E7BFF;
+  --icon-jest: #F0596A;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #FFFFFF;
+  --raised: #FAFAFA;
+  --sunken: #F5F5F5;
+  --rule: #EBEBEB;
+  --faint: #737373;
+  --muted: #525252;
+  --ink-soft: #404040;
+  --ink: #000000;
+  --ink-hover: #333333;
+  --on-ink: #FFFFFF;
+  --signal: #CC0000;
+  --gold: #8A6100;
+  --icon-mono: #0F0F11;
+  --icon-dotnet: #512BD4;
+  --icon-jest: #C21325;
+}
+
+/* typography */
+:root {
+  --font-title: var(--font-poppins), "Poppins", sans-serif;
+  --font-body: var(--font-roboto), "Roboto", system-ui, sans-serif;
+  --font-body-medium: var(--font-roboto-medium), var(--font-roboto), "Roboto", system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", monospace;
+  --font-display: var(--font-bricolage), "Bricolage Grotesque", sans-serif;
+  --weight-body: 400;
+  --weight-medium: 500;
+  --weight-title: 600;
+  --weight-code: 600;
+  --size-section-head: 10px;
+  --ls-section-head: 0.18em;
+  --size-lead: 20px;
+  --lh-lead: 1.5;
+  --ls-lead: -0.01em;
+  --size-body: 15px;
+  --lh-body: 1.7;
+  --size-small: 13px;
+  --lh-small: 1.6;
+  --size-meta: 11px;
+  --size-micro: 10px;
+  --ls-micro: 0.16em;
+  --measure-body: 64ch;
+  --measure-lead: 44ch;
+}
+
+/* spacing */
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-18: 72px;
+  --radius-control: 4px;
+  --radius-card: 12px;
+  --radius-round: 50%;
+  --hairline: 1px;
+}
+
+/* motion */
+:root {
+  --dur-pointer: 120ms;
+  --dur-photo: 300ms;
+  --ease: linear;
+}
+
+/* base */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-size: var(--size-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--ink); text-decoration: none; }
+a:hover { color: var(--ink-hover); }
+button { font-family: inherit; }
+::selection { background: var(--ink); color: var(--on-ink); }
+input:focus, textarea:focus, select:focus {
+  border-color: var(--ink);
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
