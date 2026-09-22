@@ -8,7 +8,7 @@ export function Footer() {
           <div>
             <div aria-hidden="true" className="foot__glyph">&lt;/&gt;</div>
             <div className="display foot__brand">Mikkaiser</div>
-            <p className="small foot__p">Full stack and enterprise systems, out of Abu Dhabi. Usually mid deploy.</p>
+            <p className="small foot__p">Full stack developer building enterprise systems from Abu Dhabi.</p>
             <a href="mailto:mikkaiser.ribeiro@gmail.com" className="btn btn--primary btn--sm" style={{ padding: "11px 18px" }}>Start a conversation</a>
           </div>
           <nav className="foot__col" aria-label="Footer, pages">

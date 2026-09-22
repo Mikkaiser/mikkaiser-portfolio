@@ -19,7 +19,7 @@ export function Hero() {
                   alt="Mordekaiser, the League of Legends champion"
                   width={96}
                   height={112}
-                  sizes="96px"
+                  sizes="176px"
                   loading="lazy"
                   fetchPriority="low"
                   className="ref__img"

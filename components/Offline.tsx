@@ -20,7 +20,7 @@ export function Offline() {
         {PHOTOS.map((p) => (
           <figure data-anim key={p.src}>
             <div className="frame">
-              <Image src={p.src} alt={p.alt} width={p.w} height={p.h} sizes="(max-width: 620px) 50vw, 220px" style={{ objectPosition: p.pos }} />
+              <Image src={p.src} alt={p.alt} width={p.w} height={p.h} sizes="(max-width: 620px) 120vw, 500px" style={{ objectPosition: p.pos }} />
             </div>
             <figcaption className="figcap">{p.cap}</figcaption>
           </figure>
