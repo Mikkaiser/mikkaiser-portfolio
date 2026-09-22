@@ -19,7 +19,7 @@ const jetbrains = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "600"], d
 const poppins = Poppins({ subsets: ["latin"], weight: ["600"], display: "swap", preload: false, variable: "--font-poppins" });
 
 const SITE = "https://mikkaiser.com";
-const TITLE = "Mikael Ribeiro Simoes — Software Developer, Abu Dhabi";
+const TITLE = "Mikael Ribeiro Simoes | Software Developer, Abu Dhabi";
 const DESCRIPTION =
   "Full stack software developer in Abu Dhabi. Six years across .NET, Node, Angular and Next.js building enterprise platforms, one serving 780,000 users, and two gold medals in software applications development.";
 
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "profile",
     url: SITE,
-    title: "Mikael Ribeiro Simoes (Mikkaiser) — Software Developer, Abu Dhabi",
+    title: "Mikael Ribeiro Simoes (Mikkaiser) | Software Developer, Abu Dhabi",
     description:
       "Full stack and enterprise systems in .NET, Node and TypeScript. Platforms serving 780,000 users. Two golds in software applications development.",
     locale: "en_GB",
