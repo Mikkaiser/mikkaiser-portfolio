@@ -19,11 +19,11 @@ const jetbrains = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "600"], d
 const poppins = Poppins({ subsets: ["latin"], weight: ["600"], display: "swap", preload: false, variable: "--font-poppins" });
 
 const SITE = "https://mikkaiser.com";
-// The tab reads "Mikkaiser". The full name is deliberately kept in the h1, the
-// description, the OG title and the Person schema below, which is what Google
-// matches a "mikael ribeiro" search against and what it uses to rewrite the
-// displayed title for a name query.
-const TITLE = "Mikkaiser";
+// Mikkaiser leads, so a narrow tab truncates to the name. The full name is
+// deliberately kept in the h1, the description, the OG title and the Person
+// schema below, which is what Google matches a "mikael ribeiro" search against
+// and what it uses to rewrite the displayed title for a name query.
+const TITLE = "Mikkaiser | Software Developer, Abu Dhabi";
 const FULL_NAME = "Mikael Ribeiro Simoes";
 const DESCRIPTION =
   "Mikael Ribeiro Simoes, known as Mikkaiser, is a full stack software developer in Abu Dhabi. Six years across .NET, Node, Angular and Next.js building enterprise platforms, one serving 780,000 users, and two gold medals in software applications development.";
@@ -31,7 +31,7 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: TITLE,
-  applicationName: TITLE,
+  applicationName: "Mikkaiser",
   description: DESCRIPTION,
   authors: [{ name: FULL_NAME, url: SITE }],
   creator: FULL_NAME,
