@@ -146,9 +146,13 @@
 }
 .crefwrap:hover .cbtn, .crefwrap:focus-within .cbtn { color: var(--ink); }
 .cref {
-  position: absolute; left: 0; bottom: calc(100% + 12px); width: min(340px, 82vw); background: var(--bg); border: var(--hairline) solid var(--ink);
+  /* Opens downward. The trigger is the last thing in an award card, so upward
+     put a 400px panel through the section heading and off the top of the
+     viewport, where it could not be read. Downward there is always page left. */
+  position: absolute; left: 0; top: calc(100% + 12px); width: min(340px, 82vw); background: var(--bg); border: var(--hairline) solid var(--ink);
   border-radius: var(--radius-control); padding: var(--space-4); z-index: 40; text-align: left; white-space: normal;
-  opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(7px);
+  max-height: min(420px, 62vh); overflow: hidden auto; overscroll-behavior: contain;
+  opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(-7px);
   transition: opacity .18s linear, transform .22s cubic-bezier(.16,.84,.31,1), visibility .18s linear;
 }
 .crefwrap:hover .cref, .crefwrap:focus-within .cref { opacity: 1; visibility: visible; pointer-events: auto; transform: none; }
@@ -164,13 +168,13 @@
 /* ---------- chips + tooltips ---------- */
 .chips { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
 .chip {
-  position: relative; display: inline-flex; align-items: center; gap: 7px; background: #15171B; border: var(--hairline) solid rgba(255,255,255,.1);
+  position: relative; display: inline-flex; align-items: center; gap: 7px; background: var(--chip-bg); border: var(--hairline) solid var(--chip-rule);
   border-radius: var(--radius-control); padding: 5px 9px; cursor: default;
   transition: border-color var(--dur-pointer) var(--ease), background var(--dur-pointer) var(--ease);
 }
-.chip:hover { border-color: rgba(255,255,255,.4); background: #1C1F25; }
+.chip:hover { border-color: var(--chip-rule-hover); background: var(--chip-bg-hover); }
 .chip img, .chip svg { height: 15px; width: auto; }
-.chip span { font-family: var(--font-mono); font-size: var(--size-micro); letter-spacing: .09em; text-transform: uppercase; color: #D6DBE1; white-space: nowrap; }
+.chip span { font-family: var(--font-mono); font-size: var(--size-micro); letter-spacing: .09em; text-transform: uppercase; color: var(--chip-ink); white-space: nowrap; }
 [data-tip]::after {
   content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%);
   max-width: 240px; width: max-content; background: var(--ink); color: var(--on-ink); font-family: var(--font-body); font-size: 11.5px; font-weight: 400;

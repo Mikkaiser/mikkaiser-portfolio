@@ -12,7 +12,7 @@ export function Footer() {
             <a href="mailto:mikkaiser.ribeiro@gmail.com" className="btn btn--primary btn--sm" style={{ padding: "11px 18px" }}>Start a conversation</a>
           </div>
           <nav className="foot__col" aria-label="Footer, pages">
-            <div className="foot__label">Pages</div>
+            <div className="foot__label">Sections</div>
             <a className="navlink" href="#work">Work</a>
             <a className="navlink" href="#experience">Experience</a>
             <a className="navlink" href="#awards">Achievements</a>

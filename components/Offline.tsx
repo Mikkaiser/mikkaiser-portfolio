@@ -8,14 +8,23 @@ const PHOTOS = [
   { src: "/assets/cat.jpg", w: 4000, h: 2252, alt: "An orange cat sitting on a bed", pos: "50% 42%", cap: "The same cat, September 2026." },
 ];
 
+// The eyebrow counts subjects, not photos: two of the five images are the same
+// cat. Both the count and the lead sentence are built from this one list, so
+// adding a hobby cannot leave the heading claiming the wrong number again.
+const SUBJECTS = ["the desert", "the gym", "a controller", "a cat waiting at home"];
+const NUMBERS = ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven"];
+
+const count = NUMBERS[SUBJECTS.length] ?? String(SUBJECTS.length);
+const lead = `${SUBJECTS.slice(0, -1).join(", ")}, and ${SUBJECTS.at(-1)}.`;
+
 export function Offline() {
   return (
     <section id="offline" className="section section--lazy" aria-labelledby="off-h">
       <div className="section-head" data-anim>
         <h2 id="off-h">Off the clock</h2>
-        <span className="eyebrow">Three things</span>
+        <span className="eyebrow">{count} things</span>
       </div>
-      <p className="lead offline__lead" data-anim>The desert, the gym, a controller, and a cat waiting at home.</p>
+      <p className="lead offline__lead" data-anim>{lead[0].toUpperCase() + lead.slice(1)}</p>
       <div className="gallery">
         {PHOTOS.map((p) => (
           <figure data-anim key={p.src}>

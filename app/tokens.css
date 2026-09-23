@@ -20,6 +20,11 @@
   --icon-mono: #FFFFFF;
   --icon-dotnet: #9E7BFF;
   --icon-jest: #F0596A;
+  --chip-bg: #15171B;
+  --chip-bg-hover: #1C1F25;
+  --chip-rule: rgba(255, 255, 255, 0.1);
+  --chip-rule-hover: rgba(255, 255, 255, 0.4);
+  --chip-ink: #D6DBE1;
 }
 :root[data-theme="light"] {
   color-scheme: light;
@@ -38,6 +43,11 @@
   --icon-mono: #0F0F11;
   --icon-dotnet: #512BD4;
   --icon-jest: #C21325;
+  --chip-bg: #F5F5F5;
+  --chip-bg-hover: #EBEBEB;
+  --chip-rule: rgba(0, 0, 0, 0.12);
+  --chip-rule-hover: rgba(0, 0, 0, 0.42);
+  --chip-ink: #3A3A3A;
 }
 
 /* typography */
