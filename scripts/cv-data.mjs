@@ -93,7 +93,7 @@ export const cv = {
     ["AUTEGE", "Workshop management for service workshops in Brazil and the UAE, public site and internal operations app. autege.com"],
     ["EmiratesSkills Competition System", "Runs the UAE national skills competition end to end, plus the public site. emiratesskills.mikkaiser.com"],
     ["Training Planner", "Planning and tracking for competition training programmes, full .NET stack. training-planner.mikkaiser.com"],
-    ["TechKnowledge", "Technical publication on backend architecture and enterprise development. techknowledge.blog"],
+    ["TechKnowledge", "Technical blog written with Leticia Dias, sharing what we learn about technology, from backend architecture to enterprise development. techknowledge.blog"],
     ["SotreqLink", "Operational management platform for Sotreq and Caterpillar, ~5,000 users, with Android and iOS apps."],
     ["SENAI Play", "National learning platform with 780,000+ active users. play.senai.br"],
   ],
