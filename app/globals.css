@@ -277,6 +277,16 @@
 }
 .field textarea { resize: vertical; min-height: 120px; line-height: 1.55; }
 .form__foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+/* Sent confirmation, shown in place of the fields. */
+.form__sent { display: grid; justify-items: center; text-align: center; gap: var(--space-3); padding: var(--space-8) var(--space-4); animation: mk-in .45s cubic-bezier(.16,.84,.31,1) both; }
+.form__tick { width: 46px; height: 46px; border-radius: var(--radius-round); display: grid; place-items: center; background: var(--gold); color: var(--bg); }
+.form__tick svg { display: block; }
+.form__sent h3 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 21px; letter-spacing: -0.025em; color: var(--ink); }
+.form__sent p { margin: 0; font-size: var(--size-small); line-height: var(--lh-small); color: var(--muted); max-width: 34ch; }
+.form__again { margin-top: var(--space-2); }
+/* Inline error, shown above the footer. */
+.form__error { display: flex; align-items: flex-start; gap: 9px; font-size: var(--size-small); line-height: var(--lh-small); color: var(--signal); }
+.form__error svg { flex: none; margin-top: 3px; }
 .form__status { min-width: 0; flex: 1; font-family: var(--font-mono); font-size: var(--size-micro); letter-spacing: var(--ls-micro); text-transform: uppercase; color: var(--faint); }
 .form__submit { flex: none; }
 
