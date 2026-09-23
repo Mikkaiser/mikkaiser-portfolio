@@ -1,9 +1,12 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
+import OpenAI from "openai";
 import { BIO } from "@/lib/bio";
 
 export const runtime = "nodejs";
 
+// gpt-5.4-mini: small, fast and cheap, which suits short CV answers.
+// Note it rejects `max_tokens` and requires `max_completion_tokens`.
+const MODEL = "gpt-5.4-mini";
 const MAX_TURNS = 20;
 const MAX_CHARS = 2000;
 
@@ -25,8 +28,6 @@ function parseTurns(input: unknown): Turn[] | null {
   return turns;
 }
 
-const client = new Anthropic();
-
 export async function POST(req: Request) {
   let body: unknown;
   try {
@@ -40,44 +41,37 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Expected { messages: [{ role, content }] }." }, { status: 400 });
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.error("ask: ANTHROPIC_API_KEY is not set");
+  if (!process.env.OPENAI_API_KEY) {
+    console.error("ask: OPENAI_API_KEY is not set");
     return NextResponse.json({ error: "The agent is not configured yet. Email mikkaiser.ribeiro@gmail.com instead." }, { status: 503 });
   }
 
   try {
-    const response = await client.beta.messages.create({
-      model: "claude-opus-5",
-      max_tokens: 1024,
-      betas: ["server-side-fallback-2026-07-01"],
-      fallbacks: "default",
-      output_config: { effort: "low" },
-      system: [{ type: "text", text: BIO, cache_control: { type: "ephemeral" } }],
-      messages: turns,
+    const client = new OpenAI();
+    const completion = await client.chat.completions.create({
+      model: MODEL,
+      max_completion_tokens: 1024,
+      messages: [{ role: "system", content: BIO }, ...turns],
     });
 
-    if (response.stop_reason === "refusal") {
+    const choice = completion.choices[0];
+    if (choice?.finish_reason === "content_filter") {
       return NextResponse.json({
         reply: "I cannot help with that one. Ask something about Mikael's work, stack or background.",
       });
     }
 
-    const reply = response.content
-      .filter((block) => block.type === "text")
-      .map((block) => block.text)
-      .join("")
-      .trim();
-
+    const reply = choice?.message?.content?.trim();
     return NextResponse.json({ reply: reply || "No answer came back. Try again in a moment." });
   } catch (error) {
-    if (error instanceof Anthropic.RateLimitError) {
+    if (error instanceof OpenAI.RateLimitError) {
       return NextResponse.json({ error: "Too many questions right now. Try again in a minute." }, { status: 429 });
     }
-    if (error instanceof Anthropic.AuthenticationError) {
-      console.error("ask: ANTHROPIC_API_KEY is missing or invalid");
+    if (error instanceof OpenAI.AuthenticationError) {
+      console.error("ask: OPENAI_API_KEY is invalid");
       return NextResponse.json({ error: "The agent is not configured." }, { status: 500 });
     }
-    if (error instanceof Anthropic.APIError) {
+    if (error instanceof OpenAI.APIError) {
       console.error("ask: API error", error.status, error.message);
       return NextResponse.json({ error: "That did not go through." }, { status: 502 });
     }
