@@ -39,7 +39,7 @@ const CARDS: Card[] = [
     logo: { name: "techknowledge", alt: "TechKnowledge", width: 160, height: 160, display: 26 },
     when: "2026 ↗",
     title: "TechKnowledge",
-    blurb: "My own publication. Backend architecture, enterprise development, and the parts of the job that do not fit in a commit message.",
+    blurb: "A blog I write with my friend Leticia Dias, to share what we learn about technology. Backend architecture, enterprise development, and the parts of the job that do not fit in a commit message.",
     chips: [CHIPS.next, CHIPS.ts],
     link: { href: "https://techknowledge.blog", label: "techknowledge.blog ↗" },
     preview: { src: "/assets/prev-techknowledge.webp", width: 718, height: 401, alt: "Screenshot of techknowledge.blog" },

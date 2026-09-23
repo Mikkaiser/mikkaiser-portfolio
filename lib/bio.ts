@@ -39,7 +39,7 @@ SENAI Alagoas, Maceio, Web Developer, March 2021 to April 2022. Delivered four W
 
 PROJECTS
 AUTEGE, workshop management for Brazil and the UAE, autege.com public and app.autege.com internal.
-techknowledge.blog, his own technical blog.
+techknowledge.blog, a technical blog he writes together with his friend Leticia Dias, where the two of them share what they learn about technology.
 Training planner, training-planner.mikkaiser.com, planning and tracking for competition training programmes.
 EmiratesSkills competition system, app.emiratesskills.ae, internal, runs the national skills competition. Public site at emiratesskills.mikkaiser.com.
 SotreqLink, field service platform at Radix for Sotreq and Caterpillar, with an Android and iOS app, roughly 5,000 technicians.
