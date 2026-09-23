@@ -48,6 +48,7 @@
 .btn svg { display: block; flex: none; }
 .btn--primary { background: var(--ink); color: var(--on-ink); border: 0; padding: 13px 22px; }
 .btn--primary:hover { color: var(--on-ink); background: var(--ink-hover); }
+.form__submit:disabled { opacity: .6; cursor: wait; }
 .btn--ghost { background: transparent; border: var(--hairline) solid var(--rule); color: var(--ink); padding: 12px 21px; }
 .btn--ghost:hover { border-color: var(--ink); background: var(--raised); color: var(--ink); }
 .btn--sm { font-size: 13.5px; padding: 9px 16px; }
