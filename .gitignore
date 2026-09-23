@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# cached Google Fonts for scripts/build-cv.mjs
+/scripts/.fonts

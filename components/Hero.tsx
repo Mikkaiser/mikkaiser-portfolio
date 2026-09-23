@@ -65,7 +65,7 @@ export function Hero() {
             />
           </div>
           <figcaption className="portrait__cap">
-            <span className="portrait__role"><span className="dot" />Software Developer at ACTVET</span>
+            <span className="portrait__role"><span className="dot" />Senior Software Engineer at ACTVET</span>
             <span className="portrait__loc">Abu Dhabi, UAE · UTC+4</span>
             <span className="portrait__hint">Hover me to see in colour</span>
           </figcaption>

@@ -66,7 +66,7 @@ const personJsonLd = {
   "@type": "Person",
   name: "Mikael Ribeiro Simoes",
   alternateName: "mikkaiser",
-  jobTitle: "Software Developer",
+  jobTitle: "Senior Software Engineer",
   description:
     "Full stack software developer working across backend architecture, front end and enterprise systems, based in Abu Dhabi.",
   url: `${SITE}/`,

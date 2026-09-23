@@ -4,7 +4,7 @@ type Row = { when: string; now?: boolean; title: string; org: string; blurb: str
 
 const ROWS: Row[] = [
   {
-    when: "2023 → NOW", now: true, title: "Software Development Expert", org: "ACTVET, Abu Dhabi",
+    when: "2023 → NOW", now: true, title: "Senior Software Engineer", org: "ACTVET, Abu Dhabi",
     blurb: "Internal platforms in .NET, ASP.NET Core, Next.js and SQL Server for 200+ users. I own the APIs and the pipelines, and the xUnit coverage that cut deployment issues by 30%.",
     chips: [CHIPS.dotnet, CHIPS.next, CHIPS.sqlserver, CHIPS.xunit, CHIPS.azurePipelines],
   },
