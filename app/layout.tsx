@@ -19,16 +19,24 @@ const jetbrains = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "600"], d
 const poppins = Poppins({ subsets: ["latin"], weight: ["600"], display: "swap", preload: false, variable: "--font-poppins" });
 
 const SITE = "https://mikkaiser.com";
-const TITLE = "Mikael Ribeiro Simoes | Software Developer, Abu Dhabi";
+// The tab reads "Mikkaiser". The full name is deliberately kept in the h1, the
+// description, the OG title and the Person schema below, which is what Google
+// matches a "mikael ribeiro" search against and what it uses to rewrite the
+// displayed title for a name query.
+const TITLE = "Mikkaiser";
+const FULL_NAME = "Mikael Ribeiro Simoes";
 const DESCRIPTION =
-  "Full stack software developer in Abu Dhabi. Six years across .NET, Node, Angular and Next.js building enterprise platforms, one serving 780,000 users, and two gold medals in software applications development.";
+  "Mikael Ribeiro Simoes, known as Mikkaiser, is a full stack software developer in Abu Dhabi. Six years across .NET, Node, Angular and Next.js building enterprise platforms, one serving 780,000 users, and two gold medals in software applications development.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: TITLE,
+  applicationName: TITLE,
   description: DESCRIPTION,
-  authors: [{ name: "Mikael Ribeiro Simoes", url: SITE }],
-  creator: "Mikael Ribeiro Simoes",
+  authors: [{ name: FULL_NAME, url: SITE }],
+  creator: FULL_NAME,
+  publisher: FULL_NAME,
+  keywords: [FULL_NAME, "Mikael Ribeiro", "Mikkaiser", "software developer Abu Dhabi", ".NET developer UAE"],
   alternates: { canonical: "/" },
   robots: { index: true, follow: true, "max-image-preview": "large" },
   openGraph: {
@@ -46,7 +54,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: `${FULL_NAME} (Mikkaiser)`,
     description: "Backend and enterprise systems in .NET and Node. Platforms serving 780,000 users.",
     images: ["/assets/portrait.jpg"],
   },
@@ -65,7 +73,7 @@ const personJsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
   name: "Mikael Ribeiro Simoes",
-  alternateName: "mikkaiser",
+  alternateName: ["Mikkaiser", "mikkaiser", "Mikael Ribeiro"],
   jobTitle: "Senior Software Engineer",
   description:
     "Full stack software developer working across backend architecture, front end and enterprise systems, based in Abu Dhabi.",
