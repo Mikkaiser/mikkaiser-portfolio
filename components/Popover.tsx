@@ -17,14 +17,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const GAP = 12;
 const EDGE = 16;
 const MIN = 180;
-const IDEAL = 420;
 const SIDE_GAP = 14; // matches the side offset in the stylesheet
+
+/** "none" means the panel fits and should not be capped, so no scrollbar. */
+type Max = number | "none";
 
 type Placement =
   /** Stacked above or below the trigger: the award tiles, and the hero on phones. */
-  | { mode: "stack"; dir: "up" | "down"; max: number; shift: number }
+  | { mode: "stack"; dir: "up" | "down"; max: Max; shift: number }
   /** Beside the trigger: the hero reference on wide screens. */
-  | { mode: "side"; side: "right" | "left"; top: number; max: number };
+  | { mode: "side"; side: "right" | "left"; top: number; max: Max };
 
 type Props = {
   id: string;
@@ -51,23 +53,33 @@ export function Popover({ id, label, children, wrapClass, triggerClass, panelCla
     const r = el.getBoundingClientRect();
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    // scrollHeight is the full content height even while max-height clips it.
-    const contentH = panel.scrollHeight;
     const width = panel.offsetWidth || 340;
+
+    // scrollHeight is the full content height even while max-height clips it,
+    // but it stops at the padding edge. max-height is border-box here, so the
+    // borders have to be added back or the panel is capped a couple of pixels
+    // under its own content and grows a scrollbar it does not need.
+    const cs = getComputedStyle(panel);
+    const borders = parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
+    const needed = Math.ceil(panel.scrollHeight + borders);
+    // Only cap when the content genuinely does not fit.
+    const cap = (room: number): Max => (needed <= room ? "none" : Math.floor(room));
 
     if (sideOnDesktop && window.matchMedia("(min-width: 620px)").matches) {
       // Beside the trigger. The stylesheet pins the panel's bottom to the
       // trigger's, which sends a tall one off the top of the screen, so the
       // top is computed instead and clamped to the viewport.
-      const max = Math.min(contentH, vh - EDGE * 2);
-      const wanted = r.bottom - max;
-      const top = Math.max(EDGE, Math.min(wanted, vh - EDGE - max));
+      const room = vh - EDGE * 2;
+      const max = cap(room);
+      const height = Math.min(needed, room);
+      const wanted = r.bottom - height;
+      const top = Math.max(EDGE, Math.min(wanted, vh - EDGE - height));
       // Only sit beside the trigger if a side actually has room; a narrow
       // window has neither, and then stacking below is the honest answer.
       const fitsRight = r.right + SIDE_GAP + width <= vw - EDGE;
       const fitsLeft = r.left - SIDE_GAP - width >= EDGE;
       if (fitsRight || fitsLeft) {
-        setPlacement({ mode: "side", side: fitsRight ? "right" : "left", top: Math.round(top - r.top), max: Math.round(max) });
+        setPlacement({ mode: "side", side: fitsRight ? "right" : "left", top: Math.round(top - r.top), max });
         return;
       }
     }
@@ -75,15 +87,17 @@ export function Popover({ id, label, children, wrapClass, triggerClass, panelCla
     const below = vh - r.bottom - GAP - EDGE;
     const above = r.top - GAP - EDGE;
     // Prefer downward, and flip only when upward genuinely buys more room.
-    const dir = below >= IDEAL || below >= above || below >= MIN ? "down" : "up";
-    const room = Math.max(dir === "down" ? below : above, MIN);
+    const dir = below >= needed || below >= above || below >= MIN ? "down" : "up";
+    // The real space on the chosen side. Never inflate it: the cap below is
+    // what keeps the panel on screen.
+    const room = Math.max(dir === "down" ? below : above, 0);
 
     // Keep it inside the viewport horizontally too. The hero trigger sits mid
     // sentence, so a panel anchored to it can overhang the right edge.
     const overhang = r.left + width - (vw - EDGE);
     const shift = overhang > 0 ? Math.max(-(r.left - EDGE), -overhang) : 0;
 
-    setPlacement({ mode: "stack", dir, max: Math.min(IDEAL, Math.round(room)), shift: Math.round(shift) });
+    setPlacement({ mode: "stack", dir, max: cap(room), shift: Math.round(shift) });
   }, [panelClass, sideOnDesktop]);
 
   // A hover panel rarely outlives a scroll, but a resize mid-hover would strand it.
