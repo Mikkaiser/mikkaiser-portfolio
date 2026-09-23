@@ -12,6 +12,9 @@
 .wrap { max-width: 1180px; margin: 0 auto; padding-left: var(--space-8); padding-right: var(--space-8); }
 .section { max-width: 1180px; margin: 0 auto; padding: var(--space-18) var(--space-8) 0; }
 /* Below-the-fold sections skip style/layout work until they approach the viewport. */
+/* content-visibility brings paint containment with it, which clips anything a
+   section paints outside its own box. Sections holding popovers that overflow
+   (Awards) deliberately opt out. */
 .section--lazy, .footer { content-visibility: auto; contain-intrinsic-size: auto 900px; }
 .section--last { padding-bottom: var(--space-18); }
 
@@ -85,7 +88,10 @@
 .hero [data-hero] { animation: mk-in .7s cubic-bezier(.16,.84,.31,1) both; }
 .split { display: grid; grid-template-columns: minmax(0,1fr) minmax(240px,320px); gap: var(--space-12); align-items: start; }
 .hero__h1 {
-  position: relative; z-index: 20; margin: 0; font-size: clamp(36px, 5.6vw, 62px); line-height: 1; max-width: 15ch; text-wrap: pretty;
+  /* Above the header (30): the reveal animation's transform makes this a
+     stacking context, so the reference popover inside it cannot escape on its
+     own and would be painted over by the header bar. */
+  position: relative; z-index: 40; margin: 0; font-size: clamp(36px, 5.6vw, 62px); line-height: 1; max-width: 15ch; text-wrap: pretty;
 }
 .hero__glyph { display: block; font-family: var(--font-mono); font-weight: var(--weight-code); font-size: clamp(20px, 2.6vw, 30px); letter-spacing: 0; color: var(--faint); margin-bottom: var(--space-4); }
 .hero__lead { margin-top: var(--space-8); }
@@ -146,15 +152,25 @@
 }
 .crefwrap:hover .cbtn, .crefwrap:focus-within .cbtn { color: var(--ink); }
 .cref {
-  /* Opens downward. The trigger is the last thing in an award card, so upward
-     put a 400px panel through the section heading and off the top of the
-     viewport, where it could not be read. Downward there is always page left. */
+  /* Side and height are set by components/Cref.tsx, which measures the room
+     around the trigger before opening. These are the no-JS defaults. */
   position: absolute; left: 0; top: calc(100% + 12px); width: min(340px, 82vw); background: var(--bg); border: var(--hairline) solid var(--ink);
   border-radius: var(--radius-control); padding: var(--space-4); z-index: 40; text-align: left; white-space: normal;
   max-height: min(420px, 62vh); overflow: hidden auto; overscroll-behavior: contain;
   opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(-7px);
   transition: opacity .18s linear, transform .22s cubic-bezier(.16,.84,.31,1), visibility .18s linear;
 }
+/* components/Popover.tsx measures the room around the trigger and sets these. */
+.cref[data-dir="up"] { top: auto; bottom: calc(100% + 12px); transform: translateY(7px); }
+.cref[data-dir="down"] { top: calc(100% + 12px); bottom: auto; transform: translateY(-7px); }
+/* Stacked mode has to undo the wide-screen side offset, or the measured
+   horizontal shift is computed against the wrong anchor. */
+.ref[data-dir] { left: 0; right: auto; }
+.ref[data-side] { bottom: auto; max-height: none; overflow: hidden auto; overscroll-behavior: contain; }
+.ref[data-side="right"] { left: calc(100% + 14px); right: auto; }
+.ref[data-side="left"] { left: auto; right: calc(100% + 14px); }
+.ref[data-dir="down"] { top: calc(100% + 14px); bottom: auto; transform: translateY(-7px); overflow: hidden auto; }
+.ref[data-dir="up"] { top: auto; bottom: calc(100% + 14px); transform: translateY(7px); overflow: hidden auto; }
 .crefwrap:hover .cref, .crefwrap:focus-within .cref { opacity: 1; visibility: visible; pointer-events: auto; transform: none; }
 
 /* ---------- marquee ---------- */

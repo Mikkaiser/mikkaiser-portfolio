@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Popover } from "./Popover";
 import { GameButton } from "./GameButton";
 import { GitHub, LinkedIn } from "./icons";
 
@@ -10,10 +11,14 @@ export function Hero() {
           <h1 id="hero-h" className="display hero__h1" data-hero style={{ animationDelay: ".12s" }}>
             <span aria-hidden="true" className="hero__glyph">&lt;/&gt;</span>
             Hi, my name is Mikael, but you can call me{" "}
-            <span className="refwrap">
-              <span className="refname" tabIndex={0} role="button" aria-describedby="ref-mikkaiser">Mikkaiser</span>
-              <span className="ref" id="ref-mikkaiser" role="note">
-                <span className="ref__label">Reference</span>
+            <Popover
+              id="ref-mikkaiser"
+              label="Mikkaiser"
+              wrapClass="refwrap"
+              triggerClass="refname"
+              panelClass="ref"
+              sideOnDesktop
+            >
                 <Image
                   src="/assets/mordekaiser.png"
                   alt="Mordekaiser, the League of Legends champion"
@@ -31,8 +36,7 @@ export function Hero() {
                 <span className="ref__p">
                   I swapped <strong className="strong">Morde</strong> for <strong className="strong">Mik</strong>. I have used <strong className="strong">Mikkaiser</strong> as my nickname in games, forums and anywhere else ever since. For some reason nobody else thinks of it, so it&apos;s always available ;)
                 </span>
-              </span>
-            </span>
+            </Popover>
             !
           </h1>
           <p className="lead hero__lead" data-hero style={{ animationDelay: ".2s" }}>

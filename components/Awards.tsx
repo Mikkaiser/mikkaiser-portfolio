@@ -1,22 +1,13 @@
 import Image from "next/image";
 import { BrandLogo } from "./BrandLogo";
+import { Cref } from "./Popover";
 import { Cap, FlagUAE, Medal, Mic, People } from "./icons";
 
-function Cref({ id, button, children }: { id: string; button: string; children: React.ReactNode }) {
-  return (
-    <span className="crefwrap">
-      <span className="cbtn" tabIndex={0} role="button" aria-describedby={id}>{button}</span>
-      <span className="cref" id={id} role="note">
-        <span className="ref__label">Reference</span>
-        {children}
-      </span>
-    </span>
-  );
-}
-
+// No section--lazy here: content-visibility brings paint containment with it,
+// which clips the reference popovers at the section box.
 export function Awards() {
   return (
-    <section id="awards" className="section section--lazy" aria-labelledby="aw-h">
+    <section id="awards" className="section" aria-labelledby="aw-h">
       <div className="section-head" data-anim>
         <h2 id="aw-h">Awards and achievements</h2>
         <span className="eyebrow">Two golds · One stage</span>
