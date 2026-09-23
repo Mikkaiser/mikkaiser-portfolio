@@ -14,6 +14,53 @@ const SUGGESTIONS: { label: string; ask: string }[] = [
 
 const FAIL = "That did not go through. Try again in a moment, or email mikkaiser.ribeiro@gmail.com.";
 
+// The agent answers in plain text, so its own references are turned into links
+// here. Only these shapes qualify: an #anchor naming a section that exists, a
+// full URL, an email address, or a bare domain on the short allowlist below.
+// Bare domains are matched by host rather than by shape, so ".NET", "Next.js"
+// and "ASP.NET Core" are never mistaken for links.
+const SECTIONS: Record<string, string> = {
+  top: "Top", work: "Work", experience: "Experience", awards: "Achievements",
+  ask: "Ask about me", contact: "Contact", offline: "Offline",
+};
+const HOSTS = "mikkaiser\\.com|autege\\.com|techknowledge\\.blog|senai\\.br|emiratesskills\\.ae|linkedin\\.com|github\\.com";
+const LINKABLE = new RegExp(
+  [
+    "(https?://[^\\s<>()]+[^\\s<>().,;:!?])",
+    "([\\w.+-]+@[\\w-]+(?:\\.[\\w-]+)+)",
+    `((?:[\\w-]+\\.)*(?:${HOSTS})(?:/[^\\s<>()]*[^\\s<>().,;:!?])?)`,
+    "(#[a-z]{2,12})\\b",
+  ].join("|"),
+  "gi",
+);
+
+function linkify(text: string) {
+  const out: (string | React.ReactElement)[] = [];
+  let last = 0;
+  for (const m of text.matchAll(LINKABLE)) {
+    const [raw, url, email, domain, anchor] = m;
+    const at = m.index;
+    const section = anchor ? SECTIONS[anchor.slice(1).toLowerCase()] : undefined;
+    if (anchor && !section) continue;
+    if (at > last) out.push(text.slice(last, at));
+    const external = Boolean(url || domain);
+    const href = url ? raw : domain ? `https://${raw}` : email ? `mailto:${raw}` : anchor.toLowerCase();
+    // The model usually writes "the #contact section", so do not repeat the word.
+    const label = section ?? raw;
+    const rest = text.slice(at + raw.length);
+    if (section && /^\s+section\b/i.test(rest)) last = at + raw.length + rest.match(/^\s+section/i)![0].length;
+    else last = at + raw.length;
+    out.push(
+      <a key={at} href={href} className="msg__link" {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
+        {section ? `${label} section` : label}
+      </a>,
+    );
+  }
+  if (!out.length) return text;
+  out.push(text.slice(last));
+  return out;
+}
+
 export function Ask() {
   const [messages, setMessages] = useState<Msg[]>([{ role: "assistant", content: GREETING }]);
   const [input, setInput] = useState("");
@@ -74,7 +121,7 @@ export function Ask() {
           {messages.map((m, i) => (
             <div className={`msg${m.role === "user" ? " msg--user" : ""}`} key={i}>
               {m.role === "assistant" && <span aria-hidden="true" className="msg__spark"><Spark size={14} /></span>}
-              <div className="msg__bubble">{m.content}</div>
+              <div className="msg__bubble">{m.role === "assistant" ? linkify(m.content) : m.content}</div>
             </div>
           ))}
           {busy && (

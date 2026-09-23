@@ -243,6 +243,8 @@
 .msg--user { align-self: flex-end; }
 .msg__spark { flex: none; margin-top: 9px; color: var(--ink); display: block; }
 .msg__bubble { border: var(--hairline) solid var(--rule); background: var(--bg); color: var(--ink-soft); border-radius: var(--radius-control); padding: 12px 14px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
+.msg__link { color: var(--gold); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.msg__link:hover { color: var(--ink); }
 .msg--user .msg__bubble { border-color: var(--ink); background: var(--ink); color: var(--on-ink); }
 .msg--busy .msg__bubble { color: var(--faint); }
 .ask__suggest { padding: 0 var(--space-6) var(--space-4); display: flex; gap: var(--space-2); flex-wrap: wrap; }
