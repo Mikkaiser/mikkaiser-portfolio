@@ -17,14 +17,15 @@ export const cv = {
   summary:
     "Full stack software developer with 6+ years across backend architecture, enterprise systems and the front ends on top of them. Deep expertise in .NET, ASP.NET Core and Node.js, shipping production APIs, microservices and CI/CD pipelines. Contributed to platforms serving 780,000+ users, trained 500+ students and professionals, and won two WorldSkills gold medals in Software Applications Development. Chief Expert for the United Arab Emirates in the same skill.",
   stack: [
-    ["Backend", "C# · .NET / ASP.NET Core · Node.js · NestJS · REST · GraphQL"],
-    ["Frontend", "Angular · TypeScript · React · Next.js · SASS · HTML/CSS"],
+    ["Backend", "C# · .NET / ASP.NET Core · ASP.NET MVC · Node.js · NestJS · REST · GraphQL · JWT"],
+    ["Frontend", "Angular · TypeScript · React · Next.js · SASS · HTML/CSS · Apollo"],
     ["Databases", "SQL Server · Oracle DB · MySQL · MariaDB · Redis · TypeORM · Sequelize · Entity Framework"],
-    ["DevOps & Cloud", "Microsoft Azure · Azure Pipelines · GitHub Actions · GitLab CI · Docker · Kubernetes"],
+    ["DevOps & Cloud", "Microsoft Azure · AWS · Azure Pipelines · GitHub Actions · GitLab CI · Docker · Kubernetes"],
     ["Testing", "xUnit · Jest · Jasmine · Automated testing pipelines"],
     ["Observability", "Grafana · Prometheus · Loki"],
-    ["Mobile", "React Native (Android & iOS)"],
-    ["Integrations", "SAP · Microservices architecture · WordPress / CMS"],
+    ["Mobile & Desktop", "React Native (Android & iOS) · .NET MAUI · WPF · Windows Forms"],
+    ["Architecture", "Microservices · Event-driven with RabbitMQ · Clean architecture · Domain-driven design"],
+    ["Integrations", "SAP · AI for automation and analytics · WordPress / CMS"],
   ],
   experience: [
     {
@@ -33,8 +34,9 @@ export const cv = {
       place: "Abu Dhabi, UAE",
       when: "09/2023 — Present",
       points: [
-        "Design and deliver internal platforms in .NET, ASP.NET Core, Next.js and SQL Server / MariaDB, supporting training management, performance tracking and operational workflows for 200+ active users.",
-        "Architect full .NET stack solutions (C#, ASP.NET Core Web API, Entity Framework Core, WinForms, xUnit) for national and international competition training programmes, from database design and REST APIs through automated testing and desktop applications.",
+        "Built the Student Management Platform for EmiratesSkills and WorldSkills competitors in Next.js and MariaDB, covering training tracking, performance monitoring and reporting for 200+ active users.",
+        "Build and maintain internal platforms across the .NET stack (ASP.NET Core Web API, Entity Framework Core, ASP.NET MVC, .NET MAUI, WPF, Windows Forms) for academic, operational and administrative workflows.",
+        "Integrate AI solutions for automation, analytics and operational optimisation, and configure virtualised and cloud environments that simulate production and competition-grade systems.",
         "Implement secure APIs and CI/CD pipelines via GitHub Actions and Azure Pipelines; automated testing with xUnit reduced deployment issues by 30%.",
         "Lead technical instruction for 500+ students and professionals across ATS schools, HCT and Khalifa University, in international, multicultural environments.",
         "Deliver enterprise-scale software aligned with multi-year business lifecycles, ensuring reliability and long-term maintainability.",
@@ -46,7 +48,7 @@ export const cv = {
       place: "Rio de Janeiro, Brazil",
       when: "01/2023 — 09/2023",
       points: [
-        "Supported 15 microservices and 3+ enterprise platforms in production; stabilised SotreqLink, serving roughly 5,000 internal users and field technicians.",
+        "Supported ~15 microservices communicating over RabbitMQ and 3+ enterprise platforms in production; stabilised SotreqLink, the operational management platform for Sotreq and Caterpillar, serving roughly 5,000 internal users and field technicians.",
         "Resolved 50+ production incidents per month through root cause analysis, reducing recurring failures by 35% and delivering 100+ corrective fixes and feature updates.",
         "Built backend services with ASP.NET Core and ASP.NET MVC; optimised data access via Oracle DB and Redis, improving response times by 20-30%.",
         "Managed cloud infrastructure and CI/CD on Microsoft Azure; deployed Grafana, Loki and Prometheus, cutting incident detection time by 40%.",
@@ -92,7 +94,7 @@ export const cv = {
     ["EmiratesSkills Competition System", "Runs the UAE national skills competition end to end, plus the public site. emiratesskills.mikkaiser.com"],
     ["Training Planner", "Planning and tracking for competition training programmes, full .NET stack. training-planner.mikkaiser.com"],
     ["TechKnowledge", "Technical publication on backend architecture and enterprise development. techknowledge.blog"],
-    ["SotreqLink", "Field service platform at Radix for ~5,000 technicians, with Android and iOS apps."],
+    ["SotreqLink", "Operational management platform for Sotreq and Caterpillar, ~5,000 users, with Android and iOS apps."],
     ["SENAI Play", "National learning platform with 780,000+ active users. play.senai.br"],
   ],
   certifications: [

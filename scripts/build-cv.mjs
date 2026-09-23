@@ -71,7 +71,7 @@ ${faces}
   --display:'Bricolage CV',sans-serif; --body:'Roboto CV',system-ui,sans-serif; --mono:'JetBrains CV',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:9.3pt;line-height:1.5;
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:9pt;line-height:1.45;
   -webkit-print-color-adjust:exact;print-color-adjust:exact}
 /* Margins live on the PDF itself so every page gets them, not just the first.
    Screen padding is only for the CV_PREVIEW render. */
@@ -84,14 +84,14 @@ body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:9.3
 .contact span{white-space:nowrap}
 .rule{border:0;border-top:1px solid var(--ink);margin:10px 0 0}
 
-.summary{margin-top:11px;color:var(--ink-soft);line-height:1.6;text-wrap:pretty}
+.summary{margin-top:10px;color:var(--ink-soft);line-height:1.6;text-wrap:pretty}
 .summary b{color:var(--ink);font-weight:500}
 
-.sec{margin-top:15px;break-inside:avoid}
+.sec{margin-top:13px;break-inside:avoid}
 .sec__h{font-family:var(--mono);font-size:7.2pt;font-weight:500;letter-spacing:.18em;text-transform:uppercase;
   color:var(--faint);padding-bottom:4px;border-bottom:1px solid var(--rule);margin-bottom:9px}
 
-.job{margin-bottom:11px;break-inside:avoid}
+.job{margin-bottom:9px;break-inside:avoid}
 .job:last-child{margin-bottom:0}
 .job__head{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
 .job__role{font-family:var(--display);font-weight:700;font-size:11.5pt;letter-spacing:-0.02em;line-height:1.2}
@@ -99,7 +99,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:9.3
 .job__org{font-size:8.8pt;color:var(--gold);font-weight:500;margin-top:1px}
 .job__org i{font-style:normal;color:var(--faint);font-weight:400}
 ul{list-style:none;margin-top:5px}
-li{position:relative;padding-left:11px;color:var(--ink-soft);line-height:1.45;margin-bottom:2.5px}
+li{position:relative;padding-left:11px;color:var(--ink-soft);line-height:1.4;margin-bottom:2px}
 li::before{content:"";position:absolute;left:1px;top:.52em;width:3px;height:3px;background:var(--gold);border-radius:50%}
 
 .win{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:4px 0;border-bottom:1px solid var(--rule)}
@@ -109,7 +109,7 @@ li::before{content:"";position:absolute;left:1px;top:.52em;width:3px;height:3px;
 
 .row{display:flex;gap:12px;padding:2.5px 0}
 .row__a{font-family:var(--mono);font-size:7.4pt;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);
-  flex:0 0 27mm;padding-top:1.5px}
+  flex:0 0 30mm;padding-top:1.5px}
 .row__b{color:var(--ink-soft);flex:1}
 
 .two{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}
