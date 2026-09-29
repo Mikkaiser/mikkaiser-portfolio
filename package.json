@@ -10,11 +10,11 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "next": "16.3.5",
+    "next": "16.3.6",
     "openai": "^7.23.0",
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "resend": "^6.28.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "resend": "^6.30.0",
     "simple-icons": "^16.32.0"
   },
   "devDependencies": {
@@ -22,7 +22,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.5",
+    "eslint-config-next": "16.3.6",
     "typescript": "^5"
   },
   "description": "Personal site of Mikael Ribeiro Simoes: statically generated Next.js portfolio with a Claude-powered CV agent.",
