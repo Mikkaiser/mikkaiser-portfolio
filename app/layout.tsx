@@ -23,7 +23,7 @@ const SITE = "https://mikkaiser.com";
 // deliberately kept in the h1, the description, the OG title and the Person
 // schema below, which is what Google matches a "mikael ribeiro" search against
 // and what it uses to rewrite the displayed title for a name query.
-const TITLE = "Mikkaiser | Software Developer, Abu Dhabi";
+const TITLE = "Mikkaiser | Software Engineer & Tech Educator, Abu Dhabi";
 const FULL_NAME = "Mikael Ribeiro Simoes";
 const DESCRIPTION =
   "Mikael Ribeiro Simoes, known as Mikkaiser, is a full stack software developer in Abu Dhabi. Six years across .NET, Node, Angular and Next.js building enterprise platforms, one serving 780,000 users, and two gold medals in software applications development.";
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "profile",
     url: SITE,
-    title: "Mikael Ribeiro Simoes (Mikkaiser) | Software Developer, Abu Dhabi",
+    title: "Mikael Ribeiro Simoes (Mikkaiser) | Software Engineer & Tech Educator, Abu Dhabi",
     description:
       "Full stack and enterprise systems in .NET, Node and TypeScript. Platforms serving 780,000 users. Two golds in software applications development.",
     locale: "en_GB",
@@ -74,7 +74,7 @@ const personJsonLd = {
   "@type": "Person",
   name: "Mikael Ribeiro Simoes",
   alternateName: ["Mikkaiser", "mikkaiser", "Mikael Ribeiro"],
-  jobTitle: "Senior Software Engineer",
+  jobTitle: "Software Engineer & Tech Educator",
   description:
     "Full stack software developer working across backend architecture, front end and enterprise systems, based in Abu Dhabi.",
   url: `${SITE}/`,

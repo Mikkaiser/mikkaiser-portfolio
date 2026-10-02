@@ -1,11 +1,11 @@
 // Single source of truth for the CV. Kept in sync with the site copy and lib/bio.ts.
 // Where the old resume and the site disagreed, the stronger claim was kept:
 // 6+ years (not 5+) and 500+ trained (not 400+). The ACTVET role is titled
-// "Senior Software Engineer"; "Software Development Expert" is the EmiratesSkills
+// "Software Engineer & Tech Educator"; "Software Development Expert" is the EmiratesSkills
 // designation and is carried in the headline and the awards section instead.
 export const cv = {
   name: "Mikael Ribeiro Simoes",
-  title: "Senior Software Engineer · Software Development Expert",
+  title: "Software Engineer & Tech Educator · Software Development Expert",
   contact: [
     "Abu Dhabi, UAE",
     "+971 56 766 4593",
@@ -29,7 +29,7 @@ export const cv = {
   ],
   experience: [
     {
-      role: "Senior Software Engineer",
+      role: "Software Engineer & Tech Educator",
       org: "ACTVET",
       place: "Abu Dhabi, UAE",
       when: "09/2023 — Present",
