@@ -72,10 +72,11 @@
   font-size: var(--size-lead); line-height: var(--lh-lead); letter-spacing: var(--ls-lead); color: var(--ink);
 }
 
-/* One reading column, header included, with the table of contents beside the
-   whole article from 1180px, and between the lead and the text below that. */
+/* The article and its table of contents share the full width at 9:4, the
+   contents beside the whole article from 1180px, and between the lead and the
+   text below that. */
 .post__grid {
-  display: grid; grid-template-columns: minmax(0, var(--measure-body)) 220px; column-gap: var(--space-12); align-items: start;
+  display: grid; grid-template-columns: minmax(0, 9fr) minmax(0, 4fr); column-gap: var(--space-12); align-items: start;
   grid-template-areas: "head toc" "body toc";
 }
 .post__grid--solo { grid-template-columns: minmax(0, var(--measure-body)); grid-template-areas: "head" "body"; }
