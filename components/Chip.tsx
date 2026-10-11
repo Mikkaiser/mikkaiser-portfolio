@@ -11,7 +11,6 @@ export const CHIPS = {
   graphql: { label: "GraphQL", tip: "Typed query layer over the platform content", slug: "graphql" },
   angular: { label: "Angular", tip: "TypeScript and SASS front end", slug: "angular", tint: "mono" },
   ts: { label: "TypeScript", tip: "Typed end to end, front and back", slug: "typescript" },
-  k8s: { label: "Kubernetes", tip: "Orchestration for fifteen microservices", slug: "kubernetes" },
   redis: { label: "Redis", tip: "Caching that cut response times 20 to 30%", slug: "redis" },
   grafana: { label: "Grafana", tip: "Dashboards alongside Loki and Prometheus", slug: "grafana" },
   sqlserver: { label: "SQL Server", tip: "Relational store behind the internal platforms" },

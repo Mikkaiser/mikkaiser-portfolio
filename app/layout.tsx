@@ -86,7 +86,7 @@ const personJsonLd = {
   knowsLanguage: ["en", "pt"],
   knowsAbout: [
     "C#", ".NET", "ASP.NET Core", "Node.js", "NestJS", "Angular", "Next.js", "TypeScript", "SQL Server",
-    "Oracle Database", "Redis", "Docker", "Kubernetes", "Microsoft Azure", "Grafana", "Microservices",
+    "Oracle Database", "Redis", "Docker", "Microsoft Azure", "Grafana", "Microservices",
   ],
   sameAs: ["https://www.linkedin.com/in/mikael-ribeiro/", "https://github.com/Mikkaiser", "https://techknowledge.blog"],
   award: [

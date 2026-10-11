@@ -9,7 +9,7 @@ type Msg = { role: "user" | "assistant"; content: string };
 const SUGGESTIONS: { label: string; ask: string }[] = [
   { label: "What is his .NET experience?", ask: "What is his .NET experience?" },
   { label: "Biggest system he has worked on?", ask: "What is the biggest system he has worked on?" },
-  { label: "Has he done Kubernetes in production?", ask: "Has he run Kubernetes in production?" },
+  { label: "Has he run microservices in production?", ask: "Has he run microservices in production?" },
 ];
 
 const FAIL = "That did not go through. Try again in a moment, or email mikkaiser.ribeiro@gmail.com.";

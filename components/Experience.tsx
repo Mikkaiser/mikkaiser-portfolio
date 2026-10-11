@@ -10,8 +10,8 @@ const ROWS: Row[] = [
   },
   {
     when: "2023", title: "Full Stack Developer", org: "Radix, Rio de Janeiro",
-    blurb: "Fifteen microservices and three enterprise platforms in production. Fifty incidents a month, 35% fewer repeats, 99.9% availability on Docker and Kubernetes.",
-    chips: [CHIPS.dotnet, CHIPS.k8s, CHIPS.docker, CHIPS.oracle, CHIPS.redis, CHIPS.grafana],
+    blurb: "Fifteen microservices and three enterprise platforms in production. Fifty incidents a month, 35% fewer repeats, 99.9% availability on Docker.",
+    chips: [CHIPS.dotnet, CHIPS.docker, CHIPS.oracle, CHIPS.redis, CHIPS.grafana],
   },
   {
     when: "2022", title: "Full Stack Developer", org: "SENAI Alagoas, Maceio",

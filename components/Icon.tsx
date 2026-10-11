@@ -1,5 +1,5 @@
 import {
-  siAngular, siDocker, siDotnet, siGithub, siGitlab, siGrafana, siGraphql, siJest, siKubernetes, siNestjs,
+  siAngular, siDocker, siDotnet, siGithub, siGitlab, siGrafana, siGraphql, siJest, siNestjs,
   siNextdotjs, siNodedotjs, siPrometheus, siReact, siRedis, siSass, siTypescript, siWordpress,
 } from "simple-icons";
 
@@ -7,7 +7,7 @@ import {
    there are no icon requests and theme tints resolve through CSS variables. */
 const ICONS = {
   dotnet: siDotnet, nodedotjs: siNodedotjs, nestjs: siNestjs, angular: siAngular, react: siReact,
-  nextdotjs: siNextdotjs, typescript: siTypescript, docker: siDocker, kubernetes: siKubernetes,
+  nextdotjs: siNextdotjs, typescript: siTypescript, docker: siDocker,
   github: siGithub, gitlab: siGitlab, redis: siRedis, graphql: siGraphql, grafana: siGrafana,
   prometheus: siPrometheus, jest: siJest, sass: siSass, wordpress: siWordpress,
 };

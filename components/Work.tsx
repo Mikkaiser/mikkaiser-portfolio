@@ -68,8 +68,8 @@ const CARDS: Card[] = [
     logo: { name: "sotreq", alt: "Sotreq", width: 263, height: 160, display: 24 },
     when: "2023",
     title: "SotreqLink",
-    blurb: "Field service for roughly 5,000 technicians, with an Android and iOS app in their hands. Fifteen microservices on Docker and Kubernetes, watched by Grafana, Loki and Prometheus.",
-    chips: [CHIPS.k8s, CHIPS.redis, CHIPS.grafana],
+    blurb: "Field service for roughly 5,000 technicians, with an Android and iOS app in their hands. Fifteen microservices on Docker, watched by Grafana, Loki and Prometheus.",
+    chips: [CHIPS.docker, CHIPS.redis, CHIPS.grafana],
     preview: { src: "/assets/prev-sotreqlink.webp", width: 718, height: 437, alt: "Screenshot of SotreqLink" },
   },
 ];

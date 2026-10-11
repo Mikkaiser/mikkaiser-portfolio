@@ -1,8 +1,7 @@
 import Image from "next/image";
-import { BrandLogo } from "./BrandLogo";
 import { Icon, type IconSlug, type Tint } from "./Icon";
 
-type Item = { label: string; slug?: IconSlug; tint?: Tint; local?: "aws" | "azure" };
+type Item = { label: string; slug?: IconSlug; tint?: Tint; local?: "azure" };
 
 const ITEMS: Item[] = [
   { label: ".NET", slug: "dotnet", tint: "dotnet" },
@@ -13,8 +12,6 @@ const ITEMS: Item[] = [
   { label: "Next.js", slug: "nextdotjs", tint: "mono" },
   { label: "TypeScript", slug: "typescript" },
   { label: "Docker", slug: "docker" },
-  { label: "Kubernetes", slug: "kubernetes" },
-  { label: "AWS", local: "aws" },
   { label: "Azure", local: "azure" },
   { label: "GitHub", slug: "github", tint: "mono" },
   { label: "GitLab", slug: "gitlab" },
@@ -31,7 +28,6 @@ function Group() {
     <span className="marquee__group">
       {ITEMS.map((it) => (
         <span className="marquee__item" key={it.label}>
-          {it.local === "aws" && <BrandLogo name="aws" alt="" width={608} height={364} sizes="40px" style={{ height: 22 }} />}
           {it.local === "azure" && <Image src="/assets/logo-azure.png" alt="" width={22} height={22} />}
           {it.slug && <Icon slug={it.slug} tint={it.tint} />}
           <span>{it.label}</span>

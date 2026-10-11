@@ -11,7 +11,7 @@ const DECK: Omit<Card, "id">[] = [
   { key: "dotnet", name: ".NET", slug: "dotnet", tint: "dotnet" },
   { key: "node", name: "Node.js", slug: "nodedotjs" },
   { key: "docker", name: "Docker", slug: "docker" },
-  { key: "k8s", name: "Kubernetes", slug: "kubernetes" },
+  { key: "react", name: "React", slug: "react" },
 ];
 const BEST_KEY = "mk-stack-best";
 
