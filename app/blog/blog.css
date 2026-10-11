@@ -166,6 +166,18 @@
 .figure__frame img { display: block; width: 100%; height: auto; }
 .figure__cap { margin-top: var(--space-3); padding-left: 11px; border-left: 2px solid var(--rule); font-size: 12px; line-height: 1.5; color: var(--muted); }
 
+/* ---------- terms: a niche word with a reference popover (components/blog/Term.tsx) ---------- */
+.termwrap { position: relative; display: inline-block; }
+.term { color: var(--ink); border-bottom: var(--hairline) dashed var(--faint); cursor: help; transition: border-color var(--dur-pointer) var(--ease); }
+.termwrap:hover .term, .termwrap:focus-within .term { border-bottom-color: var(--ink); }
+.termwrap .cref { text-indent: 0; }
+.termwrap:hover .cref, .termwrap:focus-within .cref { opacity: 1; visibility: visible; pointer-events: auto; transform: none; }
+.prose .termwrap .ref__link { border-bottom: 0; padding-bottom: 0; }
+
+/* ---------- diagram: one canvas in the page palette ---------- */
+.diagram { position: relative; width: 100%; aspect-ratio: 16 / 7; min-height: 200px; max-height: 320px; overflow: hidden; border: var(--hairline) solid var(--rule); border-radius: var(--radius-control); background: var(--bg); }
+.diagram canvas { display: block; width: 100%; height: 100%; font-family: var(--font-mono); }
+
 /* ---------- ending ---------- */
 .post__end { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; margin-top: var(--space-3); padding-top: 20px; border-top: var(--hairline) solid var(--rule); }
 
