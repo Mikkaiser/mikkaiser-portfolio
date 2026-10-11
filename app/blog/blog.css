@@ -166,6 +166,22 @@
 .figure__frame img { display: block; width: 100%; height: auto; }
 .figure__cap { margin-top: var(--space-3); padding-left: 11px; border-left: 2px solid var(--rule); font-size: 12px; line-height: 1.5; color: var(--muted); }
 
+/* ---------- in plain words: the steps under a dense code card (components/blog/InPlainWords.tsx) ---------- */
+.prose .plain { margin: calc(var(--space-3) - var(--space-6)) 0 var(--space-8); padding: var(--space-4) 18px; border: var(--hairline) solid var(--rule); border-radius: var(--radius-control); }
+.plain__label { font-family: var(--font-mono); font-size: var(--size-micro); letter-spacing: var(--ls-micro); text-transform: uppercase; color: var(--faint); }
+.prose .plain__intro { margin: 6px 0 var(--space-4); color: var(--ink); }
+.prose .plain__steps { list-style: none; margin: 0; padding: 0; }
+.prose .plain__step { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: var(--space-2); margin: 0; padding-bottom: var(--space-3); font-size: 14px; line-height: 1.6; color: var(--muted); }
+.prose .plain__step:last-child { padding-bottom: 0; }
+/* A thin line joins the numbers, so the steps read as one path. */
+.plain__step:not(:last-child)::before { content: ""; position: absolute; left: 7px; top: 24px; bottom: 4px; width: var(--hairline); background: var(--rule); }
+.plain__n { font-family: var(--font-mono); font-size: var(--size-meta); color: var(--faint); padding-top: 2px; font-variant-numeric: tabular-nums; }
+.prose .plain__title { color: var(--ink); font-weight: var(--weight-medium); }
+.plain__back {
+  width: max-content; margin-top: var(--space-2); padding: 3px 8px; border: var(--hairline) solid var(--ink); border-radius: var(--radius-control);
+  font-family: var(--font-mono); font-size: var(--size-micro); letter-spacing: var(--ls-micro); text-transform: uppercase; color: var(--ink);
+}
+
 /* ---------- glossary: terms as rows in a register ---------- */
 .prose .glossary { margin: var(--space-6) 0; border-top: var(--hairline) solid var(--rule); }
 .glossary > div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: var(--space-6); padding: var(--space-3) 0; border-bottom: var(--hairline) solid var(--rule); }

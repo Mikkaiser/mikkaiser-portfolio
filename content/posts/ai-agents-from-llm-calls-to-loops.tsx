@@ -1,5 +1,6 @@
 import { AgentLoop } from "@/components/blog/AgentLoop";
 import { CodeTabs } from "@/components/blog/CodeTabs";
+import { InPlainWords } from "@/components/blog/InPlainWords";
 import { ConversationGrows } from "@/components/blog/ConversationGrows";
 import { Term } from "@/components/blog/Term";
 import { WorkflowVsAgent } from "@/components/blog/WorkflowVsAgent";
@@ -152,6 +153,15 @@ export default function Post() {
         your code decides whether to do it.
       </p>
       <CodeTabs {...CODE.a2} />
+      <InPlainWords
+        intro="That's a lot of lines for a corner store. Don't feel like reading them? No problem, here's all they do:"
+        steps={[
+          { title: "A pretend shop.", text: <>The inventory is five products, each with a price and how many are on the shelf.</> },
+          { title: "Two normal functions.", text: <><Code>check_stock</Code> and <Code>get_price</Code> look a product up and return a short sentence. No AI in here.</> },
+          { title: "A name to function map.", text: <>So later, when the model asks for <Code>get_price</Code>, the code knows which function that is.</> },
+          { title: "The menu for the model.", text: <>A description of both functions: their names, what they do, and that each takes one product name. This is the only part the model ever sees.</> },
+        ]}
+      />
       <p>
         The name, the description and the{" "}
         <Term id="json-schema" label="JSON schema" title="JSON Schema" href="https://json-schema.org/">
@@ -181,6 +191,17 @@ export default function Post() {
         that&rsquo;s the answer and we&rsquo;re done.
       </p>
       <CodeTabs {...CODE.a3} />
+      <InPlainWords
+        intro="This is the most important code in the post, and it's still fine to skip it. Here's the whole thing:"
+        steps={[
+          { title: "Start the conversation.", text: <>The rules for the model, and the customer&rsquo;s question.</> },
+          { title: "Ask the model.", text: <>Send the whole conversation, plus the menu of tools.</> },
+          { title: "Got plain text back?", text: <>That&rsquo;s the answer. Return it, we&rsquo;re done.</> },
+          { title: "Got tool calls back?", text: <>Save the model&rsquo;s message, run each function it asked for, and add every result to the conversation. Errors get added too, as text.</> },
+          { title: "Still going after 10 rounds?", text: <>Stop and give up. That&rsquo;s the brake.</> },
+        ]}
+        back={{ after: 4, to: 2 }}
+      />
       <p>
         Let&rsquo;s follow the milk question. On the first turn the model can ask for both facts at once, two tool
         calls in one reply: <Code>check_stock(&quot;milk&quot;)</Code> and <Code>get_price(&quot;milk&quot;)</Code>.
@@ -254,6 +275,14 @@ export default function Post() {
         April 2026 and works with the same OpenAI client.
       </p>
       <CodeTabs {...CODE.b1} />
+      <InPlainWords
+        intro="Short version, because this one really is shorter:"
+        steps={[
+          { title: "Same shop, same two functions.", text: <>Now they&rsquo;re marked as tools, so the framework builds the menu for the model from the functions themselves.</> },
+          { title: "Describe the agent.", text: <>A name, its rules, which model to use and which tools it has.</> },
+          { title: "Run it.", text: <>One line runs the whole loop from the previous section, up to 10 rounds, and hands you the final answer.</> },
+        ]}
+      />
       <p>
         The tools are just functions now. The framework reads each signature to build the schema: type hints and the
         docstring in Python (finally, someone reads the docstrings), the{" "}
@@ -294,6 +323,17 @@ export default function Post() {
         finishes.
       </p>
       <CodeTabs {...CODE.b3} />
+      <InPlainWords
+        intro="Skipping the code? Fair. Here's what happens on every message:"
+        steps={[
+          { title: "Wait for a question.", text: <>The chat keeps going until you type <Code>exit</Code>.</> },
+          { title: "Run the agent with the whole history.", text: <>Every earlier message and tool result goes along. In Python and TypeScript it runs inside a trace, so the whole chat shows up together in the dashboard.</> },
+          { title: "Print the answer as it arrives.", text: <>Each small piece of text goes straight to the screen.</> },
+          { title: "Print a [tool] line.", text: <>When a tool finishes, match the result to its call and show what ran.</> },
+          { title: "Keep the history for next time.", text: <>The messages from this run become the history for the next question. In C#, the session does this for you.</> },
+        ]}
+        back={{ after: 5, to: 1 }}
+      />
       <p>
         Two kinds of events come in. <Term id="deltas" label="Text deltas">
           The small chunks of text a streaming response sends while the model is still writing. Glue them together
