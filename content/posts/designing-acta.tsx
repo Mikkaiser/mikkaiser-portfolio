@@ -10,7 +10,7 @@ export const meta: PostMeta = {
   topic: "Design",
   date: "2026-10-11",
   minutes: 4,
-  draft: false,
+  draft: true,
 };
 
 export const toc: TocItem[] = [

@@ -8,7 +8,9 @@
 
 /* Like .top on the home page, but clip instead of hidden: hidden makes a scroll
    container, which stops the table of contents from sticking. */
-.blog-top { background: var(--bg); min-height: 100vh; overflow-x: clip; }
+.blog-top { background: var(--bg); min-height: 100vh; min-height: 100dvh; overflow-x: clip; display: flex; flex-direction: column; }
+/* main takes the spare height, so on a short page the footer sits at the bottom of the screen. */
+.blog-top > main { flex: 1 0 auto; }
 
 /* ---------- index ---------- */
 .section-head h1 {
