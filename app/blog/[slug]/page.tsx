@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CodeLangSync } from "@/components/blog/CodeLangSync";
+import { PlainHint } from "@/components/blog/PlainHint";
 import { TocList } from "@/components/blog/TocList";
 import { FEED_ALTERNATE, formatLongDate, getNextPost, getPost, getPosts } from "@/lib/posts";
 
@@ -60,6 +61,7 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="progress" data-progress aria-hidden="true" />
       <CodeLangSync />
+      <PlainHint />
       <div className={showToc ? "post__grid" : "post__grid post__grid--solo"}>
         <header className="post__head">
           <p className="post__meta">

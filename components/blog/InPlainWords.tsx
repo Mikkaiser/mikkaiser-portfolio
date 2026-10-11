@@ -10,7 +10,7 @@ type Step = { title: string; text: ReactNode };
  */
 export function InPlainWords({ intro, steps, back }: { intro: ReactNode; steps: Step[]; back?: { after: number; to: number } }) {
   return (
-    <aside className="plain" aria-label="What this code does, in plain words">
+    <aside className="plain" aria-label="What this code does, in plain words" tabIndex={-1}>
       <div className="plain__label">In plain words</div>
       <p className="plain__intro">{intro}</p>
       <ol className="plain__steps">

@@ -203,6 +203,22 @@
   font-family: var(--font-mono); font-size: var(--size-micro); letter-spacing: var(--ls-micro); text-transform: uppercase; color: var(--ink);
 }
 
+.prose .plain { scroll-margin-top: var(--space-6); }
+.prose .plain:focus { outline: none; }
+
+/* The floating "skip to In plain words" hint (components/blog/PlainHint.tsx). */
+.plainhint {
+  position: fixed; z-index: 45; left: 50%; bottom: var(--space-6); max-width: calc(100% - var(--space-8));
+  padding: 10px var(--space-4); border: var(--hairline) solid var(--ink); border-radius: var(--radius-control);
+  background: var(--bg); color: var(--muted); font-family: var(--font-body); font-size: var(--size-small); line-height: 1.4; text-align: center; cursor: pointer;
+  opacity: 0; visibility: hidden; pointer-events: none; transform: translate(-50%, 8px);
+  transition: opacity .18s linear, transform .22s cubic-bezier(.16,.84,.31,1), visibility 0s linear .22s, background var(--dur-pointer) var(--ease);
+}
+.plainhint[data-show] { opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 0); transition-delay: 0s; }
+.plainhint strong { color: var(--ink); font-weight: var(--weight-medium); white-space: nowrap; }
+.plainhint:hover { background: var(--raised); }
+.plainhint:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
 /* ---------- glossary: terms as rows in a register ---------- */
 .prose .glossary { margin: var(--space-6) 0; border-top: var(--hairline) solid var(--rule); }
 .glossary > div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: var(--space-6); padding: var(--space-3) 0; border-bottom: var(--hairline) solid var(--rule); }
@@ -255,5 +271,6 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .progress { display: none; }
+  .plainhint { transition: none; }
   .entry, .tag, .toc__link, .prose a, .code__tabs .code__tab { transition: none; }
 }
