@@ -1,5 +1,5 @@
 // Code for AI Agents: From LLM Calls To Loops. Every snippet was type-checked or compiled and run against a mock OpenAI server.
-// Generated from verified snippet files; edit those and regenerate rather than editing here.
+// Snippets are plain strings; when you change one, re-run it against the SDK before publishing.
 
 export const CODE = {
   a1: {
