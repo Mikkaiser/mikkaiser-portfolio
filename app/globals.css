@@ -72,6 +72,28 @@
 .navlink { font-size: 13.5px; color: var(--muted); transition: color var(--dur-pointer) var(--ease); display: inline-flex; align-items: center; gap: 6px; }
 .navlink:hover { color: var(--ink); }
 .header__actions { display: flex; align-items: center; gap: var(--space-3); }
+.navlink[aria-current="page"] { color: var(--ink); }
+
+/* Mobile menu: shown at 920px and below, where .nav is hidden. Rows under the
+   header bar, divided by hairlines like every other set on the site. */
+.menu-btn, .mnav { display: none; }
+/* The hero heading sits above the header (40 over 30); lift the header while the panel is open. */
+.header:has(.mnav[data-open]) { z-index: 50; }
+.mnav[data-open] {
+  display: block; position: absolute; top: 100%; left: 0; right: 0;
+  background: var(--bg); border-bottom: var(--hairline) solid var(--rule);
+  max-height: calc(100dvh - 57px); overflow-y: auto; overscroll-behavior: contain;
+}
+.mnav__list { list-style: none; margin: 0; padding: 0; }
+.mnav__link {
+  display: flex; align-items: center; gap: 10px; padding: var(--space-4) 0;
+  border-bottom: var(--hairline) solid var(--rule);
+  font-family: var(--font-display); font-weight: 700; font-size: var(--size-entry-title, 20px); letter-spacing: -0.025em; line-height: 1.2; color: var(--ink);
+  transition: color var(--dur-pointer) var(--ease);
+}
+.mnav__link:hover { color: var(--muted); }
+.mnav__link[aria-current="page"] { border-left: var(--hairline) solid var(--ink); padding-left: 13px; }
+.mnav__cta { display: none; width: 100%; justify-content: center; margin: var(--space-6) 0; }
 
 .totop {
   position: fixed; right: var(--space-6); bottom: var(--space-6); z-index: 40; width: 44px; height: 44px;
@@ -368,6 +390,7 @@
   .modal__card { padding: var(--space-6); }
   .modal__head h2 { font-size: 19px; }
   .nav { display: none; }
+  .menu-btn { display: inline-flex; }
   .hero { padding-top: var(--space-8); }
   .foot { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-8); }
 }
@@ -385,6 +408,9 @@
 }
 @media (max-width: 620px) {
   .section, .wrap { padding-left: var(--space-4); padding-right: var(--space-4); }
+  /* No room for four controls: the menu panel carries Get in touch instead. */
+  .header__cta { display: none; }
+  .mnav__cta { display: inline-flex; }
   .ask__form { flex-direction: column; align-items: stretch; }
   .xrow { grid-template-columns: minmax(0,1fr); gap: var(--space-3); padding-left: 0; padding-right: 0; }
   .xrow__when { padding-top: 0; }

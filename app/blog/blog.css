@@ -10,9 +10,6 @@
    container, which stops the table of contents from sticking. */
 .blog-top { background: var(--bg); min-height: 100vh; overflow-x: clip; }
 
-/* The Blog link in the shared header, while on the blog. */
-.navlink[aria-current="page"] { color: var(--ink); }
-
 /* ---------- index ---------- */
 .section-head h1 {
   margin: 0; font-family: var(--font-body); font-size: var(--size-section-head); letter-spacing: var(--ls-section-head);
