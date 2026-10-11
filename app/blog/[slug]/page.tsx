@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CodeLangSync } from "@/components/blog/CodeLangSync";
-import { EntryRow } from "@/components/blog/EntryRow";
 import { TocList } from "@/components/blog/TocList";
 import { FEED_ALTERNATE, formatLongDate, getNextPost, getPost, getPosts } from "@/lib/posts";
 
@@ -61,29 +60,24 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="progress" data-progress aria-hidden="true" />
       <CodeLangSync />
-      <header className="post__head">
-        <p className="post__meta">
-          <time dateTime={meta.date}>{formatLongDate(meta.date)}</time>
-          <span aria-hidden="true">·</span>
-          <span>{meta.minutes} min read</span>
-          <span aria-hidden="true">·</span>
-          <span>{meta.topic}</span>
-        </p>
-        <h1 className="post__title">{meta.title}</h1>
-        <p className="post__lead">{meta.lead ?? meta.summary}</p>
-      </header>
       <div className={showToc ? "post__grid" : "post__grid post__grid--solo"}>
-        {showToc ? <aside className="post__toc"><TocList items={toc} /></aside> : null}
+        <header className="post__head">
+          <p className="post__meta">
+            <time dateTime={meta.date}>{formatLongDate(meta.date)}</time>
+            <span aria-hidden="true">·</span>
+            <span>{meta.minutes} min</span>
+            <span aria-hidden="true">·</span>
+            <span>{meta.topic}</span>
+          </p>
+          <h1 className="post__title">{meta.title}</h1>
+          <p className="post__lead">{meta.lead ?? meta.summary}</p>
+        </header>
+        {showToc ? <aside className="post__toc"><TocList items={toc} minutes={meta.minutes} /></aside> : null}
         <div className="post__body">
           <div className="prose"><Body /></div>
           <footer className="post__end">
-            {next ? (
-              <>
-                <div className="post__next">Next post</div>
-                <EntryRow post={next.meta} kicker={false} />
-              </>
-            ) : null}
-            <Link href="/blog" className="ghost">All posts ↑</Link>
+            {next ? <Link href={`/blog/${next.meta.slug}`} className="btn btn--primary" aria-label={`Read next: ${next.meta.title}`}>Read next</Link> : null}
+            <Link href="/blog" className="btn btn--ghost">All posts</Link>
           </footer>
         </div>
       </div>
