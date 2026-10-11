@@ -32,10 +32,12 @@ export function pen(ctx: CanvasRenderingContext2D, cv: HTMLCanvasElement) {
   const v = (n: string) => cs.getPropertyValue(n).trim();
   const C = { ink: v("--ink"), soft: v("--ink-soft"), muted: v("--muted"), faint: v("--faint"), rule: v("--rule"), raised: v("--raised"), bg: v("--bg") };
   const family = cs.fontFamily;
+  // The canvas's own font-size is the blog's fluid micro size, so labels grow with the text on wide screens.
+  const scale = (parseFloat(cs.fontSize) || 10) / 10;
   let alpha = 1;
 
   const text = (s: string, x: number, y: number, color: string, align: CanvasTextAlign = "left", weight = 400, size = 10) => {
-    ctx.font = `${weight} ${size}px ${family}`;
+    ctx.font = `${weight} ${size * scale}px ${family}`;
     ctx.fillStyle = color;
     ctx.textAlign = align;
     ctx.textBaseline = "middle";
@@ -61,7 +63,7 @@ export function pen(ctx: CanvasRenderingContext2D, cv: HTMLCanvasElement) {
     /** Moving parts fade out together at the end of a loop. */
     setAlpha(a: number) { alpha = a; },
     measure(s: string, size = 10, weight = 400) {
-      ctx.font = `${weight} ${size}px ${family}`;
+      ctx.font = `${weight} ${size * scale}px ${family}`;
       return ctx.measureText(s).width;
     },
     box(x: number, y: number, w: number, h: number, label: string, state: BoxState = "idle") {
