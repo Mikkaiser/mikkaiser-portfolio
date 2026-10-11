@@ -123,10 +123,22 @@
 .code__lights i:nth-child(2) { background: var(--code-light-min); }
 .code__lights i:nth-child(3) { background: var(--code-light-max); }
 .code__tab {
-  font-family: var(--font-mono); font-size: 12px; line-height: 1.4; padding: 6px 12px; white-space: nowrap;
-  border-radius: var(--radius-chip); background: var(--code-chrome); color: var(--code-fg);
+  position: relative; font-family: var(--font-mono); font-size: 12px; line-height: 1.4; padding: 6px 12px; white-space: nowrap;
+  border-radius: var(--radius-chip); color: var(--code-comment);
   overflow: hidden; text-overflow: ellipsis; min-width: 0;
 }
+.code__tab--on { background: var(--code-chrome); color: var(--code-fg); }
+
+/* Language tabs: radio buttons styled as filename tabs; CSS shows the matching body. */
+.code__tabs { display: flex; flex-wrap: wrap; gap: var(--space-1); border: 0; margin: 0; padding: 0; min-width: 0; }
+.code__tabs .code__tab { cursor: pointer; transition: color var(--dur-pointer) var(--ease); }
+.code__tabs .code__tab:hover { color: var(--code-fg); }
+.code__tab input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
+.code__tab:has(input:checked) { background: var(--code-chrome); color: var(--code-fg); }
+.code__tab:has(input:focus-visible) { outline: 2px solid var(--code-fg); outline-offset: 2px; }
+.code--tabs:has(input[value="py"]:checked) .code__body:not([data-lang="py"]),
+.code--tabs:has(input[value="ts"]:checked) .code__body:not([data-lang="ts"]),
+.code--tabs:has(input[value="cs"]:checked) .code__body:not([data-lang="cs"]) { display: none; }
 .code__body { overflow-x: auto; padding: 4px 20px 22px; }
 .code__body:focus-visible { outline: 2px solid var(--code-fg); outline-offset: -2px; }
 .code__body pre {
@@ -173,10 +185,14 @@
 }
 @media (max-width: 620px) {
   .post { padding-top: var(--space-12); }
+  /* Three filename tabs and the lights have to share one row on a phone. */
+  .code__bar { gap: var(--space-3); }
+  .code__tabs { flex-wrap: nowrap; gap: 2px; }
+  .code__tabs .code__tab { padding: 6px 9px; }
   .entry { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "date dur" "main main"; gap: var(--space-2) var(--space-4); padding-inline: 0; }
   .entry:hover { background: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .progress { display: none; }
-  .entry, .tag, .toc__link, .ghost, .prose a { transition: none; }
+  .entry, .tag, .toc__link, .ghost, .prose a, .code__tabs .code__tab { transition: none; }
 }

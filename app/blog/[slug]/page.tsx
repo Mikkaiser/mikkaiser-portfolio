@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CodeLangSync } from "@/components/blog/CodeLangSync";
 import { EntryRow } from "@/components/blog/EntryRow";
 import { TocList } from "@/components/blog/TocList";
 import { FEED_ALTERNATE, formatLongDate, getNextPost, getPost, getPosts } from "@/lib/posts";
@@ -59,6 +60,7 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
     <article className="wrap post">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="progress" data-progress aria-hidden="true" />
+      <CodeLangSync />
       <header className="post__head">
         <p className="post__meta">
           <time dateTime={meta.date}>{formatLongDate(meta.date)}</time>
