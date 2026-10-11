@@ -1,6 +1,8 @@
 import { AgentLoop } from "@/components/blog/AgentLoop";
 import { CodeTabs } from "@/components/blog/CodeTabs";
+import { ConversationGrows } from "@/components/blog/ConversationGrows";
 import { Term } from "@/components/blog/Term";
+import { WorkflowVsAgent } from "@/components/blog/WorkflowVsAgent";
 import { A, Code, H2, Quote } from "@/components/blog/Prose";
 import type { PostMeta, TocItem } from "@/lib/posts";
 import { CODE } from "./ai-agents-from-llm-calls-to-loops.code";
@@ -12,11 +14,12 @@ export const meta: PostMeta = {
   lead: "An agent is just a model call inside a loop. Write that loop by hand once and every framework gets a lot less mysterious.",
   topic: "AI",
   date: "2026-10-11",
-  minutes: 10,
+  minutes: 11,
   draft: true,
 };
 
 export const toc: TocItem[] = [
+  { id: "words", label: "A few words first" },
   { id: "one-call", label: "A single call" },
   { id: "tools", label: "Giving the model tools" },
   { id: "loop", label: "The loop" },
@@ -33,16 +36,79 @@ export default function Post() {
   return (
     <>
       <p>
-        &ldquo;Agent&rdquo; sounds like a whole new kind of software. It isn&rsquo;t. It&rsquo;s an{" "}
-        <Term id="llm" label="LLM" title="Large language model" href="https://en.wikipedia.org/wiki/Large_language_model">
-          A model trained on a huge pile of text to predict what comes next, one small piece at a time. GPT, Claude
-          and Gemini are all LLMs. Very good at writing, zero idea what&rsquo;s on your shelves.
-        </Term>{" "}
+        &ldquo;Agent&rdquo; sounds like a whole new kind of software. It isn&rsquo;t. It&rsquo;s an LLM
         call inside a loop, plus a short list of functions the model is allowed to ask you to run. To see that loop from the
         inside, I built a <A href={REPO}>corner store assistant</A>: a terminal chat for a small shop that answers
         questions about stock and prices. In this post I rebuild it by hand, starting from one API call, and then
         again with a framework, so you can see how much work the framework is doing for you.
       </p>
+
+      <H2 id="words">A few words first</H2>
+      <p>
+        Before we start, here are the words this post uses a lot. If you already know them, skip ahead. I won&rsquo;t
+        be offended. Much.
+      </p>
+      <dl className="glossary">
+        <div>
+          <dt>LLM</dt>
+          <dd>
+            Large language model. You send it text, it sends text back. It&rsquo;s great at writing and knows a lot
+            about the world, but nothing about your shop.
+          </dd>
+        </div>
+        <div>
+          <dt>Messages</dt>
+          <dd>
+            What you send the model: a list of messages, each with a role. <Code>system</Code> is the rules for the
+            model, <Code>user</Code> is the person asking, <Code>assistant</Code> is the model&rsquo;s own replies and{" "}
+            <Code>tool</Code> is the result of a tool call.
+          </dd>
+        </div>
+        <div>
+          <dt>API call</dt>
+          <dd>One request to the model over the internet. One request in, one reply out, and each one costs a little.</dd>
+        </div>
+        <div>
+          <dt>Token</dt>
+          <dd>
+            The small pieces of text models read and write, about three quarters of a word each. You pay per token,
+            for what you send and for what comes back.
+          </dd>
+        </div>
+        <div>
+          <dt>Tool</dt>
+          <dd>
+            A normal function in your code that the model is allowed to ask for, like <Code>check_stock</Code>. The
+            model never sees the code, only the name, a description and the arguments it takes.
+          </dd>
+        </div>
+        <div>
+          <dt>Tool call</dt>
+          <dd>
+            The model&rsquo;s way of asking. Instead of text for the person, it replies &ldquo;run{" "}
+            <Code>check_stock</Code> with milk&rdquo;, and your code runs the function.
+          </dd>
+        </div>
+        <div>
+          <dt>Tool result</dt>
+          <dd>Whatever the function returned, sent back to the model as a new message so it can keep going.</dd>
+        </div>
+        <div>
+          <dt>Agent</dt>
+          <dd>
+            An LLM calling tools in a loop until it has what it needs to answer. The model decides what to do next;
+            your code runs it and keeps the loop going.
+          </dd>
+        </div>
+        <div>
+          <dt>Framework, SDK</dt>
+          <dd>
+            A library that writes the loop for you. SDK means software development kit: the official library a
+            company ships for its platform, like the OpenAI Agents SDK.
+          </dd>
+        </div>
+      </dl>
+      <p>Put those together and you get this:</p>
       <figure className="figure">
         <div className="diagram"><AgentLoop /></div>
         <figcaption className="figure__cap">
@@ -122,12 +188,26 @@ export default function Post() {
         and 7.00 AED right there in the conversation, so it answers in text and the loop ends. If it asks for the facts
         one at a time instead, it just takes one more turn.
       </p>
+      <figure className="figure">
+        <div className="diagram"><ConversationGrows /></div>
+        <figcaption className="figure__cap">
+          Every call sends the whole conversation so far. The tool results become new messages, so the second call
+          has everything the model needs to answer.
+        </figcaption>
+      </figure>
       <Quote>The model decides what happens next. Your code keeps going until the model says it&rsquo;s done.</Quote>
       <p>
         That&rsquo;s the difference between an agent and a workflow. In a workflow, your code fixes the order of the
         steps and the model fills each one in. In an agent, the model picks the next step, and your code just enforces
         the rules.
       </p>
+      <figure className="figure">
+        <div className="diagram"><WorkflowVsAgent /></div>
+        <figcaption className="figure__cap">
+          The workflow runs the same steps in the same order every time. The agent picks its next step on each turn,
+          so two runs of the same question can go in a different order.
+        </figcaption>
+      </figure>
       <p>
         I used Chat Completions here because the growing list of messages makes the loop easy to see. OpenAI
         recommends the{" "}
