@@ -43,7 +43,13 @@ export function PlainHint() {
   const skip = () => {
     if (!target) return;
     const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    target.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
+    // Land with the end of the code card still on screen above the panel, so the
+    // panel reads as part of that code: its top a little below the middle, or
+    // higher if that is what it takes to show the whole panel.
+    const vh = window.innerHeight;
+    const r = target.getBoundingClientRect();
+    const offset = Math.max(Math.min(vh * 0.45, vh - r.height - 24), 96);
+    window.scrollTo({ top: r.top + window.scrollY - offset, behavior: smooth ? "smooth" : "auto" });
     target.focus({ preventScroll: true });
     setTarget(null);
   };
