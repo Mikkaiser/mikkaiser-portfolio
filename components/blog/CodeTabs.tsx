@@ -32,7 +32,7 @@ export async function CodeTabs({ py, ts, cs, files = {} }: { py: string; ts: str
         <fieldset className="code__tabs">
           <legend className="sr-only">Language</legend>
           {LANGS.map((l, i) => (
-            <label key={l.key} className="code__tab">
+            <label key={l.key} className="code__tab" data-lang={l.key}>
               <input type="radio" name={name} value={l.key} defaultChecked={i === 0} />
               <span className="sr-only">{l.name}, </span>
               {files[l.key] ?? l.file}

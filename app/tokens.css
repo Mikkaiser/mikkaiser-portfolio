@@ -101,6 +101,10 @@
   --code-light-min: #F1FA8C;
   --code-light-max: #50FA7B;
   --code-shadow: 0 14px 40px rgba(0, 0, 0, 0.32);
+  /* The selected language tab, one Dracula colour per language. */
+  --code-lang-py: #F1FA8C;
+  --code-lang-ts: #8BE9FD;
+  --code-lang-cs: #BD93F9;
 }
 
 /* spacing */

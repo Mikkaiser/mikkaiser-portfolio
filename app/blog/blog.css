@@ -141,9 +141,12 @@
 /* Language tabs: radio buttons styled as filename tabs; CSS shows the matching body. */
 .code__tabs { display: flex; flex-wrap: wrap; gap: var(--space-1); border: 0; margin: 0; padding: 0; min-width: 0; }
 .code__tabs .code__tab { cursor: pointer; transition: color var(--dur-pointer) var(--ease); }
-.code__tabs .code__tab:hover { color: var(--code-fg); }
+.code__tabs .code__tab:not(:has(input:checked)):hover { color: var(--code-fg); }
 .code__tab input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
-.code__tab:has(input:checked) { background: var(--code-chrome); color: var(--code-fg); }
+.code__tab[data-lang="py"] { --lang: var(--code-lang-py); }
+.code__tab[data-lang="ts"] { --lang: var(--code-lang-ts); }
+.code__tab[data-lang="cs"] { --lang: var(--code-lang-cs); }
+.code__tab:has(input:checked) { background: color-mix(in srgb, var(--lang) 14%, var(--code-chrome)); color: var(--lang); }
 .code__tab:has(input:focus-visible) { outline: 2px solid var(--code-fg); outline-offset: 2px; }
 .code--tabs:has(input[value="py"]:checked) .code__body:not([data-lang="py"]),
 .code--tabs:has(input[value="ts"]:checked) .code__body:not([data-lang="ts"]),
