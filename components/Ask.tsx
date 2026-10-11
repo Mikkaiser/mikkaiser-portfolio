@@ -6,11 +6,36 @@ import { Spark } from "./icons";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-const SUGGESTIONS: { label: string; ask: string }[] = [
-  { label: "What is his .NET experience?", ask: "What is his .NET experience?" },
-  { label: "Biggest system he has worked on?", ask: "What is the biggest system he has worked on?" },
-  { label: "Has he run microservices in production?", ask: "Has he run microservices in production?" },
+// The agent sends fresh follow-ups with every answer. This pool opens the chat
+// and tops the cards up whenever an answer comes back with fewer than three.
+const STARTERS = [
+  "What is his .NET experience?",
+  "What is the biggest system he has worked on?",
+  "Has he run microservices in production?",
+  "What did he build at ACTVET?",
+  "What did he win at WorldSkills?",
+  "What does he teach?",
+  "What front end work has he done?",
+  "Has he shipped mobile apps?",
+  "What was SotreqLink?",
 ];
+const SHOWN = 3;
+
+const norm = (q: string) => q.trim().toLowerCase().replace(/[?.!\s]+$/, "");
+
+/** Up to three questions, the agent's first, none the visitor has already asked. */
+function pickSuggestions(fresh: string[], asked: string[]) {
+  const seen = new Set(asked.map(norm));
+  const out: string[] = [];
+  for (const q of [...fresh, ...STARTERS]) {
+    const k = norm(q);
+    if (!k || seen.has(k)) continue;
+    seen.add(k);
+    out.push(q.trim());
+    if (out.length === SHOWN) break;
+  }
+  return out;
+}
 
 const FAIL = "That did not go through. Try again in a moment, or email mikkaiser.ribeiro@gmail.com.";
 
@@ -65,6 +90,7 @@ export function Ask() {
   const [messages, setMessages] = useState<Msg[]>([{ role: "assistant", content: GREETING }]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [suggestions, setSuggestions] = useState(() => pickSuggestions([], []));
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -79,6 +105,8 @@ export function Ask() {
     setMessages(next);
     setInput("");
     setBusy(true);
+    const asked = next.filter((m) => m.role === "user").map((m) => m.content);
+    let fresh: string[] = [];
     try {
       const history = next.filter((m) => m.content !== GREETING);
       const res = await fetch("/api/ask", {
@@ -86,12 +114,14 @@ export function Ask() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ messages: history }),
       });
-      const data = (await res.json().catch(() => ({}))) as { reply?: string; error?: string };
+      const data = (await res.json().catch(() => ({}))) as { reply?: string; error?: string; suggestions?: unknown };
+      if (Array.isArray(data.suggestions)) fresh = data.suggestions.filter((q): q is string => typeof q === "string");
       const reply = res.ok && data.reply ? data.reply : data.error || FAIL;
       setMessages([...next, { role: "assistant", content: reply }]);
     } catch {
       setMessages([...next, { role: "assistant", content: FAIL }]);
     } finally {
+      setSuggestions(pickSuggestions(fresh, asked));
       setBusy(false);
     }
   }, [busy, messages]);
@@ -132,8 +162,8 @@ export function Ask() {
           )}
         </div>
         <div className="ask__suggest">
-          {SUGGESTIONS.map((s) => (
-            <button type="button" className="btn btn--ghost" key={s.ask} onClick={() => send(s.ask)} disabled={busy}>{s.label}</button>
+          {suggestions.map((q) => (
+            <button type="button" className="btn btn--ghost" key={q} onClick={() => send(q)} disabled={busy}>{q}</button>
           ))}
         </div>
         <form onSubmit={onSubmit} className="ask__form">

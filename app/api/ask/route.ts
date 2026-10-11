@@ -10,7 +10,50 @@ const MODEL = "gpt-5.4-mini";
 const MAX_TURNS = 20;
 const MAX_CHARS = 2000;
 
+const MAX_SUGGESTIONS = 3;
+
 type Turn = { role: "user" | "assistant"; content: string };
+
+// Every answer comes back with fresh follow-up questions for the cards under the
+// chat, so a visitor always has somewhere to go next. Structured output keeps
+// the reply and the suggestions apart without parsing prose.
+const SUGGEST = `Reply with JSON matching the schema. "reply" is your answer to the visitor, written exactly as the rules above say. "suggestions" is ${MAX_SUGGESTIONS} short questions the visitor could ask you next, each under 50 characters, phrased about Mikael in the third person ("What did he build at ACTVET?"). Make the first one dig deeper into your answer and the others open a different part of his background (work, projects, stack, awards, teaching, education), so the visitor keeps discovering something new. Each must make sense on its own as a button, so name the employer, project or technology instead of writing "there", "it" or "that". Every one must be answerable from the facts above and different from anything the visitor has already asked. Never suggest personal or off-topic questions.`;
+
+const FORMAT = {
+  type: "json_schema",
+  json_schema: {
+    name: "answer",
+    strict: true,
+    schema: {
+      type: "object",
+      properties: {
+        reply: { type: "string" },
+        suggestions: { type: "array", items: { type: "string" } },
+      },
+      required: ["reply", "suggestions"],
+      additionalProperties: false,
+    },
+  },
+} as const;
+
+function parseAnswer(raw: string): { reply: string; suggestions: string[] } {
+  try {
+    const { reply, suggestions } = JSON.parse(raw) as { reply?: unknown; suggestions?: unknown };
+    if (typeof reply !== "string") throw new Error("no reply");
+    const list = Array.isArray(suggestions) ? suggestions : [];
+    return {
+      reply: reply.trim(),
+      suggestions: list
+        .filter((q): q is string => typeof q === "string")
+        .map((q) => q.trim())
+        .filter((q) => q && q.length <= 80)
+        .slice(0, MAX_SUGGESTIONS),
+    };
+  } catch {
+    // Not JSON after all: show what came back and let the client fill the cards.
+    return { reply: raw.trim(), suggestions: [] };
+  }
+}
 
 function parseTurns(input: unknown): Turn[] | null {
   if (!Array.isArray(input) || input.length === 0 || input.length > MAX_TURNS) return null;
@@ -51,7 +94,8 @@ export async function POST(req: Request) {
     const completion = await client.chat.completions.create({
       model: MODEL,
       max_completion_tokens: 1024,
-      messages: [{ role: "system", content: BIO }, ...turns],
+      response_format: FORMAT,
+      messages: [{ role: "system", content: BIO }, { role: "system", content: SUGGEST }, ...turns],
     });
 
     const choice = completion.choices[0];
@@ -61,8 +105,8 @@ export async function POST(req: Request) {
       });
     }
 
-    const reply = choice?.message?.content?.trim();
-    return NextResponse.json({ reply: reply || "No answer came back. Try again in a moment." });
+    const { reply, suggestions } = parseAnswer(choice?.message?.content ?? "");
+    return NextResponse.json({ reply: reply || "No answer came back. Try again in a moment.", suggestions });
   } catch (error) {
     if (error instanceof OpenAI.RateLimitError) {
       return NextResponse.json({ error: "Too many questions right now. Try again in a minute." }, { status: 429 });
