@@ -61,6 +61,18 @@
   --weight-medium: 500;
   --weight-title: 600;
   --weight-code: 600;
+  --weight-heading: 700;
+  --weight-display: 800;
+  --size-page-title: clamp(24px, 3.4vw, 38px);
+  --lh-page-title: 1.08;
+  --ls-page-title: -0.04em;
+  --size-heading: 24px;
+  --size-h3: 21px;
+  --lh-heading: 1.15;
+  --ls-heading: -0.025em;
+  --size-entry-title: 20px;
+  --lh-entry-title: 1.2;
+  --ls-entry-title: -0.025em;
   --size-section-head: 10px;
   --ls-section-head: 0.18em;
   --size-lead: 20px;
@@ -75,6 +87,20 @@
   --ls-micro: 0.16em;
   --measure-body: 64ch;
   --measure-lead: 44ch;
+  --size-code: 13px;
+  --lh-code: 1.75;
+}
+
+/* code: Dracula, identical in both themes. Code never adopts the page theme. */
+:root {
+  --code-bg: #111216;
+  --code-chrome: #232428;
+  --code-fg: #F8F8F2;
+  --code-comment: #6272A4;
+  --code-light-close: #FF5555;
+  --code-light-min: #F1FA8C;
+  --code-light-max: #50FA7B;
+  --code-shadow: 0 14px 40px rgba(0, 0, 0, 0.32);
 }
 
 /* spacing */
@@ -88,9 +114,12 @@
   --space-12: 48px;
   --space-18: 72px;
   --radius-control: 4px;
+  --radius-chip: 7px;
   --radius-card: 12px;
   --radius-round: 50%;
   --hairline: 1px;
+  --pad-row: 16px;
+  --pad-row-inline: 14px;
 }
 
 /* motion */
@@ -98,6 +127,7 @@
   --dur-pointer: 120ms;
   --dur-photo: 300ms;
   --ease: linear;
+  --progress-height: 2px;
 }
 
 /* base */

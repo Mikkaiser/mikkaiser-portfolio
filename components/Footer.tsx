@@ -1,6 +1,9 @@
+import Link from "next/link";
+import { getPosts } from "@/lib/posts";
 import { Clock } from "./Clock";
 
 export function Footer() {
+  const hasPosts = getPosts().length > 0;
   return (
     <footer className="footer">
       <div className="wrap footer__in">
@@ -13,11 +16,12 @@ export function Footer() {
           </div>
           <nav className="foot__col" aria-label="Footer, pages">
             <div className="foot__label">Sections</div>
-            <a className="navlink" href="#work">Work</a>
-            <a className="navlink" href="#experience">Experience</a>
-            <a className="navlink" href="#awards">Achievements</a>
-            <a className="navlink" href="#contact">Contact</a>
-            <a className="navlink" href="#offline">Offline</a>
+            <Link className="navlink" href="/#work">Work</Link>
+            <Link className="navlink" href="/#experience">Experience</Link>
+            <Link className="navlink" href="/#awards">Achievements</Link>
+            <Link className="navlink" href="/#contact">Contact</Link>
+            <Link className="navlink" href="/#offline">Offline</Link>
+            {hasPosts ? <Link className="navlink" href="/blog">Blog</Link> : null}
           </nav>
           <nav className="foot__col" aria-label="Footer, elsewhere">
             <div className="foot__label">Elsewhere</div>

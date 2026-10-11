@@ -37,3 +37,6 @@ jobs:
 
       - name: Assert "/" is prerendered
         run: test -f .next/server/app/index.html && echo "prerendered / found"
+
+      - name: Assert "/blog" is prerendered
+        run: test -f .next/server/app/blog.html && echo "prerendered /blog found"
