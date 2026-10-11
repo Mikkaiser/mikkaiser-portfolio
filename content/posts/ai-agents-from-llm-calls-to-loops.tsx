@@ -212,9 +212,8 @@ export default function Post() {
       </p>
       <p>
         The corner store did not stop at one agent. Its second phase splits the assistant into a team: writers running
-        in parallel, specialists called as tools and a checkout reached through a handoff. That is the{" "}
-        <A href="/blog/ai-agents-from-one-agent-to-a-team">next post</A>, and the full code is in the{" "}
-        <A href={REPO}>repository</A>.
+        in parallel, specialists called as tools and a checkout reached through a handoff. The full code for both
+        phases is in the <A href={REPO}>repository</A>.
       </p>
     </>
   );

@@ -1,7 +1,5 @@
 import type { ComponentType } from "react";
 import * as aiAgents from "@/content/posts/ai-agents-from-llm-calls-to-loops";
-import * as aiAgentsTeam from "@/content/posts/ai-agents-from-one-agent-to-a-team";
-import * as designingActa from "@/content/posts/designing-acta";
 
 export type PostMeta = {
   slug: string;
@@ -30,7 +28,7 @@ export type Post = { meta: PostMeta; toc: TocItem[]; Body: ComponentType };
 type PostModule = { meta: PostMeta; toc?: TocItem[]; default: ComponentType };
 
 // Every post is a TSX module in content/posts. Register it here to publish it.
-const MODULES: PostModule[] = [aiAgents, aiAgentsTeam, designingActa];
+const MODULES: PostModule[] = [aiAgents];
 
 const SHOW_DRAFTS = process.env.NODE_ENV !== "production";
 
