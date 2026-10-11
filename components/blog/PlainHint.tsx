@@ -56,7 +56,8 @@ export function PlainHint() {
 
   return (
     <button type="button" className="plainhint" data-show={target ? "" : undefined} tabIndex={target ? 0 : -1} aria-hidden={!target} onClick={skip}>
-      Don&rsquo;t want to read the code? <strong>Skip to In plain words ↓</strong>
+      <span>Don&rsquo;t want to read the code?</span>
+      <span className="plainhint__go">Skip to In plain words <span className="plainhint__arrow" aria-hidden="true">↓</span></span>
     </button>
   );
 }
