@@ -12,7 +12,9 @@ export type Pt = { x: number; y: number };
 
 /** One particle: where it sits on the path (0 to 1), how far off it, how fast it flows, how bright and big. */
 export type Seed = { u: number; off: number; speed: number; tone: number; size: number };
-export type Field = { seeds: Seed[]; at: (u: number, off: number) => Pt };
+/** A mote of background dust: a home spot (0 to 1 of the canvas) it drifts around. */
+export type Mote = { x: number; y: number; amp: number; phase: number; tone: number; size: number };
+export type Field = { seeds: Seed[]; motes: Mote[]; at: (u: number, off: number) => Pt };
 
 /** Every particle goes once round the path in about this many seconds, give or take. */
 const LAP_S = 24;
@@ -35,7 +37,9 @@ function loop(kind: CoverKind, w: number, h: number): Path {
   } else {
     // Wide screens: the loop takes the right of the content column, the title the bottom left.
     const col = Math.min(w, 1180);
-    rx = Math.min(col * 0.27, h * 0.6); ry = rx * 0.5; cx = w * 0.5 + col * 0.25; cy = h * 0.4;
+    rx = Math.min(col * 0.3, h * 0.7, w * 0.26); ry = Math.min(rx * 0.48, h * 0.34); cy = h * 0.44;
+    // Kept inside the right edge on narrower screens.
+    cx = Math.min(w * 0.5 + col * 0.22, w - rx - Math.max(24, w * 0.03));
   }
   const at = (u: number, off: number): Pt => {
     const a = u * 2 * Math.PI;
@@ -80,7 +84,19 @@ export function field(shape: CoverShape, kind: CoverKind, w: number, h: number):
       size: path.size * (0.7 + r() * 0.45),
     });
   }
-  return { seeds, at: path.at };
+  // Faint dust over the whole canvas, so the cover is never just a shape on a blank page.
+  const motes: Mote[] = [];
+  const m = kind === "thumb" ? 0 : Math.min(700, Math.round((w * h) / 2600));
+  for (let i = 0; i < m; i++) {
+    motes.push({ x: r(), y: r(), amp: 6 + r() * 14, phase: r() * 2 * Math.PI, tone: 0.1 + r() * 0.28, size: 1.1 + r() * 0.9 });
+  }
+  return { seeds, motes, at: path.at };
+}
+
+/** Where a mote sits at time `t` (ms): a slow wander round its home spot. */
+export function drift(mote: Mote, w: number, h: number, t: number): Pt {
+  const a = t * 0.00022 + mote.phase;
+  return { x: mote.x * w + Math.sin(a) * mote.amp, y: mote.y * h + Math.cos(a * 1.3) * mote.amp };
 }
 
 /** How lit a particle at `u` is by the pulse whose head is at `head`: a short trail behind it. */

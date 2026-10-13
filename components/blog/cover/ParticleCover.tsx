@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { field, glow, PULSE_MS, STILL_HEAD, type CoverShape, type Field } from "./field";
+import { drift, field, glow, PULSE_MS, STILL_HEAD, type CoverShape, type Field } from "./field";
 
 const SPRING = 22;
 const DAMP = 6.5;
@@ -38,18 +38,24 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       cv.height = Math.round(h * dpr);
       cv.getContext("2d")?.setTransform(dpr, 0, 0, dpr, 0, 0);
       f = field(shape, kind, w, h);
-      const n = f.seeds.length;
+      // Path particles first, then the dust.
+      const n = f.seeds.length + f.motes.length;
       us = Float32Array.from(f.seeds, (s) => s.u);
       px = new Float32Array(n); py = new Float32Array(n); vx = new Float32Array(n); vy = new Float32Array(n);
       // On first paint the cover's particles start scattered and gather into the path.
       const scatter = kind === "cover" && !reduced && !gathered;
       for (let i = 0; i < n; i++) {
-        const p = f.at(us[i], f.seeds[i].off);
+        const p = target(i, 0);
         px[i] = scatter ? Math.random() * w : p.x;
         py[i] = scatter ? Math.random() * h : p.y;
       }
       gathered = true;
       return true;
+    };
+
+    const target = (i: number, t: number) => {
+      const S = f!.seeds.length;
+      return i < S ? f!.at(us[i], f!.seeds[i].off) : drift(f!.motes[i - S], w, h, t);
     };
 
     const pointer = { x: 0, y: 0, vx: 0, vy: 0, on: false, until: 0 };
@@ -59,9 +65,10 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       if (!ctx || !f) return;
       ctx.clearRect(0, 0, w, h);
       ctx.fillStyle = getComputedStyle(cv).getPropertyValue("--ink").trim();
-      for (let i = 0; i < f.seeds.length; i++) {
-        const s = f.seeds[i];
-        let a = s.tone + glow(us[i], head) * 0.6;
+      const S = f.seeds.length;
+      for (let i = 0; i < px.length; i++) {
+        const s = i < S ? f.seeds[i] : f.motes[i - S];
+        let a = i < S ? s.tone + glow(us[i], head) * 0.6 : s.tone;
         let r = s.size;
         if (pointer.on) {
           const d = Math.hypot(px[i] - pointer.x, py[i] - pointer.y);
@@ -79,10 +86,10 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       if (!f) return;
       const now = performance.now();
       if (pointer.until && now > pointer.until) { pointer.on = false; pointer.until = 0; }
-      for (let i = 0; i < f.seeds.length; i++) {
-        const s = f.seeds[i];
-        us[i] = (us[i] + s.speed * dt) % 1;
-        const t = f.at(us[i], s.off);
+      const S = f.seeds.length;
+      for (let i = 0; i < px.length; i++) {
+        if (i < S) us[i] = (us[i] + f.seeds[i].speed * dt) % 1;
+        const t = target(i, now);
         let ax = (t.x - px[i]) * SPRING - vx[i] * DAMP;
         let ay = (t.y - py[i]) * SPRING - vy[i] * DAMP;
         if (pointer.on) {
