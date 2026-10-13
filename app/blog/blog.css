@@ -66,6 +66,13 @@
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
 .entry__date { grid-area: date; }
+/* The cover as a thumbnail: Acta's thumbnail tier, grayscale until the row is hovered. */
+.entries:has(.entry__thumb) .entry { grid-template-columns: 52px 160px minmax(0, 1fr) auto; grid-template-areas: "date thumb main dur"; }
+.entry__thumb {
+  grid-area: thumb; align-self: start; display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover;
+  border: var(--hairline) solid var(--rule); filter: grayscale(1) contrast(1.04); transition: filter 300ms var(--ease);
+}
+.entry:hover .entry__thumb { filter: none; }
 .entry__dur { grid-area: dur; }
 .entry__main { grid-area: main; display: block; min-width: 0; }
 .entry__head { display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; margin-bottom: 5px; }
@@ -271,12 +278,13 @@
   .code__bar { gap: var(--space-3); }
   .code__tabs { flex-wrap: nowrap; gap: 2px; }
   .code__tabs .code__tab { padding: 6px 9px; }
-  .entry { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "date dur" "main main"; gap: var(--space-2) var(--space-4); padding-inline: 0; }
+  .entry, .entries:has(.entry__thumb) .entry { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "date dur" "thumb thumb" "main main"; gap: var(--space-2) var(--space-4); padding-inline: 0; }
+  .entry__thumb { margin: var(--space-1) 0 var(--space-2); }
   .entry:hover { background: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .progress { display: none; }
   .plainhint { transition: none; }
   .plainhint[data-show] .plainhint__arrow { animation: none; }
-  .entry, .tag, .toc__link, .prose a, .code__tabs .code__tab { transition: none; }
+  .entry, .entry__thumb, .tag, .toc__link, .prose a, .code__tabs .code__tab { transition: none; }
 }
