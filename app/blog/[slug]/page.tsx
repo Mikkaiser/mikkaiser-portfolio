@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CodeLangSync } from "@/components/blog/CodeLangSync";
+import { ParticleCover } from "@/components/blog/cover/ParticleCover";
 import { PlainHint } from "@/components/blog/PlainHint";
 import { TocList } from "@/components/blog/TocList";
 import { FEED_ALTERNATE, formatLongDate, getNextPost, getPost, getPosts } from "@/lib/posts";
@@ -20,8 +20,7 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
   const { slug } = await params;
   const post = getPost(slug);
   if (!post) return {};
-  const { title, summary, date, cover } = post.meta;
-  const images = cover ? [{ url: cover.src, width: cover.width, height: cover.height, alt: cover.alt }] : undefined;
+  const { title, summary, date } = post.meta;
   return {
     title: `${title} | Mikkaiser`,
     description: summary,
@@ -33,9 +32,8 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
       description: summary,
       publishedTime: date,
       authors: ["Mikael Ribeiro Simoes"],
-      images,
     },
-    twitter: { title, description: summary, images },
+    twitter: { title, description: summary },
   };
 }
 
@@ -53,7 +51,7 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
     headline: meta.title,
     description: meta.summary,
     datePublished: meta.date,
-    ...(meta.cover ? { image: `${SITE}${meta.cover.src}` } : {}),
+    image: `${SITE}/blog/${slug}/opengraph-image`,
     url: `${SITE}/blog/${slug}`,
     mainEntityOfPage: `${SITE}/blog/${slug}`,
     inLanguage: "en-GB",
@@ -79,15 +77,7 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
       <PlainHint />
       {meta.cover ? (
         <header className="cover">
-          <Image
-            className="cover__img"
-            src={meta.cover.src}
-            alt={meta.cover.alt}
-            fill
-            sizes="100vw"
-            loading="eager"
-            fetchPriority="high"
-          />
+          <ParticleCover shape={meta.cover} kind="cover" />
           <div className="wrap cover__text">
             {metaLine}
             {title}

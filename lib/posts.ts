@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import type { CoverShape } from "@/components/blog/cover/field";
 import * as aiAgents from "@/content/posts/ai-agents-from-llm-calls-to-loops";
 
 export type PostMeta = {
@@ -14,8 +15,8 @@ export type PostMeta = {
   date: string;
   /** Reading time in minutes, set by hand. */
   minutes: number;
-  /** A 16:9 cover under the lead, also the post's share image. Lives in public/assets/blog. */
-  cover?: { src: string; alt: string; width: number; height: number };
+  /** The particle shape behind the title, on the index thumbnail and in the share image. */
+  cover?: CoverShape;
   /** Drafts render in `next dev` only. */
   draft?: boolean;
 };

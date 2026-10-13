@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import { ParticleCover } from "@/components/blog/cover/ParticleCover";
 import { formatShortDate, type PostMeta } from "@/lib/posts";
 
 /** One post as a row in the register: date gutter, cover thumbnail, title and kicker, summary, reading time. */
@@ -8,7 +8,7 @@ export function EntryRow({ post, kicker = true }: { post: PostMeta; kicker?: boo
     <Link href={`/blog/${post.slug}`} className="entry">
       <time className="entry__date" dateTime={post.date}>{formatShortDate(post.date)}</time>
       {post.cover ? (
-        <Image className="entry__thumb" src={post.cover.src} alt="" width={post.cover.width} height={post.cover.height} sizes="(max-width: 620px) 100vw, 160px" />
+        <span className="entry__thumb"><ParticleCover shape={post.cover} kind="thumb" /></span>
       ) : null}
       <span className="entry__main">
         <span className="entry__head">

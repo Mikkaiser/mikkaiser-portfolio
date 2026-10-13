@@ -16,12 +16,7 @@ export const meta: PostMeta = {
   topic: "AI",
   date: "2026-10-11",
   minutes: 11,
-  cover: {
-    src: "/assets/blog/ai-agents-from-llm-calls-to-loops.jpg",
-    alt: "A cartoon corner store. A customer asks about milk at the counter, and a small robot runs a dashed loop across the floor: from the counter to the milk shelf, where it checks a clipboard, and back.",
-    width: 1280,
-    height: 720,
-  },
+  cover: "loop",
   draft: true,
 };
 
