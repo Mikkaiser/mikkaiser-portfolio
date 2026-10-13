@@ -8,11 +8,17 @@ const DAMP = 6.5;
 const REACH = 120;
 const PUSH = 3200;
 const DRAG = 0.9;
+// A click inside the loop blows the field apart: particles fly free for
+// BURST_MS, then the spring eases back in over RETURN_MS and pulls them home.
+const BURST_MS = 1500;
+const RETURN_MS = 700;
+const FREE_DAMP = 1.6;
 
 /**
  * A post's particle field. As the cover, it flows all the time it is on screen
  * and the pointer pushes particles aside; they spring back into the path. As a
- * thumbnail it holds still until its index row is hovered. Under reduced
+ * thumbnail it holds still until its index row is hovered. A click inside the
+ * cover's shape scatters everything, and it gathers back 1.5s later. Under reduced
  * motion both draw a single still frame. Colours come from the page palette,
  * read at paint time, like the diagrams.
  */
@@ -82,16 +88,35 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       ctx.globalAlpha = 1;
     };
 
+    let burstAt = 0;
+    const explode = (at: { x: number; y: number }) => {
+      burstAt = performance.now();
+      for (let i = 0; i < px.length; i++) {
+        const dx = px[i] - at.x, dy = py[i] - at.y;
+        const d = Math.hypot(dx, dy);
+        const a = (d > 0.5 ? Math.atan2(dy, dx) : Math.random() * 2 * Math.PI) + (Math.random() - 0.5) * 0.5;
+        // Closer particles fly faster; everything moves.
+        const v = (260 + Math.random() * 620) * (0.6 + 0.4 * Math.exp(-d / 400));
+        vx[i] = Math.cos(a) * v;
+        vy[i] = Math.sin(a) * v;
+      }
+    };
+
     const step = (dt: number) => {
       if (!f) return;
       const now = performance.now();
       if (pointer.until && now > pointer.until) { pointer.on = false; pointer.until = 0; }
+      const since = burstAt ? now - burstAt : Infinity;
+      const free = since < BURST_MS;
+      const back = Math.min(1, Math.max(0, (since - BURST_MS) / RETURN_MS));
+      const spring = free ? 0 : SPRING * back * back * (3 - 2 * back);
+      const damp = free ? FREE_DAMP : DAMP;
       const S = f.seeds.length;
       for (let i = 0; i < px.length; i++) {
         if (i < S) us[i] = (us[i] + f.seeds[i].speed * dt) % 1;
         const t = target(i, now);
-        let ax = (t.x - px[i]) * SPRING - vx[i] * DAMP;
-        let ay = (t.y - py[i]) * SPRING - vy[i] * DAMP;
+        let ax = (t.x - px[i]) * spring - vx[i] * damp;
+        let ay = (t.y - py[i]) * spring - vy[i] * damp;
         if (pointer.on) {
           const dx = px[i] - pointer.x, dy = py[i] - pointer.y;
           const d = Math.hypot(dx, dy);
@@ -104,6 +129,11 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
         }
         vx[i] += ax * dt; vy[i] += ay * dt;
         px[i] += vx[i] * dt; py[i] += vy[i] * dt;
+        // While scattered, the cover's edges bounce particles back, so the burst fills it.
+        if (free) {
+          if (px[i] < 0 || px[i] > w) { px[i] = px[i] < 0 ? 0 : w; vx[i] *= -0.6; }
+          if (py[i] < 0 || py[i] > h) { py[i] = py[i] < 0 ? 0 : h; vy[i] *= -0.6; }
+        }
       }
     };
 
@@ -120,8 +150,8 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
     // The thumbnail only flows while its row is hovered; the cover whenever it is on screen.
     let hovered = kind === "cover";
     const onEnter = () => { hovered = true; };
-    const onLeave = () => { hovered = kind === "cover"; pointer.on = false; };
-    const local = (e: PointerEvent) => {
+    const onLeave = () => { hovered = kind === "cover"; pointer.on = false; host.style.cursor = ""; };
+    const local = (e: MouseEvent) => {
       const r = cv.getBoundingClientRect();
       return { x: e.clientX - r.left, y: e.clientY - r.top };
     };
@@ -131,17 +161,25 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       const gap = Math.max(16, now - last) / 1000;
       if (pointer.on) { pointer.vx = (p.x - pointer.x) / gap; pointer.vy = (p.y - pointer.y) / gap; }
       pointer.x = p.x; pointer.y = p.y; pointer.on = true; pointer.until = 0; last = now;
+      // The middle of the loop is clickable, so it says so.
+      host.style.cursor = f?.inside(p) ? "pointer" : "";
     };
-    // A tap on a phone pushes the particles once, then lets them settle.
+    // A tap on a phone pushes the particles once, then lets them settle; inside the loop the click handles it.
     const onDown = (e: PointerEvent) => {
-      if (e.pointerType === "mouse") return;
-      Object.assign(pointer, local(e), { vx: 0, vy: 0, on: true, until: performance.now() + 450 });
+      const p = local(e);
+      if (e.pointerType === "mouse" || f?.inside(p)) return;
+      Object.assign(pointer, p, { vx: 0, vy: 0, on: true, until: performance.now() + 450 });
+    };
+    const onClick = (e: MouseEvent) => {
+      const p = local(e);
+      if (f?.inside(p)) explode(p);
     };
     host.addEventListener("pointerenter", onEnter);
     host.addEventListener("pointerleave", onLeave);
     if (kind === "cover") {
       host.addEventListener("pointermove", onMove);
       host.addEventListener("pointerdown", onDown);
+      host.addEventListener("click", onClick);
     }
 
     let raf = 0, prev = 0, n = 0, visible = false, ready = setup();
@@ -175,6 +213,8 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       host.removeEventListener("pointerleave", onLeave);
       host.removeEventListener("pointermove", onMove);
       host.removeEventListener("pointerdown", onDown);
+      host.removeEventListener("click", onClick);
+      host.style.cursor = "";
     };
   }, [shape, kind]);
 

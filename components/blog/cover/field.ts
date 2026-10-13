@@ -14,7 +14,13 @@ export type Pt = { x: number; y: number };
 export type Seed = { u: number; off: number; speed: number; tone: number; size: number };
 /** A mote of background dust: a home spot (0 to 1 of the canvas) it drifts around. */
 export type Mote = { x: number; y: number; amp: number; phase: number; tone: number; size: number };
-export type Field = { seeds: Seed[]; motes: Mote[]; at: (u: number, off: number) => Pt };
+export type Field = {
+  seeds: Seed[];
+  motes: Mote[];
+  at: (u: number, off: number) => Pt;
+  /** True for a point inside the shape, clear of its band: where a click sets off a burst. */
+  inside: (p: Pt) => boolean;
+};
 
 /** Every particle goes once round the path in about this many seconds, give or take. */
 const LAP_S = 24;
@@ -22,7 +28,7 @@ const LAP_S = 24;
 export const PULSE_MS = 4200;
 const TRAIL = 0.09;
 
-type Path = { at: (u: number, off: number) => Pt; perimeter: number; band: number; size: number };
+type Path = { at: (u: number, off: number) => Pt; inside: (p: Pt) => boolean; perimeter: number; band: number; size: number };
 
 /** The agent loop: an ellipse, clockwise on screen. */
 function loop(kind: CoverKind, w: number, h: number): Path {
@@ -49,8 +55,11 @@ function loop(kind: CoverKind, w: number, h: number): Path {
     return { x: cx + rx * c + (nx / nl) * off, y: cy + ry * s + (ny / nl) * off };
   };
   const perimeter = 2 * Math.PI * Math.sqrt((rx * rx + ry * ry) / 2);
-  const band = kind === "thumb" ? 1.4 : Math.max(4, rx * 0.028);
-  return { at, perimeter, band, size: kind === "thumb" ? 1.3 : 2.4 };
+  const inside = (p: Pt) => ((p.x - cx) / rx) ** 2 + ((p.y - cy) / ry) ** 2 < 0.8;
+  // A thumbnail grows to full width on a phone, so its particles grow with it.
+  const band = kind === "thumb" ? Math.max(1.4, w * 0.009) : Math.max(4, rx * 0.028);
+  const size = kind === "thumb" ? Math.min(2.4, 1.3 * Math.max(1, w / 200)) : 2.4;
+  return { at, inside, perimeter, band, size };
 }
 
 const SHAPES: Record<CoverShape, (kind: CoverKind, w: number, h: number) => Path> = { loop };
@@ -90,7 +99,7 @@ export function field(shape: CoverShape, kind: CoverKind, w: number, h: number):
   for (let i = 0; i < m; i++) {
     motes.push({ x: r(), y: r(), amp: 6 + r() * 14, phase: r() * 2 * Math.PI, tone: 0.1 + r() * 0.28, size: 1.1 + r() * 0.9 });
   }
-  return { seeds, motes, at: path.at };
+  return { seeds, motes, at: path.at, inside: path.inside };
 }
 
 /** Where a mote sits at time `t` (ms): a slow wander round its home spot. */
