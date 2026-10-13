@@ -14,6 +14,8 @@ export type PostMeta = {
   date: string;
   /** Reading time in minutes, set by hand. */
   minutes: number;
+  /** A 16:9 cover under the lead, also the post's share image. Lives in public/assets/blog. */
+  cover?: { src: string; alt: string; width: number; height: number };
   /** Drafts render in `next dev` only. */
   draft?: boolean;
 };

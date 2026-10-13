@@ -92,6 +92,8 @@
   margin: 0 0 22px; max-width: var(--measure-lead); text-wrap: pretty;
   font-size: var(--size-lead); line-height: var(--lh-lead); letter-spacing: var(--ls-lead); color: var(--ink);
 }
+/* The cover: Acta's landscape tier, 16:9 with square corners at the full measure. */
+.post__cover { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; margin: var(--space-6) 0 var(--space-8); border: var(--hairline) solid var(--rule); }
 
 /* The article and its table of contents share the full width at 9:4, the
    contents beside the whole article from 1180px, and between the lead and the

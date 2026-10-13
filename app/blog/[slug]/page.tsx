@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CodeLangSync } from "@/components/blog/CodeLangSync";
@@ -19,7 +20,8 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
   const { slug } = await params;
   const post = getPost(slug);
   if (!post) return {};
-  const { title, summary, date } = post.meta;
+  const { title, summary, date, cover } = post.meta;
+  const images = cover ? [{ url: cover.src, width: cover.width, height: cover.height, alt: cover.alt }] : undefined;
   return {
     title: `${title} | Mikkaiser`,
     description: summary,
@@ -31,8 +33,9 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
       description: summary,
       publishedTime: date,
       authors: ["Mikael Ribeiro Simoes"],
+      images,
     },
-    twitter: { title, description: summary },
+    twitter: { title, description: summary, images },
   };
 }
 
@@ -50,6 +53,7 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
     headline: meta.title,
     description: meta.summary,
     datePublished: meta.date,
+    ...(meta.cover ? { image: `${SITE}${meta.cover.src}` } : {}),
     url: `${SITE}/blog/${slug}`,
     mainEntityOfPage: `${SITE}/blog/${slug}`,
     inLanguage: "en-GB",
@@ -73,6 +77,17 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
           </p>
           <h1 className="post__title">{meta.title}</h1>
           <p className="post__lead">{meta.lead ?? meta.summary}</p>
+          {meta.cover ? (
+            <Image
+              className="post__cover"
+              src={meta.cover.src}
+              alt={meta.cover.alt}
+              width={meta.cover.width}
+              height={meta.cover.height}
+              sizes="(max-width: 1179px) 100vw, 760px"
+              loading="eager"
+            />
+          ) : null}
         </header>
         {showToc ? <aside className="post__toc"><TocList items={toc} minutes={meta.minutes} /></aside> : null}
         <div className="post__body">
