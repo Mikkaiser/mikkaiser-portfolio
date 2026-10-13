@@ -10,15 +10,15 @@ const PUSH = 3200;
 const DRAG = 0.9;
 // A click inside the loop blows the field apart: particles fly free for
 // BURST_MS, then the spring eases back in over RETURN_MS and pulls them home.
-const BURST_MS = 1500;
+const BURST_MS = 3000;
 const RETURN_MS = 700;
-const FREE_DAMP = 1.6;
+const FREE_DAMP = 1.1;
 
 /**
  * A post's particle field. As the cover, it flows all the time it is on screen
  * and the pointer pushes particles aside; they spring back into the path. As a
  * thumbnail it holds still until its index row is hovered. A click inside the
- * cover's shape scatters everything, and it gathers back 1.5s later. Under reduced
+ * cover's shape scatters everything, and it gathers back 3s later. Under reduced
  * motion both draw a single still frame. Colours come from the page palette,
  * read at paint time, like the diagrams.
  */
