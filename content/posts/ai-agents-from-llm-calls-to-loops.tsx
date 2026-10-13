@@ -20,7 +20,6 @@ export const meta: PostMeta = {
 };
 
 export const toc: TocItem[] = [
-  { id: "words", label: "A few words first" },
   { id: "one-call", label: "A single call" },
   { id: "tools", label: "Giving the model tools" },
   { id: "loop", label: "The loop" },
@@ -37,79 +36,30 @@ export default function Post() {
   return (
     <>
       <p>
-        &ldquo;Agent&rdquo; sounds like a whole new kind of software. It isn&rsquo;t. It&rsquo;s an LLM
+        &ldquo;
+        <Term id="agent" label="Agent">
+          An LLM calling tools in a loop until it has what it needs to answer. The model decides what to do next;
+          your code runs it and keeps the loop going.
+        </Term>
+        &rdquo; sounds like a whole new kind of software. It isn&rsquo;t. It&rsquo;s an{" "}
+        <Term id="llm" label="LLM" title="Large language model">
+          You send it text, it sends text back. It&rsquo;s great at writing and knows a lot about the world, but
+          nothing about your shop.
+        </Term>{" "}
         call inside a loop, plus a short list of functions the model is allowed to ask you to run. To see that loop from the
         inside, I built a <A href={REPO}>corner store assistant</A>: a terminal chat for a small shop that answers
-        questions about stock and prices. In this post I rebuild it by hand, starting from one API call, and then
-        again with a framework, so you can see how much work the framework is doing for you.
+        questions about stock and prices. In this post I rebuild it by hand, starting from one{" "}
+        <Term id="api-call" label="API call">
+          One request to the model over the internet. One request in, one reply out, and each one costs a little.
+        </Term>
+        , and then again with a{" "}
+        <Term id="framework" label="framework">
+          A library that writes the loop for you, so you only describe the agent and its tools.
+        </Term>
+        , so you can see how much work the framework is doing for you.
       </p>
 
-      <H2 id="words">A few words first</H2>
-      <p>
-        Before we start, here are the words this post uses a lot. If you already know them, skip ahead. I won&rsquo;t
-        be offended. Much.
-      </p>
-      <dl className="glossary">
-        <div>
-          <dt>LLM</dt>
-          <dd>
-            Large language model. You send it text, it sends text back. It&rsquo;s great at writing and knows a lot
-            about the world, but nothing about your shop.
-          </dd>
-        </div>
-        <div>
-          <dt>Messages</dt>
-          <dd>
-            What you send the model: a list of messages, each with a role. <Code>system</Code> is the rules for the
-            model, <Code>user</Code> is the person asking, <Code>assistant</Code> is the model&rsquo;s own replies and{" "}
-            <Code>tool</Code> is the result of a tool call.
-          </dd>
-        </div>
-        <div>
-          <dt>API call</dt>
-          <dd>One request to the model over the internet. One request in, one reply out, and each one costs a little.</dd>
-        </div>
-        <div>
-          <dt>Token</dt>
-          <dd>
-            The small pieces of text models read and write, about three quarters of a word each. You pay per token,
-            for what you send and for what comes back.
-          </dd>
-        </div>
-        <div>
-          <dt>Tool</dt>
-          <dd>
-            A normal function in your code that the model is allowed to ask for, like <Code>check_stock</Code>. The
-            model never sees the code, only the name, a description and the arguments it takes.
-          </dd>
-        </div>
-        <div>
-          <dt>Tool call</dt>
-          <dd>
-            The model&rsquo;s way of asking. Instead of text for the person, it replies &ldquo;run{" "}
-            <Code>check_stock</Code> with milk&rdquo;, and your code runs the function.
-          </dd>
-        </div>
-        <div>
-          <dt>Tool result</dt>
-          <dd>Whatever the function returned, sent back to the model as a new message so it can keep going.</dd>
-        </div>
-        <div>
-          <dt>Agent</dt>
-          <dd>
-            An LLM calling tools in a loop until it has what it needs to answer. The model decides what to do next;
-            your code runs it and keeps the loop going.
-          </dd>
-        </div>
-        <div>
-          <dt>Framework, SDK</dt>
-          <dd>
-            A library that writes the loop for you. SDK means software development kit: the official library a
-            company ships for its platform, like the OpenAI Agents SDK.
-          </dd>
-        </div>
-      </dl>
-      <p>Put those together and you get this:</p>
+      <p>Here&rsquo;s the difference in one picture:</p>
       <figure className="figure">
         <div className="diagram"><AgentLoop /></div>
         <figcaption className="figure__cap">
@@ -132,7 +82,15 @@ export default function Post() {
       </p>
 
       <H2 id="one-call">A single call</H2>
-      <p>Let&rsquo;s start with one request. A list of messages goes in, one message comes out.</p>
+      <p>
+        Let&rsquo;s start with one request. A list of{" "}
+        <Term id="messages" label="messages">
+          Each message has a role. <Code>system</Code> is the rules for the model, <Code>user</Code> is the person
+          asking, <Code>assistant</Code> is the model&rsquo;s own replies and <Code>tool</Code> is the result of a tool
+          call.
+        </Term>{" "}
+        goes in, one message comes out.
+      </p>
       <CodeTabs {...CODE.a1} />
       <p>
         That&rsquo;s the whole interface. The model is{" "}
@@ -148,7 +106,12 @@ export default function Post() {
 
       <H2 id="tools">Giving the model tools</H2>
       <p>
-        A tool is a normal function plus a description the model can read. The function stays in your code. The model
+        A{" "}
+        <Term id="tool" label="tool">
+          A normal function in your code that the model is allowed to ask for, like <Code>check_stock</Code>. The
+          model never sees the code, only the name, a description and the arguments it takes.
+        </Term>{" "}
+        is a normal function plus a description the model can read. The function stays in your code. The model
         never runs anything itself: it replies with &ldquo;please call this function with these arguments&rdquo;, and
         your code decides whether to do it.
       </p>
@@ -186,8 +149,16 @@ export default function Post() {
 
       <H2 id="loop">The loop</H2>
       <p>
-        Now put the call in a loop. Each turn sends the conversation and the tools. If the reply has tool calls, the
-        loop runs them, adds the results to the conversation and goes around again. If the reply is plain text,
+        Now put the call in a loop. Each turn sends the conversation and the tools. If the reply has{" "}
+        <Term id="tool-call" label="tool calls" title="Tool call">
+          The model&rsquo;s way of asking. Instead of text for the person, it replies &ldquo;run{" "}
+          <Code>check_stock</Code> with milk&rdquo;, and your code runs the function.
+        </Term>
+        , the loop runs them, adds the{" "}
+        <Term id="tool-result" label="results" title="Tool result">
+          Whatever the function returned, sent back to the model as a new message so it can keep going.
+        </Term>{" "}
+        to the conversation and goes around again. If the reply is plain text,
         that&rsquo;s the answer and we&rsquo;re done.
       </p>
       <CodeTabs {...CODE.a3} />
@@ -218,7 +189,12 @@ export default function Post() {
       </figure>
       <Quote>The model decides what happens next. Your code keeps going until the model says it&rsquo;s done.</Quote>
       <p>
-        That&rsquo;s the difference between an agent and a workflow. In a workflow, your code fixes the order of the
+        That&rsquo;s the difference between an agent and a{" "}
+        <Term id="workflow" label="workflow">
+          A fixed series of steps written in your code. The model can fill in a step, but it never decides which
+          step comes next.
+        </Term>
+        . In a workflow, your code fixes the order of the
         steps and the model fills each one in. In an agent, the model picks the next step, and your code just enforces
         the rules.
       </p>
@@ -230,7 +206,12 @@ export default function Post() {
         </figcaption>
       </figure>
       <p>
-        I used Chat Completions here because the growing list of messages makes the loop easy to see. OpenAI
+        I used{" "}
+        <Term id="chat-completions" label="Chat Completions" href="https://developers.openai.com/api/docs/guides/text">
+          OpenAI&rsquo;s classic API for talking to its models: you send the list of messages, it sends one message
+          back. Lots of other providers copy its shape.
+        </Term>{" "}
+        here because the growing list of messages makes the loop easy to see. OpenAI
         recommends the{" "}
         <Term id="responses" label="Responses API">
           OpenAI&rsquo;s newer API for talking to its models. It can keep the conversation on OpenAI&rsquo;s side and
@@ -253,7 +234,11 @@ export default function Post() {
           <strong>One reply can have several calls.</strong> Run all of them before you call the model again.
         </li>
         <li>
-          <strong>Errors are results too.</strong> An unknown tool, bad arguments, an exception inside the function:
+          <strong>Errors are results too.</strong> An unknown tool, bad arguments, an{" "}
+          <Term id="exception" label="exception">
+            The error a function throws when something goes wrong. If nobody catches it, the program stops.
+          </Term>{" "}
+          inside the function:
           send it back as the tool result. The model reads the error and can fix its own mistake. If you crash the
           loop instead, it never gets the chance.
         </li>
@@ -263,14 +248,28 @@ export default function Post() {
         </li>
       </ul>
       <p>
-        The arguments also arrive as a JSON string, so they need parsing before the function sees them. That&rsquo;s
+        The arguments also arrive as a{" "}
+        <Term id="json" label="JSON" href="https://www.json.org/">
+          A plain text format for data: curly braces, keys in quotes, values after colons. Every language can read it,
+          which is why APIs love it.
+        </Term>{" "}
+        string, so they need parsing before the function sees them. That&rsquo;s
         why every version parses them inside the <Code>try</Code>.
       </p>
 
       <H2 id="framework">The same agent with a framework</H2>
       <p>
-        Agent frameworks are basically this loop in a box. The corner store uses the OpenAI Agents SDK, which exists
-        for Python and TypeScript. OpenAI doesn&rsquo;t have a .NET version, so the C# tab uses{" "}
+        Agent frameworks are basically this loop in a box. The corner store uses the{" "}
+        <Term id="agents-sdk" label="OpenAI Agents SDK" href="https://openai.github.io/openai-agents-python/">
+          OpenAI&rsquo;s agent framework. SDK means software development kit: the official library a company ships
+          for its platform.
+        </Term>
+        , which exists for Python and TypeScript. OpenAI doesn&rsquo;t have a{" "}
+        <Term id="dotnet" label=".NET" href="https://dotnet.microsoft.com/">
+          Microsoft&rsquo;s platform for C# and friends. When someone says &ldquo;a .NET version&rdquo;, they mean
+          one you can use from C#.
+        </Term>{" "}
+        version, so the C# tab uses{" "}
         <A href="https://github.com/microsoft/agent-framework">Microsoft Agent Framework</A>, which reached 1.0 in
         April 2026 and works with the same OpenAI client.
       </p>
@@ -284,14 +283,32 @@ export default function Post() {
         ]}
       />
       <p>
-        The tools are just functions now. The framework reads each signature to build the schema: type hints and the
-        docstring in Python (finally, someone reads the docstrings), the{" "}
+        The tools are just functions now. The framework reads each{" "}
+        <Term id="signature" label="signature">
+          The first line of a function: its name, its parameters and their types. Everything except the body.
+        </Term>{" "}
+        to build the schema:{" "}
+        <Term id="type-hints" label="type hints" href="https://docs.python.org/3/library/typing.html">
+          Labels in Python code that say what type a value should be, like <Code>name: str</Code>. Python itself
+          ignores them, but tools can read them.
+        </Term>{" "}
+        and the{" "}
+        <Term id="docstring" label="docstring" href="https://peps.python.org/pep-0257/">
+          The text in quotes right under a Python function&rsquo;s first line, describing what it does. Here it
+          becomes the tool&rsquo;s description.
+        </Term>{" "}
+        in Python (finally, someone reads the docstrings), the{" "}
         <Term id="zod" label="zod" title="Zod" href="https://zod.dev/">
           A TypeScript library for describing the shape of your data and checking it at runtime. The Agents SDK
           turns a zod schema into the JSON schema the model sees.
         </Term>{" "}
         schema in TypeScript, the parameter types
-        and <Code>[Description]</Code> attributes in C#. One side effect: the C# parameter is called{" "}
+        and <Code>[Description]</Code>{" "}
+        <Term id="attributes" label="attributes" href="https://learn.microsoft.com/dotnet/csharp/advanced-topics/reflection-and-attributes/">
+          Tags in square brackets that you put on C# code. They don&rsquo;t do anything themselves, but other code
+          can read them, like a framework looking for a description.
+        </Term>{" "}
+        in C#. One side effect: the C# parameter is called{" "}
         <Code>productName</Code>, so that&rsquo;s the name the model sees. The dispatch table, the message
         bookkeeping, the argument parsing and the loop itself are gone, and the step limit is a single option.
       </p>
@@ -319,7 +336,12 @@ export default function Post() {
       <H2 id="streaming">Streaming and tracing</H2>
       <p>
         A run can take a few seconds while the tools work, and staring at a blank terminal is no fun. So the corner
-        store streams: the answer shows up word by word, and a <Code>[tool]</Code> line appears for each call as it
+        store{" "}
+        <Term id="streaming" label="streams" title="Streaming">
+          Sending the answer in small pieces as the model writes it, instead of all at once when it&rsquo;s done.
+          It&rsquo;s why chat apps look like they&rsquo;re typing.
+        </Term>
+        : the answer shows up word by word, and a <Code>[tool]</Code> line appears for each call as it
         finishes.
       </p>
       <CodeTabs {...CODE.b3} />
@@ -339,12 +361,22 @@ export default function Post() {
           The small chunks of text a streaming response sends while the model is still writing. Glue them together
           in order and you get the full answer.
         </Term>{" "}
-        are pieces of the answer. Run items are the tool activity, and all
+        are pieces of the answer.{" "}
+        <Term id="run-items" label="Run items">
+          The Agents SDK&rsquo;s name for everything that happens during a run besides the text: tool calls, tool
+          results, handoffs.
+        </Term>{" "}
+        are the tool activity, and all
         the calls of a turn arrive before their results, which is why each version keeps a map by call id to match
         them up.
       </p>
       <p>
-        The trace block is the other half. Each turn becomes a trace in the OpenAI dashboard, and the shared group id
+        The trace block is the other half. Each turn becomes a{" "}
+        <Term id="trace" label="trace">
+          A record of everything one run did, in order and with timings: each model call, each tool call, what went
+          in and what came out. Great for finding out why the agent did something weird.
+        </Term>{" "}
+        in the OpenAI dashboard, and the shared group id
         ties all the turns of one chat together, so you can open a follow-up and see the earlier messages in the
         model&rsquo;s input. Agent Framework traces through{" "}
         <Term id="otel" label="OpenTelemetry" href="https://opentelemetry.io/">
@@ -389,7 +421,12 @@ export default function Post() {
       </p>
       <p>
         The corner store didn&rsquo;t stop at one agent, by the way. Its second phase splits the assistant into a
-        team: writers running in parallel, specialists called as tools and a checkout reached through a handoff. The
+        team: writers running in parallel, specialists called as tools and a checkout reached through a{" "}
+        <Term id="handoff" label="handoff">
+          One agent passing the whole conversation to another agent, which takes over from there. Like being
+          transferred to a different department, minus the hold music.
+        </Term>
+        . The
         full code for both phases is in the <A href={REPO}>repository</A>.
       </p>
     </>

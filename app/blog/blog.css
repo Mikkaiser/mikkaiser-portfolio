@@ -231,15 +231,6 @@
 /* On a phone the question sits above the chip, so the padding evens out. */
 @media (max-width: 620px) { .plainhint { padding: 10px; } }
 
-/* ---------- glossary: terms as rows in a register ---------- */
-.prose .glossary { margin: var(--space-6) 0; border-top: var(--hairline) solid var(--rule); }
-.glossary > div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: var(--space-6); padding: var(--space-3) 0; border-bottom: var(--hairline) solid var(--rule); }
-.glossary dt { font-family: var(--font-display); font-weight: var(--weight-heading); font-size: var(--size-term); line-height: 1.6; letter-spacing: var(--ls-heading); color: var(--ink); }
-.glossary dd { margin: 0; }
-@media (max-width: 620px) {
-  .glossary > div { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
-}
-
 /* ---------- terms: a niche word with a reference popover (components/blog/Term.tsx) ---------- */
 .termwrap { position: relative; display: inline-block; }
 .term { color: var(--ink); border-bottom: var(--hairline) dashed var(--faint); cursor: help; transition: border-color var(--dur-pointer) var(--ease); }
