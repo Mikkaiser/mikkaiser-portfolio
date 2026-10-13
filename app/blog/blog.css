@@ -99,8 +99,24 @@
   margin: 0 0 22px; max-width: var(--measure-lead); text-wrap: pretty;
   font-size: var(--size-lead); line-height: var(--lh-lead); letter-spacing: var(--ls-lead); color: var(--ink);
 }
-/* The cover: Acta's landscape tier, 16:9 with square corners at the full measure. */
-.post__cover { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; margin: var(--space-6) 0 var(--space-8); border: var(--hairline) solid var(--rule); }
+/* The cover: the image runs edge to edge under the site header, with the date
+   line and the title over its bottom left. Outside Acta, which has no hero; the
+   text stays white in both themes because it always sits on the dark scrim. */
+.post--cover { padding-top: 0; }
+.cover {
+  position: relative; display: flex; align-items: flex-end; overflow: hidden;
+  height: clamp(420px, 56.25vw, 78vh); margin-bottom: var(--space-12); background: #0A0A0A;
+}
+.cover__img { object-fit: cover; object-position: 50% 45%; }
+.cover::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(to top, rgba(10, 10, 10, 0.88) 0%, rgba(10, 10, 10, 0.55) 30%, rgba(10, 10, 10, 0) 62%),
+    linear-gradient(to right, rgba(10, 10, 10, 0.45) 0%, rgba(10, 10, 10, 0) 55%);
+}
+.cover__text { position: relative; z-index: 1; width: 100%; padding-bottom: var(--space-12); }
+.cover .post__meta { color: rgba(255, 255, 255, 0.78); }
+.cover .post__title { margin: 0; max-width: 18ch; color: #FFFFFF; font-size: clamp(34px, 5.2vw, 68px); text-shadow: 0 1px 24px rgba(0, 0, 0, 0.35); }
 
 /* The article and its table of contents share the full width at 9:4, the
    contents beside the whole article from 1180px, and between the lead and the
@@ -274,6 +290,13 @@
 }
 @media (max-width: 620px) {
   .post { padding-top: var(--space-12); }
+  .post--cover { padding-top: 0; }
+  /* A phone is too narrow to crop the cover, so the whole image shows and the
+     title sits on a dark band that the image fades into. */
+  .cover { display: block; height: auto; padding-top: calc(56.25vw - var(--space-8)); margin-bottom: var(--space-8); }
+  .cover .cover__img { height: 56.25vw !important; bottom: auto !important; object-position: center; }
+  .cover::after { bottom: auto; height: 56.25vw; background: linear-gradient(to top, #0A0A0A 0%, rgba(10, 10, 10, 0.55) 22%, rgba(10, 10, 10, 0) 50%); }
+  .cover__text { padding-bottom: var(--space-8); }
   /* Three filename tabs and the lights have to share one row on a phone. */
   .code__bar { gap: var(--space-3); }
   .code__tabs { flex-wrap: nowrap; gap: 2px; }

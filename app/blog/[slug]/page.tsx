@@ -60,42 +60,54 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
     author: { "@type": "Person", name: "Mikael Ribeiro Simoes", url: `${SITE}/` },
   };
 
+  const metaLine = (
+    <p className="post__meta">
+      <time dateTime={meta.date}>{formatLongDate(meta.date)}</time>
+      <span aria-hidden="true">·</span>
+      <span>{meta.minutes} min</span>
+      <span aria-hidden="true">·</span>
+      <span>{meta.topic}</span>
+    </p>
+  );
+  const title = <h1 className="post__title">{meta.title}</h1>;
+
   return (
-    <article className="wrap post">
+    <article className={meta.cover ? "post post--cover" : "post"}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="progress" data-progress aria-hidden="true" />
       <CodeLangSync />
       <PlainHint />
-      <div className={showToc ? "post__grid" : "post__grid post__grid--solo"}>
-        <header className="post__head">
-          <p className="post__meta">
-            <time dateTime={meta.date}>{formatLongDate(meta.date)}</time>
-            <span aria-hidden="true">·</span>
-            <span>{meta.minutes} min</span>
-            <span aria-hidden="true">·</span>
-            <span>{meta.topic}</span>
-          </p>
-          <h1 className="post__title">{meta.title}</h1>
-          <p className="post__lead">{meta.lead ?? meta.summary}</p>
-          {meta.cover ? (
-            <Image
-              className="post__cover"
-              src={meta.cover.src}
-              alt={meta.cover.alt}
-              width={meta.cover.width}
-              height={meta.cover.height}
-              sizes="(max-width: 1179px) 100vw, 760px"
-              loading="eager"
-            />
-          ) : null}
+      {meta.cover ? (
+        <header className="cover">
+          <Image
+            className="cover__img"
+            src={meta.cover.src}
+            alt={meta.cover.alt}
+            fill
+            sizes="100vw"
+            loading="eager"
+            fetchPriority="high"
+          />
+          <div className="wrap cover__text">
+            {metaLine}
+            {title}
+          </div>
         </header>
-        {showToc ? <aside className="post__toc"><TocList items={toc} minutes={meta.minutes} /></aside> : null}
-        <div className="post__body">
-          <div className="prose"><Body /></div>
-          <footer className="post__end">
-            {next ? <Link href={`/blog/${next.meta.slug}`} className="btn btn--primary" aria-label={`Read next: ${next.meta.title}`}>Read next</Link> : null}
-            <Link href="/blog" className="btn btn--ghost">All posts</Link>
-          </footer>
+      ) : null}
+      <div className="wrap">
+        <div className={showToc ? "post__grid" : "post__grid post__grid--solo"}>
+          <header className="post__head">
+            {meta.cover ? null : <>{metaLine}{title}</>}
+            <p className="post__lead">{meta.lead ?? meta.summary}</p>
+          </header>
+          {showToc ? <aside className="post__toc"><TocList items={toc} minutes={meta.minutes} /></aside> : null}
+          <div className="post__body">
+            <div className="prose"><Body /></div>
+            <footer className="post__end">
+              {next ? <Link href={`/blog/${next.meta.slug}`} className="btn btn--primary" aria-label={`Read next: ${next.meta.title}`}>Read next</Link> : null}
+              <Link href="/blog" className="btn btn--ghost">All posts</Link>
+            </footer>
+          </div>
         </div>
       </div>
     </article>
