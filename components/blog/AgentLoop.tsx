@@ -3,8 +3,8 @@
 import { useRef } from "react";
 import { clamp, lerp, quad, seg, useDiagram, within, type Pen } from "./diagram";
 
-const LOOP = 14000;
-const FADE = 12800;
+const LOOP = 11000;
+const FADE = 9800;
 
 // The agent lane: three model calls, two of them answered by a tool.
 const CALLS = [

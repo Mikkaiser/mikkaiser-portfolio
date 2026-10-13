@@ -3,8 +3,8 @@
 import { useRef } from "react";
 import { clamp, seg, useDiagram, within, type Pen } from "./diagram";
 
-const LOOP = 13000;
-const FADE = 11700;
+const LOOP = 9400;
+const FADE = 8200;
 
 // The milk question, message by message. `at` is when the message joins the list.
 const ROWS = [

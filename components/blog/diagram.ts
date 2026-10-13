@@ -153,12 +153,15 @@ export function useDiagram(
       return () => { mo.disconnect(); ro.disconnect(); };
     }
 
-    let raf = 0, t0 = 0, n = 0, visible = true;
+    let raf = 0, t0 = 0, n = 0, visible = false;
     const tick = (now: number) => {
       if (!t0) t0 = now;
       if (n++ % 6 === 0) {
         const r = cv.getBoundingClientRect();
+        const was = visible;
         visible = r.bottom > 0 && r.top < window.innerHeight;
+        // Start from the top whenever the diagram scrolls back into view.
+        if (visible && !was) t0 = now;
       }
       if (visible) frame((now - t0) % loop);
       raf = requestAnimationFrame(tick);
