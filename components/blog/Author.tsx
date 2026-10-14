@@ -22,7 +22,7 @@ export function AuthorByline() {
       <Portrait size="sm" />
       <span className="byline__text">
         <span className="byline__name">Mikael Ribeiro Simoes</span>
-        <span className="byline__role">Software engineer and tech educator, Abu Dhabi</span>
+        <span className="byline__role">Software Engineer &amp; Tech Educator, Abu Dhabi</span>
       </span>
     </Link>
   );
