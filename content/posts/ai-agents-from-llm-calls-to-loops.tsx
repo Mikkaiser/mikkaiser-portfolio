@@ -10,7 +10,7 @@ import { CODE } from "./ai-agents-from-llm-calls-to-loops.code";
 
 export const meta: PostMeta = {
   slug: "ai-agents-from-llm-calls-to-loops",
-  title: "AI Agents: From LLM Calls To Loops",
+  title: "AI Agents: From LLM Calls to Loops",
   summary: "Building a corner store agent by hand in Python, TypeScript and C#, then rebuilding it with a framework.",
   lead: "An agent is just a model call inside a loop. Write that loop by hand once and every framework gets a lot less mysterious.",
   topic: "AI",

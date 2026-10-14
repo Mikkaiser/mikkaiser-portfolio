@@ -10,7 +10,8 @@ import Link from "next/link";
 function Portrait({ size }: { size: "sm" | "lg" }) {
   return (
     <span className={`author__photo author__photo--${size}`}>
-      <Image src="/assets/portrait.jpg" alt="" width={666} height={1000} sizes={size === "sm" ? "140px" : "330px"} className="photo" />
+      {/* Cropped hard to the face, so it asks for about twice the drawn width, at the hero portrait's quality. */}
+      <Image src="/assets/portrait.jpg" alt="" width={666} height={1000} sizes={size === "sm" ? "280px" : "660px"} quality={90} className="photo" />
     </span>
   );
 }
