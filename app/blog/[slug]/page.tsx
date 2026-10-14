@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AuthorByline, AuthorCard } from "@/components/blog/Author";
 import { CodeLangSync } from "@/components/blog/CodeLangSync";
 import { ParticleCover } from "@/components/blog/cover/ParticleCover";
 import { PlainHint } from "@/components/blog/PlainHint";
@@ -89,10 +90,12 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
           <header className="post__head">
             {meta.cover ? null : <>{metaLine}{title}</>}
             <p className="post__lead">{meta.lead ?? meta.summary}</p>
+            <AuthorByline />
           </header>
           {showToc ? <aside className="post__toc"><TocList items={toc} minutes={meta.minutes} /></aside> : null}
           <div className="post__body">
             <div className="prose"><Body /></div>
+            <AuthorCard />
             <footer className="post__end">
               {next ? <Link href={`/blog/${next.meta.slug}`} className="btn btn--primary" aria-label={`Read next: ${next.meta.title}`}>Read next</Link> : null}
               <Link href="/blog" className="btn btn--ghost">All posts</Link>
