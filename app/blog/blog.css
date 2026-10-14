@@ -98,7 +98,8 @@
 }
 /* The cover: the post's particle field runs edge to edge under the site
    header, with the date line and the title over its bottom left. Outside Acta,
-   which has no hero; the field itself follows the diagram rules. */
+   which has no hero; the loop follows the diagram rules, and the faintly
+   tinted stars behind it are the one deliberate step outside the palette. */
 .post--cover { padding-top: 0; }
 .cover {
   position: relative; display: flex; align-items: flex-end; overflow: hidden; touch-action: pan-y;

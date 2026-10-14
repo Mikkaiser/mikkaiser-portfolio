@@ -12,11 +12,14 @@ export type Pt = { x: number; y: number };
 
 /** One particle: where it sits on the path (0 to 1), how far off it, how fast it flows, how bright and big. */
 export type Seed = { u: number; off: number; speed: number; tone: number; size: number };
-/** A mote of background dust: a home spot (0 to 1 of the canvas) it drifts around. */
-export type Mote = { x: number; y: number; amp: number; phase: number; tone: number; size: number };
+/**
+ * A background star: a fixed spot (0 to 1 of the canvas), a tint, how bright and
+ * big, and how it twinkles. Stars sit behind the path and never move.
+ */
+export type Star = { x: number; y: number; tint: number; tone: number; size: number; halo: boolean; depth: number; rate: number; phase: number };
 export type Field = {
   seeds: Seed[];
-  motes: Mote[];
+  stars: Star[];
   at: (u: number, off: number) => Pt;
   /** True for a point inside the shape, clear of its band: where a click sets off a burst. */
   inside: (p: Pt) => boolean;
@@ -93,19 +96,55 @@ export function field(shape: CoverShape, kind: CoverKind, w: number, h: number):
       size: path.size * (0.7 + r() * 0.45),
     });
   }
-  // Faint dust over the whole canvas, so the cover is never just a shape on a blank page.
-  const motes: Mote[] = [];
-  const m = kind === "thumb" ? 0 : Math.min(700, Math.round((w * h) / 2600));
+  // A sky of faint stars over the whole canvas, so the loop hangs in space. Most
+  // are pinpricks, a few are brighter, and only a handful carry a soft halo; all
+  // of them stay dimmer and sparser than the loop, which is the subject.
+  const stars: Star[] = [];
+  const m = kind === "thumb" ? 0 : Math.min(900, Math.round((w * h) / 1500));
   for (let i = 0; i < m; i++) {
-    motes.push({ x: r(), y: r(), amp: 6 + r() * 14, phase: r() * 2 * Math.PI, tone: 0.1 + r() * 0.28, size: 1.1 + r() * 0.9 });
+    const k = r();
+    const halo = k < 0.015;
+    const mid = !halo && k < 0.14;
+    stars.push({
+      x: r(),
+      y: r(),
+      tint: pickTint(r()),
+      tone: halo ? 0.7 + r() * 0.2 : mid ? 0.45 + r() * 0.2 : 0.2 + r() * 0.3,
+      size: halo ? 2.2 + r() * 0.5 : mid ? 1.6 + r() * 0.5 : 1 + r() * 0.6,
+      halo,
+      // About half twinkle noticeably; the rest barely shimmer.
+      depth: r() < 0.5 ? 0.35 + r() * 0.35 : r() * 0.15,
+      rate: 0.6 + r() * 1.8,
+      phase: r() * 2 * Math.PI,
+    });
   }
-  return { seeds, motes, at: path.at, inside: path.inside };
+  return { seeds, stars, at: path.at, inside: path.inside };
 }
 
-/** Where a mote sits at time `t` (ms): a slow wander round its home spot. */
-export function drift(mote: Mote, w: number, h: number, t: number): Pt {
-  const a = t * 0.00022 + mote.phase;
-  return { x: mote.x * w + Math.sin(a) * mote.amp, y: mote.y * h + Math.cos(a * 1.3) * mote.amp };
+/**
+ * Star colours, from hot to cool, each as a pale tint for the dark theme and a
+ * deeper one for the light theme. Weighted like a real sky: mostly white and
+ * blue-white, a little yellow and orange, a rare red.
+ */
+export const STAR_TINTS: { dark: string; light: string; share: number }[] = [
+  { dark: "#F2F3FF", light: "#3B3B4A", share: 0.4 },
+  { dark: "#8FB0FF", light: "#2E4A8A", share: 0.25 },
+  { dark: "#FFD97A", light: "#80651E", share: 0.18 },
+  { dark: "#FFA95E", light: "#8F521D", share: 0.11 },
+  { dark: "#FF7F6B", light: "#8C392E", share: 0.06 },
+];
+
+function pickTint(x: number) {
+  for (let i = 0; i < STAR_TINTS.length; i++) {
+    x -= STAR_TINTS[i].share;
+    if (x < 0) return i;
+  }
+  return 0;
+}
+
+/** How lit a star is at time `t` (ms): its tone, dipping now and then as it twinkles. */
+export function twinkle(star: Star, t: number) {
+  return star.tone * (1 - star.depth * (0.5 + 0.5 * Math.sin(t * 0.001 * star.rate + star.phase)));
 }
 
 /** How lit a particle at `u` is by the pulse whose head is at `head`: a short trail behind it. */

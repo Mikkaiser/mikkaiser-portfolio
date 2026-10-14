@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { drift, field, glow, PULSE_MS, STILL_HEAD, type CoverShape, type Field } from "./field";
+import { field, glow, PULSE_MS, STAR_TINTS, STILL_HEAD, twinkle, type CoverShape, type Field } from "./field";
 
 const SPRING = 22;
 const DAMP = 6.5;
@@ -19,8 +19,9 @@ const FREE_DAMP = 1.1;
  * and the pointer pushes particles aside; they spring back into the path. As a
  * thumbnail it holds still until its index row is hovered. A click inside the
  * cover's shape scatters everything, and it gathers back 3s later. Under reduced
- * motion both draw a single still frame. Colours come from the page palette,
- * read at paint time, like the diagrams.
+ * motion both draw a single still frame. The loop's colour comes from the page
+ * palette, read at paint time, like the diagrams; the stars behind it take a
+ * faint tint per theme and only twinkle, untouched by the pointer and the burst.
  */
 export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover" | "thumb" }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -44,14 +45,13 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       cv.height = Math.round(h * dpr);
       cv.getContext("2d")?.setTransform(dpr, 0, 0, dpr, 0, 0);
       f = field(shape, kind, w, h);
-      // Path particles first, then the dust.
-      const n = f.seeds.length + f.motes.length;
+      const n = f.seeds.length;
       us = Float32Array.from(f.seeds, (s) => s.u);
       px = new Float32Array(n); py = new Float32Array(n); vx = new Float32Array(n); vy = new Float32Array(n);
       // On first paint the cover's particles start scattered and gather into the path.
       const scatter = kind === "cover" && !reduced && !gathered;
       for (let i = 0; i < n; i++) {
-        const p = target(i, 0);
+        const p = target(i);
         px[i] = scatter ? Math.random() * w : p.x;
         py[i] = scatter ? Math.random() * h : p.y;
       }
@@ -59,22 +59,36 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       return true;
     };
 
-    const target = (i: number, t: number) => {
-      const S = f!.seeds.length;
-      return i < S ? f!.at(us[i], f!.seeds[i].off) : drift(f!.motes[i - S], w, h, t);
-    };
+    const target = (i: number) => f!.at(us[i], f!.seeds[i].off);
 
     const pointer = { x: 0, y: 0, vx: 0, vy: 0, on: false, until: 0 };
 
-    const paint = (head: number) => {
+    const paint = (head: number, t: number) => {
       const ctx = cv.getContext("2d");
       if (!ctx || !f) return;
       ctx.clearRect(0, 0, w, h);
-      ctx.fillStyle = getComputedStyle(cv).getPropertyValue("--ink").trim();
-      const S = f.seeds.length;
+      const ink = getComputedStyle(cv).getPropertyValue("--ink").trim();
+      // A light ink means the dark theme, where the stars take their pale tints.
+      const dark = parseInt(ink.slice(1, 3), 16) > 128;
+      for (const st of f.stars) {
+        const a = twinkle(st, t);
+        const x = st.x * w, y = st.y * h;
+        ctx.fillStyle = dark ? STAR_TINTS[st.tint].dark : STAR_TINTS[st.tint].light;
+        if (st.halo) {
+          ctx.globalAlpha = a * 0.14;
+          ctx.beginPath();
+          ctx.arc(x, y, st.size * 1.8, 0, 2 * Math.PI);
+          ctx.fill();
+        }
+        ctx.globalAlpha = a;
+        ctx.beginPath();
+        ctx.arc(x, y, st.size / 2, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+      ctx.fillStyle = ink;
       for (let i = 0; i < px.length; i++) {
-        const s = i < S ? f.seeds[i] : f.motes[i - S];
-        let a = i < S ? s.tone + glow(us[i], head) * 0.6 : s.tone;
+        const s = f.seeds[i];
+        let a = s.tone + glow(us[i], head) * 0.6;
         let r = s.size;
         if (pointer.on) {
           const d = Math.hypot(px[i] - pointer.x, py[i] - pointer.y);
@@ -111,10 +125,9 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       const back = Math.min(1, Math.max(0, (since - BURST_MS) / RETURN_MS));
       const spring = free ? 0 : SPRING * back * back * (3 - 2 * back);
       const damp = free ? FREE_DAMP : DAMP;
-      const S = f.seeds.length;
       for (let i = 0; i < px.length; i++) {
-        if (i < S) us[i] = (us[i] + f.seeds[i].speed * dt) % 1;
-        const t = target(i, now);
+        us[i] = (us[i] + f.seeds[i].speed * dt) % 1;
+        const t = target(i);
         let ax = (t.x - px[i]) * spring - vx[i] * damp;
         let ay = (t.y - py[i]) * spring - vy[i] * damp;
         if (pointer.on) {
@@ -138,9 +151,9 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
     };
 
     if (reduced) {
-      const once = () => { if (setup()) paint(STILL_HEAD); };
+      const once = () => { if (setup()) paint(STILL_HEAD, 0); };
       once();
-      const mo = new MutationObserver(() => paint(STILL_HEAD));
+      const mo = new MutationObserver(() => paint(STILL_HEAD, 0));
       mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "class"] });
       const ro = new ResizeObserver(once);
       ro.observe(cv);
@@ -192,17 +205,17 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       prev = now;
       if (visible && ready && hovered) {
         step(dt);
-        paint((now % PULSE_MS) / PULSE_MS);
+        paint((now % PULSE_MS) / PULSE_MS, now);
       }
       raf = requestAnimationFrame(tick);
     };
-    if (ready) paint(STILL_HEAD);
+    if (ready) paint(STILL_HEAD, 0);
     raf = requestAnimationFrame(tick);
 
-    const ro = new ResizeObserver(() => { ready = setup(); if (ready) paint(STILL_HEAD); });
+    const ro = new ResizeObserver(() => { ready = setup(); if (ready) paint(STILL_HEAD, 0); });
     ro.observe(cv);
     // A thumbnail at rest still follows a theme switch.
-    const mo = new MutationObserver(() => { if (!hovered) paint(STILL_HEAD); });
+    const mo = new MutationObserver(() => { if (!hovered) paint(STILL_HEAD, 0); });
     mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "class"] });
 
     return () => {

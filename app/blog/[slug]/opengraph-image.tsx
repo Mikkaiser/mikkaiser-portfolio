@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
-import { drift, field, glow, STILL_HEAD } from "@/components/blog/cover/field";
+import { field, glow, STAR_TINTS, STILL_HEAD } from "@/components/blog/cover/field";
 import { getPost, getPosts } from "@/lib/posts";
 
 // The share image: a still frame of the post's particle cover, with the title.
@@ -31,10 +31,12 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       <div style={{ width: "100%", height: "100%", display: "flex", position: "relative", background: "#0A0A0A" }}>
         {f ? (
           <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ position: "absolute", top: 0, left: 0 }}>
-            {f.motes.map((m, i) => {
-              const p = drift(m, w, h, 0);
-              return <circle key={`m${i}`} cx={p.x} cy={p.y} r={m.size / 2} fill="#FFFFFF" fillOpacity={m.tone} />;
-            })}
+            {f.stars.map((st, i) => (
+              <g key={`s${i}`}>
+                {st.halo ? <circle cx={st.x * w} cy={st.y * h} r={st.size * 1.8} fill={STAR_TINTS[st.tint].dark} fillOpacity={st.tone * 0.14} /> : null}
+                <circle cx={st.x * w} cy={st.y * h} r={st.size / 2} fill={STAR_TINTS[st.tint].dark} fillOpacity={st.tone} />
+              </g>
+            ))}
             {f.seeds.map((s, i) => {
               const p = f.at(s.u, s.off);
               const a = Math.min(1, s.tone + glow(s.u, STILL_HEAD) * 0.6);
