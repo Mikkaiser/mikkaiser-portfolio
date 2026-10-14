@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { EntryRow } from "@/components/blog/EntryRow";
+import { PostCard } from "@/components/blog/PostCard";
 import { TopicFilter } from "@/components/blog/TopicFilter";
 import { FEED_ALTERNATE, getPosts, getTopics, topicKey } from "@/lib/posts";
 
@@ -33,10 +33,10 @@ export default function BlogIndex() {
       ) : (
         <>
           {topics.length > 1 ? <TopicFilter topics={topics} /> : null}
-          <ol className="entries">
+          <ol className="postcards">
             {posts.map((p) => (
               <li key={p.meta.slug} data-topic={topicKey(p.meta.topic)}>
-                <EntryRow post={p.meta} />
+                <PostCard post={p.meta} />
               </li>
             ))}
           </ol>

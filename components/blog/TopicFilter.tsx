@@ -1,14 +1,14 @@
 import { topicKey } from "@/lib/posts";
 
 /**
- * Topic tags that filter the post rows with no JavaScript: each tag is a radio
- * button, and a generated :has() rule hides the rows of every other topic.
- * Rows carry data-topic; the filter and the rows share the .blog-index parent.
+ * Topic tags that filter the post cards with no JavaScript: each tag is a radio
+ * button, and a generated :has() rule hides the cards of every other topic.
+ * Cards carry data-topic; the filter and the cards share the .blog-index parent.
  */
 export function TopicFilter({ topics }: { topics: string[] }) {
   const rules = topics
     .map((t) => topicKey(t))
-    .map((k) => `.blog-index:has(.topics input[value="${k}"]:checked) .entries > li:not([data-topic="${k}"]){display:none}`)
+    .map((k) => `.blog-index:has(.topics input[value="${k}"]:checked) .postcards > li:not([data-topic="${k}"]){display:none}`)
     .join("");
   return (
     <>

@@ -13,29 +13,43 @@ const DRAG = 0.9;
 const BURST_MS = 3000;
 const RETURN_MS = 700;
 const FREE_DAMP = 1.1;
+// On a card the particles rest as a loose cloud this wide (of the card's short
+// side) and gather into the loop while it is hovered; the stars shift with the
+// pointer by up to PARALLAX px, the bigger ones more, so the sky has depth.
+const CLOUD = 0.06;
+const PARALLAX = 10;
+const SETTLE_MS = 1600;
 
 /**
  * A post's particle field. As the cover, it flows all the time it is on screen
- * and the pointer pushes particles aside; they spring back into the path. As a
- * thumbnail it holds still until its index row is hovered. A click inside the
- * cover's shape scatters everything, and it gathers back 3s later. Under reduced
- * motion both draw a single still frame. The loop's colour comes from the page
+ * and the pointer pushes particles aside; they spring back into the path. A
+ * click inside the cover's shape scatters everything, and it gathers back 3s
+ * later. On an index card the particles rest as a loose cloud round the loop and
+ * gather into it while the card is hovered (always, on a touch screen), with the
+ * stars drifting against the pointer. Under reduced motion both draw a single
+ * still frame of the gathered loop. The loop's colour comes from the page
  * palette, read at paint time, like the diagrams; the stars behind it take a
  * faint tint per theme and twinkle. The pointer pushes stars aside like the
  * loop, but a burst leaves them where they are.
  */
-export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover" | "thumb" }) {
+export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover" | "card" }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const cv = ref.current;
-    const host = kind === "cover" ? cv?.parentElement : cv?.closest<HTMLElement>(".entry");
+    const host = kind === "cover" ? cv?.parentElement : cv?.closest<HTMLElement>(".postcard");
     if (!cv || !host) return;
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const touch = matchMedia("(hover: none)").matches;
+    // How gathered the loop is: 1 is the path, 0 the card's resting cloud.
+    let g = kind === "cover" || reduced || touch ? 1 : 0;
+    // The star parallax: where it is, and where the pointer wants it.
+    const par = { x: 0, y: 0, gx: 0, gy: 0 };
 
     let f: Field | null = null;
     let w = 0, h = 0;
     let us = new Float32Array(0), px = new Float32Array(0), py = new Float32Array(0), vx = new Float32Array(0), vy = new Float32Array(0);
+    let rest = new Float32Array(0);
     let gathered = false;
 
     const setup = () => {
@@ -49,6 +63,10 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       // Path particles first, then the stars.
       const S = f.seeds.length, n = S + f.stars.length;
       us = Float32Array.from(f.seeds, (s) => s.u);
+      // Each particle's spot in the resting cloud, as an offset from its place on the path.
+      const spread = Math.min(w, h) * CLOUD;
+      const gauss = () => Math.sqrt(-2 * Math.log(Math.random() || 1e-9)) * Math.cos(2 * Math.PI * Math.random());
+      rest = Float32Array.from({ length: 2 * S }, () => gauss() * spread);
       px = new Float32Array(n); py = new Float32Array(n); vx = new Float32Array(n); vy = new Float32Array(n);
       // On first paint the cover's particles start scattered and gather into the path; the stars are already there.
       const scatter = kind === "cover" && !reduced && !gathered;
@@ -63,9 +81,14 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
 
     const target = (i: number) => {
       const S = f!.seeds.length;
-      if (i < S) return f!.at(us[i], f!.seeds[i].off);
+      if (i < S) {
+        const p = f!.at(us[i], f!.seeds[i].off);
+        if (g < 1) { p.x += (1 - g) * rest[2 * i]; p.y += (1 - g) * rest[2 * i + 1]; }
+        return p;
+      }
       const st = f!.stars[i - S];
-      return { x: st.x * w, y: st.y * h };
+      const depth = (st.size / 2.7) * PARALLAX;
+      return { x: st.x * w + par.x * depth, y: st.y * h + par.y * depth };
     };
 
     const pointer = { x: 0, y: 0, vx: 0, vy: 0, on: false, until: 0 };
@@ -138,6 +161,11 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       const since = burstAt ? now - burstAt : Infinity;
       const free = since < BURST_MS;
       const back = Math.min(1, Math.max(0, (since - BURST_MS) / RETURN_MS));
+      if (kind === "card") {
+        const k = Math.min(1, dt * 3);
+        g += ((hovered ? 1 : 0) - g) * (touch ? 1 : k);
+        par.x += (par.gx - par.x) * k; par.y += (par.gy - par.y) * k;
+      }
       const loopSpring = free ? 0 : SPRING * back * back * (3 - 2 * back);
       const loopDamp = free ? FREE_DAMP : DAMP;
       const S = f.seeds.length;
@@ -179,10 +207,14 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       return () => { mo.disconnect(); ro.disconnect(); };
     }
 
-    // The thumbnail only flows while its row is hovered; the cover whenever it is on screen.
-    let hovered = kind === "cover";
+    // A card only moves while it is hovered, and while it settles after; the cover whenever it is on screen.
+    let hovered = kind === "cover" || touch;
+    let settleUntil = 0;
     const onEnter = () => { hovered = true; };
-    const onLeave = () => { hovered = kind === "cover"; pointer.on = false; host.style.cursor = ""; };
+    const onLeave = () => {
+      hovered = kind === "cover" || touch; pointer.on = false; host.style.cursor = "";
+      par.gx = 0; par.gy = 0; settleUntil = performance.now() + SETTLE_MS;
+    };
     const local = (e: MouseEvent) => {
       const r = cv.getBoundingClientRect();
       return { x: e.clientX - r.left, y: e.clientY - r.top };
@@ -195,6 +227,11 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       pointer.x = p.x; pointer.y = p.y; pointer.on = true; pointer.until = 0; last = now;
       // The middle of the loop is clickable, so it says so.
       host.style.cursor = f?.inside(p) ? "pointer" : "";
+    };
+    // The stars drift against the pointer: right of centre, they slide left.
+    const onCardMove = (e: PointerEvent) => {
+      const p = local(e);
+      par.gx = -(p.x / w - 0.5) * 2; par.gy = -(p.y / h - 0.5) * 2;
     };
     // A tap on a phone pushes the particles once, then lets them settle; inside the loop the click handles it.
     const onDown = (e: PointerEvent) => {
@@ -212,9 +249,11 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       host.addEventListener("pointermove", onMove);
       host.addEventListener("pointerdown", onDown);
       host.addEventListener("click", onClick);
+    } else if (!touch) {
+      host.addEventListener("pointermove", onCardMove);
     }
 
-    let raf = 0, prev = 0, n = 0, visible = false, ready = setup();
+    let raf = 0, prev = 0, n = 0, visible = false, running = hovered, ready = setup();
     const tick = (now: number) => {
       if (n++ % 6 === 0) {
         const r = cv.getBoundingClientRect();
@@ -222,7 +261,8 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       }
       const dt = prev ? Math.min((now - prev) / 1000, 1 / 30) : 0;
       prev = now;
-      if (visible && ready && hovered) {
+      running = hovered || now < settleUntil;
+      if (visible && ready && running) {
         step(dt);
         paint((now % PULSE_MS) / PULSE_MS, now);
       }
@@ -233,8 +273,8 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
 
     const ro = new ResizeObserver(() => { ready = setup(); if (ready) paint(STILL_HEAD, 0); });
     ro.observe(cv);
-    // A thumbnail at rest still follows a theme switch.
-    const mo = new MutationObserver(() => { if (!hovered) paint(STILL_HEAD, 0); });
+    // A card at rest still follows a theme switch.
+    const mo = new MutationObserver(() => { if (!running) paint(STILL_HEAD, 0); });
     mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "class"] });
 
     return () => {
@@ -244,11 +284,12 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       host.removeEventListener("pointerenter", onEnter);
       host.removeEventListener("pointerleave", onLeave);
       host.removeEventListener("pointermove", onMove);
+      host.removeEventListener("pointermove", onCardMove);
       host.removeEventListener("pointerdown", onDown);
       host.removeEventListener("click", onClick);
       host.style.cursor = "";
     };
   }, [shape, kind]);
 
-  return <canvas ref={ref} className={kind === "cover" ? "cover__canvas" : "entry__canvas"} aria-hidden="true" />;
+  return <canvas ref={ref} className={kind === "cover" ? "cover__canvas" : "postcard__canvas"} aria-hidden="true" />;
 }

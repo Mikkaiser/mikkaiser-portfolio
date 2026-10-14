@@ -1,4 +1,4 @@
-/* Blog styles: the Acta blog patterns (post index rows, article column, code card),
+/* Blog styles: the Acta blog patterns (article column, code card) and the post cards,
    ported from acta-design-system as classes. Values follow the Acta tokens in tokens.css. */
 
 .sr-only {
@@ -52,33 +52,35 @@
 .tag:has(input:checked) { background: var(--ink); border-color: var(--ink); color: var(--on-ink); }
 .tag:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
 
-/* ---------- entry row ---------- */
-.entries { list-style: none; margin: 0; padding: 0; border-top: var(--hairline) solid var(--rule); }
-.entry {
-  display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; grid-template-areas: "date main dur";
-  gap: var(--space-6); align-items: baseline;
-  padding: var(--pad-row) var(--pad-row-inline); border-bottom: var(--hairline) solid var(--rule);
-  transition: background var(--dur-pointer) var(--ease);
+/* ---------- post cards: a portrait poster of each post's cover, outside Acta's
+   text-led entry rows. The particles rest as a cloud and gather into the loop
+   on hover (components/blog/cover/ParticleCover.tsx). ---------- */
+.postcards {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-12) var(--space-6);
 }
-.entry:hover { background: var(--raised); }
-.entry__date, .entry__dur {
-  font-family: var(--font-mono); font-size: var(--size-meta); color: var(--faint);
-  font-variant-numeric: tabular-nums; white-space: nowrap;
+.postcard { display: block; color: inherit; text-decoration: none; }
+.postcard:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+.postcard__poster {
+  position: relative; display: flex; align-items: flex-end; aspect-ratio: 4 / 5; overflow: hidden;
+  border: var(--hairline) solid var(--rule); background: var(--bg);
+  transition: border-color var(--dur-pointer) var(--ease);
 }
-.entry__date { grid-area: date; }
-/* The cover as a thumbnail: a still frame of the field, flowing while the row is hovered. */
-.entries:has(.entry__thumb) .entry { grid-template-columns: 52px 160px minmax(0, 1fr) auto; grid-template-areas: "date thumb main dur"; }
-.entry__thumb { grid-area: thumb; align-self: start; display: block; aspect-ratio: 16 / 9; border: var(--hairline) solid var(--rule); }
-.entry__canvas { display: block; width: 100%; height: 100%; }
-.entry__dur { grid-area: dur; }
-.entry__main { grid-area: main; display: block; min-width: 0; }
-.entry__head { display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; margin-bottom: 5px; }
-.entry__title {
-  font-family: var(--font-display); font-weight: var(--weight-heading); font-size: var(--size-entry-title);
-  line-height: var(--lh-entry-title); letter-spacing: var(--ls-entry-title); color: var(--ink);
+.postcard:hover .postcard__poster { border-color: var(--faint); }
+.postcard__canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.postcard__text { position: relative; display: block; width: 100%; padding: var(--space-6); }
+.postcard__meta {
+  display: block; margin-bottom: 10px;
+  font-family: var(--font-mono); font-size: var(--size-meta); letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--faint); font-variant-numeric: tabular-nums;
 }
-.entry__kicker { font-family: var(--font-mono); font-size: var(--size-micro); letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
-.entry__summary { display: block; font-size: var(--size-small); line-height: var(--lh-small); color: var(--muted); max-width: 60ch; }
+.postcard__title {
+  display: block; text-wrap: balance;
+  font-family: var(--font-display); font-weight: var(--weight-display); font-size: clamp(24px, 1.2vw + 13px, 30px);
+  line-height: 1.04; letter-spacing: var(--ls-page-title); color: var(--ink);
+}
+.postcard__summary { display: block; margin-top: var(--space-4); font-size: var(--size-small); line-height: var(--lh-small); color: var(--muted); }
+@media (max-width: 960px) { .postcards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* ---------- article ---------- */
 .post { padding-top: var(--space-18); }
@@ -288,13 +290,11 @@
   .code__bar { gap: var(--space-3); }
   .code__tabs { flex-wrap: nowrap; gap: 2px; }
   .code__tabs .code__tab { padding: 6px 9px; }
-  .entry, .entries:has(.entry__thumb) .entry { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "date dur" "thumb thumb" "main main"; gap: var(--space-2) var(--space-4); padding-inline: 0; }
-  .entry__thumb { margin: var(--space-1) 0 var(--space-2); }
-  .entry:hover { background: none; }
+  .postcards { grid-template-columns: minmax(0, 1fr); gap: var(--space-12); }
 }
 @media (prefers-reduced-motion: reduce) {
   .progress { display: none; }
   .plainhint { transition: none; }
   .plainhint[data-show] .plainhint__arrow { animation: none; }
-  .entry, .tag, .toc__link, .prose a, .code__tabs .code__tab { transition: none; }
+  .postcard__poster, .tag, .toc__link, .prose a, .code__tabs .code__tab { transition: none; }
 }

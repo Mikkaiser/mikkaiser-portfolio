@@ -1,13 +1,13 @@
 /*
- * The particle covers, shared by the live canvas (cover and thumbnail) and the
+ * The particle covers, shared by the live canvas (cover and index card) and the
  * share image. A post names a shape; the shape lays out a path for each place
  * the cover appears, and a seeded scatter of particles rides along that path,
  * so the same post draws the same field everywhere.
  */
 
 export type CoverShape = "loop";
-/** Where the field is drawn: the post's hero, the index thumbnail, or the share image. */
-export type CoverKind = "cover" | "thumb" | "share";
+/** Where the field is drawn: the post's hero, its poster card on the index, or the share image. */
+export type CoverKind = "cover" | "card" | "share";
 export type Pt = { x: number; y: number };
 
 /** One particle: where it sits on the path (0 to 1), how far off it, how fast it flows, how bright and big. */
@@ -36,8 +36,9 @@ type Path = { at: (u: number, off: number) => Pt; inside: (p: Pt) => boolean; pe
 /** The agent loop: an ellipse, clockwise on screen. */
 function loop(kind: CoverKind, w: number, h: number): Path {
   let cx: number, cy: number, rx: number, ry: number;
-  if (kind === "thumb") {
-    cx = w * 0.5; cy = h * 0.5; rx = w * 0.36; ry = h * 0.3;
+  if (kind === "card") {
+    // A portrait poster: the loop in the upper half, the title below it.
+    rx = w * 0.34; ry = rx * 0.62; cx = w * 0.5; cy = h * 0.33;
   } else if (kind === "share") {
     cx = w * 0.72; cy = h * 0.4; rx = w * 0.22; ry = rx * 0.52;
   } else if (w < 620) {
@@ -59,9 +60,8 @@ function loop(kind: CoverKind, w: number, h: number): Path {
   };
   const perimeter = 2 * Math.PI * Math.sqrt((rx * rx + ry * ry) / 2);
   const inside = (p: Pt) => ((p.x - cx) / rx) ** 2 + ((p.y - cy) / ry) ** 2 < 0.8;
-  // A thumbnail grows to full width on a phone, so its particles grow with it.
-  const band = kind === "thumb" ? Math.max(1.4, w * 0.009) : Math.max(4, rx * 0.028);
-  const size = kind === "thumb" ? Math.min(2.4, 1.3 * Math.max(1, w / 200)) : 2.4;
+  const band = kind === "card" ? Math.max(2, w * 0.011) : Math.max(4, rx * 0.028);
+  const size = kind === "card" ? 2.2 : 2.4;
   return { at, inside, perimeter, band, size };
 }
 
@@ -83,7 +83,7 @@ export function field(shape: CoverShape, kind: CoverKind, w: number, h: number):
   const path = SHAPES[shape](kind, w, h);
   const r = rng(7);
   const gauss = () => Math.sqrt(-2 * Math.log(r() || 1e-9)) * Math.cos(2 * Math.PI * r());
-  const n = Math.round(path.perimeter * (kind === "thumb" ? 1.1 : 0.85));
+  const n = Math.round(path.perimeter * (kind === "card" ? 1 : 0.85));
   const seeds: Seed[] = [];
   for (let i = 0; i < n; i++) {
     // Most particles hug the path; a few stray wider, for texture.
@@ -92,7 +92,7 @@ export function field(shape: CoverShape, kind: CoverKind, w: number, h: number):
       u: r(),
       off: gauss() * path.band * spread,
       speed: (1 / LAP_S) * (0.75 + r() * 0.5),
-      tone: (kind === "thumb" ? 0.45 : 0.28) + r() * 0.45,
+      tone: (kind === "card" ? 0.4 : 0.28) + r() * 0.45,
       size: path.size * (0.7 + r() * 0.45),
     });
   }
@@ -100,7 +100,7 @@ export function field(shape: CoverShape, kind: CoverKind, w: number, h: number):
   // are pinpricks, a few are brighter, and only a handful carry a soft halo; all
   // of them stay dimmer and sparser than the loop, which is the subject.
   const stars: Star[] = [];
-  const m = kind === "thumb" ? 0 : Math.min(900, Math.round((w * h) / 1500));
+  const m = Math.min(900, Math.round((w * h) / 1500));
   for (let i = 0; i < m; i++) {
     const k = r();
     const halo = k < 0.015;
