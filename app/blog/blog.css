@@ -123,11 +123,12 @@
 
 /* The author (components/blog/Author.tsx): a byline under the lead, and a card
    after the last paragraph. Portraits follow Acta's chrome tier: 56px and 132px
-   circles, grayscale until hovered, the image at 248% and anchored on the face. */
+   circles, grayscale until hovered. Zoomed to 155% rather than Acta's 248%, so the
+   whole head fits, with a little of the shoulders under it. */
 .author__photo { position: relative; flex: none; display: block; overflow: hidden; border-radius: var(--radius-round); }
 .author__photo--sm { width: 56px; height: 56px; }
 .author__photo--lg { width: 132px; height: 132px; }
-.author__photo img { position: absolute; left: 50%; top: -61%; width: 248%; max-width: none; height: auto; transform: translateX(-50%); }
+.author__photo img { position: absolute; left: 50%; top: -24%; width: 155%; max-width: none; height: auto; transform: translateX(-50%); }
 .byline:hover .photo, .author:hover .photo { filter: none; }
 .byline { display: inline-flex; align-items: center; gap: var(--space-3); margin: 0 0 var(--space-8); text-decoration: none; }
 .byline__text { display: flex; flex-direction: column; gap: 2px; }
