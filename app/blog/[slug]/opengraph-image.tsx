@@ -5,12 +5,16 @@ import { field, glow, STAR_TINTS, STILL_HEAD } from "@/components/blog/cover/fie
 import { getPost, getPosts } from "@/lib/posts";
 
 // The share image: a still frame of the post's particle cover, with the title.
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
-export const alt = "The post title over its particle cover";
+const size = { width: 1200, height: 630 };
 
 export function generateStaticParams() {
   return getPosts().map((p) => ({ slug: p.meta.slug }));
+}
+
+// One image per post, so its alt text can name the post. Served at /blog/<slug>/opengraph-image/cover.
+export function generateImageMetadata({ params }: { params: { slug: string } }) {
+  const title = getPost(params.slug)?.meta.title ?? "Mikkaiser";
+  return [{ id: "cover", size, contentType: "image/png", alt: `${title}, the post title over its loop of particles in a starry sky` }];
 }
 
 // Static instances of the site fonts (both SIL Open Font License); the share image cannot use next/font.
@@ -19,7 +23,7 @@ const fonts = Promise.all([
   readFile(join(process.cwd(), "assets/fonts/JetBrainsMono-Regular.ttf")),
 ]);
 
-export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
+export default async function Image({ params }: { params: Promise<{ slug: string }>; id: Promise<string> }) {
   const { slug } = await params;
   const post = getPost(slug);
   const [display, mono] = await fonts;

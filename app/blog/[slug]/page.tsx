@@ -52,7 +52,7 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
     headline: meta.title,
     description: meta.summary,
     datePublished: meta.date,
-    image: `${SITE}/blog/${slug}/opengraph-image`,
+    image: `${SITE}/blog/${slug}/opengraph-image/cover`,
     url: `${SITE}/blog/${slug}`,
     mainEntityOfPage: `${SITE}/blog/${slug}`,
     inLanguage: "en-GB",
