@@ -105,6 +105,14 @@
   --code-lang-py: #F1FA8C;
   --code-lang-ts: #8BE9FD;
   --code-lang-cs: #BD93F9;
+  /* Inline code in running text: a chip in the page palette, unlike the cards. */
+  --icode-bg: var(--chip-bg);
+  --icode-fg: var(--ink);
+  --icode-rule: var(--chip-rule);
+}
+/* On white the dark card needs a lighter lift, or its shadow smudges what sits below it. */
+:root[data-theme="light"] {
+  --code-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
 /* spacing */

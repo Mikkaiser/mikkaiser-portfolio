@@ -154,7 +154,7 @@
 
 .icode {
   font-family: var(--font-mono); font-weight: var(--weight-code); font-size: var(--size-code); font-feature-settings: "calt" 1, "liga" 1;
-  background: var(--code-bg); color: var(--code-fg); border: var(--hairline) solid var(--code-chrome);
+  background: var(--icode-bg); color: var(--icode-fg); border: var(--hairline) solid var(--icode-rule);
   border-radius: var(--radius-control); padding: 2px 6px; overflow-wrap: anywhere; box-decoration-break: clone; -webkit-box-decoration-break: clone;
 }
 

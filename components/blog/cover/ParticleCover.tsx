@@ -21,7 +21,8 @@ const FREE_DAMP = 1.1;
  * cover's shape scatters everything, and it gathers back 3s later. Under reduced
  * motion both draw a single still frame. The loop's colour comes from the page
  * palette, read at paint time, like the diagrams; the stars behind it take a
- * faint tint per theme and only twinkle, untouched by the pointer and the burst.
+ * faint tint per theme and twinkle. The pointer pushes stars aside like the
+ * loop, but a burst leaves them where they are.
  */
 export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover" | "thumb" }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -45,21 +46,27 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       cv.height = Math.round(h * dpr);
       cv.getContext("2d")?.setTransform(dpr, 0, 0, dpr, 0, 0);
       f = field(shape, kind, w, h);
-      const n = f.seeds.length;
+      // Path particles first, then the stars.
+      const S = f.seeds.length, n = S + f.stars.length;
       us = Float32Array.from(f.seeds, (s) => s.u);
       px = new Float32Array(n); py = new Float32Array(n); vx = new Float32Array(n); vy = new Float32Array(n);
-      // On first paint the cover's particles start scattered and gather into the path.
+      // On first paint the cover's particles start scattered and gather into the path; the stars are already there.
       const scatter = kind === "cover" && !reduced && !gathered;
       for (let i = 0; i < n; i++) {
         const p = target(i);
-        px[i] = scatter ? Math.random() * w : p.x;
-        py[i] = scatter ? Math.random() * h : p.y;
+        px[i] = scatter && i < S ? Math.random() * w : p.x;
+        py[i] = scatter && i < S ? Math.random() * h : p.y;
       }
       gathered = true;
       return true;
     };
 
-    const target = (i: number) => f!.at(us[i], f!.seeds[i].off);
+    const target = (i: number) => {
+      const S = f!.seeds.length;
+      if (i < S) return f!.at(us[i], f!.seeds[i].off);
+      const st = f!.stars[i - S];
+      return { x: st.x * w, y: st.y * h };
+    };
 
     const pointer = { x: 0, y: 0, vx: 0, vy: 0, on: false, until: 0 };
 
@@ -70,9 +77,16 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       const ink = getComputedStyle(cv).getPropertyValue("--ink").trim();
       // A light ink means the dark theme, where the stars take their pale tints.
       const dark = parseInt(ink.slice(1, 3), 16) > 128;
-      for (const st of f.stars) {
-        const a = twinkle(st, t);
-        const x = st.x * w, y = st.y * h;
+      const S = f.seeds.length;
+      for (let j = 0; j < f.stars.length; j++) {
+        const st = f.stars[j], x = px[S + j], y = py[S + j];
+        let a = twinkle(st, t);
+        // Stars near the pointer light up a little, less than the loop does.
+        if (pointer.on) {
+          const d = Math.hypot(x - pointer.x, y - pointer.y);
+          if (d < REACH) a += (1 - d / REACH) * 0.3;
+        }
+        a = Math.min(1, a);
         ctx.fillStyle = dark ? STAR_TINTS[st.tint].dark : STAR_TINTS[st.tint].light;
         if (st.halo) {
           ctx.globalAlpha = a * 0.14;
@@ -86,7 +100,7 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
         ctx.fill();
       }
       ctx.fillStyle = ink;
-      for (let i = 0; i < px.length; i++) {
+      for (let i = 0; i < S; i++) {
         const s = f.seeds[i];
         let a = s.tone + glow(us[i], head) * 0.6;
         let r = s.size;
@@ -105,7 +119,8 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
     let burstAt = 0;
     const explode = (at: { x: number; y: number }) => {
       burstAt = performance.now();
-      for (let i = 0; i < px.length; i++) {
+      // Only the loop blows apart; the stars stay in the sky.
+      for (let i = 0; i < f!.seeds.length; i++) {
         const dx = px[i] - at.x, dy = py[i] - at.y;
         const d = Math.hypot(dx, dy);
         const a = (d > 0.5 ? Math.atan2(dy, dx) : Math.random() * 2 * Math.PI) + (Math.random() - 0.5) * 0.5;
@@ -123,10 +138,14 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       const since = burstAt ? now - burstAt : Infinity;
       const free = since < BURST_MS;
       const back = Math.min(1, Math.max(0, (since - BURST_MS) / RETURN_MS));
-      const spring = free ? 0 : SPRING * back * back * (3 - 2 * back);
-      const damp = free ? FREE_DAMP : DAMP;
+      const loopSpring = free ? 0 : SPRING * back * back * (3 - 2 * back);
+      const loopDamp = free ? FREE_DAMP : DAMP;
+      const S = f.seeds.length;
       for (let i = 0; i < px.length; i++) {
-        us[i] = (us[i] + f.seeds[i].speed * dt) % 1;
+        const star = i >= S;
+        if (!star) us[i] = (us[i] + f.seeds[i].speed * dt) % 1;
+        // Stars always spring home, even while the loop is scattered.
+        const spring = star ? SPRING : loopSpring, damp = star ? DAMP : loopDamp;
         const t = target(i);
         let ax = (t.x - px[i]) * spring - vx[i] * damp;
         let ay = (t.y - py[i]) * spring - vy[i] * damp;
@@ -143,7 +162,7 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
         vx[i] += ax * dt; vy[i] += ay * dt;
         px[i] += vx[i] * dt; py[i] += vy[i] * dt;
         // While scattered, the cover's edges bounce particles back, so the burst fills it.
-        if (free) {
+        if (free && !star) {
           if (px[i] < 0 || px[i] > w) { px[i] = px[i] < 0 ? 0 : w; vx[i] *= -0.6; }
           if (py[i] < 0 || py[i] > h) { py[i] = py[i] < 0 ? 0 : h; vy[i] *= -0.6; }
         }

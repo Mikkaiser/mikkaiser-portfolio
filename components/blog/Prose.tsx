@@ -12,7 +12,7 @@ export function H3({ id, children }: { id?: string; children: ReactNode }) {
   return <h3 id={id}>{children}</h3>;
 }
 
-/** Inline code: a small Dracula chip, the same in both themes. */
+/** Inline code: a small chip in the page palette, so it follows the theme like the text around it. */
 export function Code({ children }: { children: ReactNode }) {
   return <code className="icode">{children}</code>;
 }
