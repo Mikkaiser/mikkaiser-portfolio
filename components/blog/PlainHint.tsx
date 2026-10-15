@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * While a code card that has an "In plain words" panel under it fills the
@@ -10,20 +10,21 @@ import { useEffect, useRef, useState } from "react";
  */
 export function PlainHint() {
   const [target, setTarget] = useState<HTMLElement | null>(null);
-  const pairs = useRef<{ code: Element; plain: HTMLElement }[]>([]);
 
   useEffect(() => {
-    pairs.current = [...document.querySelectorAll<HTMLElement>(".prose .plain")]
-      .map((plain) => ({ code: plain.previousElementSibling, plain }))
-      .filter((p): p is { code: Element; plain: HTMLElement } => !!p.code?.classList.contains("code"));
-    if (!pairs.current.length) return;
+    // Read the cards on every check, not once: a hot reload or a late render swaps the
+    // nodes, and a list kept from mount would point at ones no longer on the page.
+    const pairs = () =>
+      [...document.querySelectorAll<HTMLElement>(".prose .plain")]
+        .map((plain) => ({ code: plain.previousElementSibling, plain }))
+        .filter((p): p is { code: Element; plain: HTMLElement } => !!p.code?.classList.contains("code"));
 
     let raf = 0;
     const check = () => {
       raf = 0;
       const vh = window.innerHeight;
       // The card is being read: it is well into the screen, and its panel is still below the fold.
-      const hit = pairs.current.find(({ code, plain }) => {
+      const hit = pairs().find(({ code, plain }) => {
         const c = code.getBoundingClientRect();
         return c.top < vh * 0.7 && c.bottom > vh * 0.4 && plain.getBoundingClientRect().top > vh * 0.8;
       });
