@@ -192,6 +192,11 @@ export default function Post() {
         to the conversation and goes around again. If the reply is plain text,
         that&rsquo;s the answer and we&rsquo;re done.
       </p>
+      <p>
+        You&rsquo;ll also see a <Code>MAX_STEPS</Code> limit in the code. The model decides when to stop, and every
+        round is a paid request, so a model that keeps asking for tools could loop (and bill you) forever. The limit
+        is a safety brake: after 10 rounds the loop gives up. It&rsquo;s the one safeguard I kept in the code.
+      </p>
       <CodeTabs {...CODE.a3} />
       <InPlainWords
         intro="This is the most important code in the post, and it's still fine to skip it. Here's the whole thing:"
