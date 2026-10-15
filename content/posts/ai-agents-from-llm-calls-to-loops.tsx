@@ -15,7 +15,7 @@ export const meta: PostMeta = {
   lead: "An agent is just a model call inside a loop. Write that loop by hand once and every framework gets a lot less mysterious.",
   topic: "AI",
   date: "2026-10-11",
-  minutes: 12,
+  minutes: 13,
   cover: "loop",
   draft: true,
 };
@@ -59,13 +59,40 @@ export default function Post() {
         let&rsquo;s pin it down.
       </p>
       <p>
-        &ldquo;
-        <Term id="agent" label="Agent">
-          An LLM calling tools in a loop until it has what it needs to answer. The model decides what to do next;
-          your code runs it and keeps the loop going.
+        Here&rsquo;s the meaning I&rsquo;ll use. An{" "}
+        <Term id="agent" label="agent">
+          LLM calls in a loop, working toward a goal. The model decides what to do next; your code does it and keeps
+          the loop going.
+        </Term>{" "}
+        is LLM calls inside a loop, working toward a goal. And reaching that goal usually means the model has to do
+        things on its own: check a database, look up a price, send an email.
+      </p>
+      <p>
+        This is where a lot of people get the wrong idea. They picture the model with some kind of superpower,
+        reaching into your software and pressing buttons. It can&rsquo;t. An LLM can&rsquo;t click, can&rsquo;t run
+        code and can&rsquo;t touch your database. All it does is take text in and give text back. It reads your
+        message as{" "}
+        <Term id="token" label="tokens">
+          Small chunks of text, usually a word or a piece of one. Models read and write in tokens, and you pay per
+          token too.
+        </Term>{" "}
+        and writes its reply one token at a time, each one picked based on everything before it. Text in, text out.
+        That&rsquo;s the whole trick.
+      </p>
+      <p>
+        So who does the actual work? Your code. You write normal functions, like &ldquo;check the stock&rdquo; or
+        &ldquo;get the price&rdquo;, and tell the model they exist. When the model needs one, it writes back a little
+        note: &ldquo;please run this one, with these inputs&rdquo;. Your code runs it and hands the result back, as
+        more text. Those functions are what we call{" "}
+        <Term id="tool" label="tools">
+          Normal functions in your code that the model is allowed to ask for, like <Code>check_stock</Code>. The
+          model never sees the code, only the name, a description and the arguments it takes.
         </Term>
-        &rdquo; sounds like a whole new kind of software. It isn&rsquo;t. It&rsquo;s an LLM call inside a loop, plus a short list of functions the model is allowed to ask you to run. To see that loop from the
-        inside, I built a <A href={REPO}>corner store assistant</A>: a terminal chat for a small shop that answers
+        . The model decides, your software acts. Less superhero, more very smart pen pal.
+      </p>
+      <p>
+        So an agent isn&rsquo;t some brand new kind of software. It&rsquo;s an LLM call inside a loop, plus a short
+        list of tools. To see that loop from the inside, I built a <A href={REPO}>corner store assistant</A>: a terminal chat for a small shop that answers
         questions about stock and prices. In this post I rebuild it by hand, starting from one{" "}
         <Term id="api-call" label="API call">
           One request to the model over the internet. One request in, one reply out, and each one costs a little.
@@ -124,12 +151,7 @@ export default function Post() {
 
       <H2 id="tools">Giving the model tools</H2>
       <p>
-        A{" "}
-        <Term id="tool" label="tool">
-          A normal function in your code that the model is allowed to ask for, like <Code>check_stock</Code>. The
-          model never sees the code, only the name, a description and the arguments it takes.
-        </Term>{" "}
-        is a normal function plus a description the model can read. The function stays in your code. The model
+        A tool is a normal function plus a description the model can read. The function stays in your code. The model
         never runs anything itself: it replies with &ldquo;please call this function with these arguments&rdquo;, and
         your code decides whether to do it.
       </p>
