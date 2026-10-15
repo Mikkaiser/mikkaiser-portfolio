@@ -18,7 +18,9 @@ const FREE_DAMP = 1.1;
 // pointer by up to PARALLAX px, the bigger ones more, so the sky has depth.
 const CLOUD = 0.06;
 const PARALLAX = 10;
-const SETTLE_MS = 1600;
+// How fast a card eases back to rest after the pointer leaves, per second: about 3.5s to settle.
+const OUT_RATE = 1.1;
+const AT_REST = 0.01;
 
 /**
  * A post's particle field. As the cover, it flows all the time it is on screen
@@ -43,6 +45,9 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
     const touch = matchMedia("(hover: none)").matches;
     // How gathered the loop is: 1 is the path, 0 the card's resting cloud.
     let g = kind === "cover" || reduced || touch ? 1 : 0;
+    // How fast the loop flows and glows: 1 while it is hovered, easing to 0 after the pointer leaves,
+    // so it slows to a stop instead of freezing.
+    let flow = kind === "cover" || reduced || touch ? 1 : 0;
     // The star parallax: where it is, and where the pointer wants it.
     const par = { x: 0, y: 0, gx: 0, gy: 0 };
 
@@ -93,7 +98,7 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
 
     const pointer = { x: 0, y: 0, vx: 0, vy: 0, on: false, until: 0 };
 
-    const paint = (head: number, t: number) => {
+    const paint = (head: number, t: number, mix = 1) => {
       const ctx = cv.getContext("2d");
       if (!ctx || !f) return;
       ctx.clearRect(0, 0, w, h);
@@ -103,7 +108,8 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       const S = f.seeds.length;
       for (let j = 0; j < f.stars.length; j++) {
         const st = f.stars[j], x = px[S + j], y = py[S + j];
-        let a = twinkle(st, t);
+        const rest = twinkle(st, 0);
+        let a = rest + (twinkle(st, t) - rest) * mix;
         // Stars near the pointer light up a little, less than the loop does.
         if (pointer.on) {
           const d = Math.hypot(x - pointer.x, y - pointer.y);
@@ -125,7 +131,7 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       ctx.fillStyle = ink;
       for (let i = 0; i < S; i++) {
         const s = f.seeds[i];
-        let a = s.tone + glow(us[i], head) * 0.6;
+        let a = s.tone + (glow(us[i], head) * mix + glow(us[i], STILL_HEAD) * (1 - mix)) * 0.6;
         let r = s.size;
         if (pointer.on) {
           const d = Math.hypot(px[i] - pointer.x, py[i] - pointer.y);
@@ -162,8 +168,10 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       const free = since < BURST_MS;
       const back = Math.min(1, Math.max(0, (since - BURST_MS) / RETURN_MS));
       if (kind === "card") {
-        const k = Math.min(1, dt * 3);
+        // In is quick, out is slow: the loop drifts apart over a couple of seconds.
+        const k = Math.min(1, dt * (hovered ? 3 : OUT_RATE));
         g += ((hovered ? 1 : 0) - g) * (touch ? 1 : k);
+        flow += ((hovered ? 1 : 0) - flow) * (touch ? 1 : Math.min(1, dt * (hovered ? 4 : OUT_RATE)));
         par.x += (par.gx - par.x) * k; par.y += (par.gy - par.y) * k;
       }
       const loopSpring = free ? 0 : SPRING * back * back * (3 - 2 * back);
@@ -171,7 +179,7 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       const S = f.seeds.length;
       for (let i = 0; i < px.length; i++) {
         const star = i >= S;
-        if (!star) us[i] = (us[i] + f.seeds[i].speed * dt) % 1;
+        if (!star) us[i] = (us[i] + f.seeds[i].speed * dt * (kind === "card" ? flow : 1)) % 1;
         // Stars always spring home, even while the loop is scattered.
         const spring = star ? SPRING : loopSpring, damp = star ? DAMP : loopDamp;
         const t = target(i);
@@ -209,11 +217,10 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
 
     // A card only moves while it is hovered, and while it settles after; the cover whenever it is on screen.
     let hovered = kind === "cover" || touch;
-    let settleUntil = 0;
     const onEnter = () => { hovered = true; };
     const onLeave = () => {
       hovered = kind === "cover" || touch; pointer.on = false; host.style.cursor = "";
-      par.gx = 0; par.gy = 0; settleUntil = performance.now() + SETTLE_MS;
+      par.gx = 0; par.gy = 0;
     };
     const local = (e: MouseEvent) => {
       const r = cv.getBoundingClientRect();
@@ -261,10 +268,16 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       }
       const dt = prev ? Math.min((now - prev) / 1000, 1 / 30) : 0;
       prev = now;
-      running = hovered || now < settleUntil;
+      // A card keeps going until it has eased all the way back to rest.
+      const settling = kind === "card" && (flow > AT_REST || g > AT_REST);
+      const wasRunning = running;
+      running = hovered || settling;
       if (visible && ready && running) {
         step(dt);
-        paint((now % PULSE_MS) / PULSE_MS, now);
+        paint((now % PULSE_MS) / PULSE_MS, now, kind === "card" ? flow : 1);
+      } else if (kind === "card" && wasRunning && !running && ready) {
+        flow = 0; g = 0;
+        paint(STILL_HEAD, 0);
       }
       raf = requestAnimationFrame(tick);
     };

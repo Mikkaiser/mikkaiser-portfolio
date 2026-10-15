@@ -11,6 +11,7 @@ import { Offline } from "@/components/Offline";
 import { Reveal } from "@/components/Reveal";
 import { StackGame } from "@/components/StackGame";
 import { Work } from "@/components/Work";
+import { Writing } from "@/components/Writing";
 
 export default function Home() {
   return (
@@ -21,6 +22,7 @@ export default function Home() {
         <Hero />
         <Marquee />
         <Work />
+        <Writing />
         <Experience />
         <Awards />
         <Ask />

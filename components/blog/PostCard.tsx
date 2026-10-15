@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ParticleCover } from "@/components/blog/cover/ParticleCover";
 import { formatLongDate, type PostMeta } from "@/lib/posts";
+import "./postlist.css";
 
 /** One post on the index: a portrait poster of its cover with the date line and title over its foot, and the summary under it. */
 export function PostCard({ post }: { post: PostMeta }) {
