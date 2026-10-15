@@ -1,6 +1,7 @@
 import { AgentLoop } from "@/components/blog/AgentLoop";
 import { CodeTabs } from "@/components/blog/CodeTabs";
 import { InPlainWords } from "@/components/blog/InPlainWords";
+import { Exchange } from "@/components/blog/Exchange";
 import { ConversationGrows } from "@/components/blog/ConversationGrows";
 import { Term } from "@/components/blog/Term";
 import { WorkflowVsAgent } from "@/components/blog/WorkflowVsAgent";
@@ -118,6 +119,14 @@ export default function Post() {
         goes in, one message comes out.
       </p>
       <CodeTabs {...CODE.a1} />
+      <Exchange
+        label="What the code prints"
+        lines={[
+          { role: "user", text: "Do you have milk, and how much is a bottle?" },
+          { role: "assistant", text: "I can\u2019t see your shop\u2019s shelves or prices, so I can\u2019t say. Check your stock list or ask the shop owner." },
+        ]}
+        end="End of the conversation. The model forgets all of it. The next message starts from zero."
+      />
       <p>
         That&rsquo;s the whole interface. The model is{" "}
         <Term id="stateless" label="stateless" href="https://en.wikipedia.org/wiki/Stateless_protocol">

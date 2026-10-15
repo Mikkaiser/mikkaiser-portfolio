@@ -246,6 +246,22 @@
 .figure__frame img { display: block; width: 100%; height: auto; }
 .figure__cap { margin-top: var(--space-3); padding-left: 11px; border-left: 2px solid var(--rule); font-size: var(--size-label); line-height: 1.5; color: var(--muted); }
 
+/* ---------- exchange: the chat a code card produces (components/blog/Exchange.tsx) ---------- */
+.prose .exchange { margin: calc(var(--space-3) - var(--space-6)) 0 var(--space-8); padding: var(--space-4) 18px; border: var(--hairline) solid var(--rule); border-radius: var(--radius-control); }
+.exchange__label { font-family: var(--font-mono); font-size: var(--size-micro); letter-spacing: var(--ls-micro); text-transform: uppercase; color: var(--faint); margin-bottom: var(--space-3); }
+.exchange__row { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: var(--space-3); padding: var(--space-3) 0; border-top: var(--hairline) solid var(--rule); }
+.exchange__role { font-family: var(--font-mono); font-size: var(--size-meta); letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); padding-top: 3px; }
+.prose .exchange__text { margin: 0; color: var(--muted); }
+.exchange__row--user .exchange__text { color: var(--ink); font-weight: var(--weight-medium); }
+.exchange__end {
+  padding-top: var(--space-3); border-top: var(--hairline) solid var(--ink);
+  font-family: var(--font-mono); font-size: var(--size-micro); letter-spacing: var(--ls-micro); line-height: 1.7; text-transform: uppercase; color: var(--ink);
+}
+@media (max-width: 620px) {
+  .exchange__row { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
+  .exchange__role { padding-top: 0; }
+}
+
 /* ---------- in plain words: the steps under a dense code card (components/blog/InPlainWords.tsx) ---------- */
 .prose .plain { margin: calc(var(--space-3) - var(--space-6)) 0 var(--space-8); padding: var(--space-4) 18px; border: var(--hairline) solid var(--rule); border-radius: var(--radius-control); }
 .plain__label { font-family: var(--font-mono); font-size: var(--size-micro); letter-spacing: var(--ls-micro); text-transform: uppercase; color: var(--faint); }
