@@ -1,16 +1,29 @@
-import { createHighlighter, type BundledLanguage, type Highlighter } from "shiki";
+import { bundledThemes, createHighlighter, type BundledLanguage, type Highlighter, type ThemeRegistration } from "shiki";
 
 const LANGS: BundledLanguage[] = ["ts", "tsx", "js", "jsx", "css", "html", "json", "bash", "csharp", "python", "sql", "yaml"];
+
+// Dracula colours function names green, but its Python grammar scopes a plain call like
+// create(...) as meta.function-call.generic, which the stock theme leaves uncoloured.
+// TypeScript and C# already come out green, so Python gets the one missing rule.
+const THEME = "dracula-calls";
+async function theme(): Promise<ThemeRegistration> {
+  const dracula = (await bundledThemes.dracula()).default;
+  return {
+    ...dracula,
+    name: THEME,
+    tokenColors: [...(dracula.tokenColors ?? []), { scope: ["meta.function-call.generic.python"], settings: { foreground: "#50FA7B" } }],
+  };
+}
 
 // One highlighter for the whole build; every code card awaits the same instance.
 let highlighter: Promise<Highlighter> | undefined;
 
 /** Code to Dracula-highlighted HTML at build time. The card paints the background. */
 export async function highlight(code: string, lang: BundledLanguage): Promise<string> {
-  highlighter ??= createHighlighter({ themes: ["dracula"], langs: LANGS });
+  highlighter ??= theme().then((t) => createHighlighter({ themes: [t], langs: LANGS }));
   return (await highlighter).codeToHtml(code.replace(/^\n+|\s+$/g, ""), {
     lang,
-    theme: "dracula",
+    theme: THEME,
     // Drop Shiki's own background so the card's token value wins.
     transformers: [{ pre(node) { delete node.properties.style; delete node.properties.tabindex; } }],
   });
