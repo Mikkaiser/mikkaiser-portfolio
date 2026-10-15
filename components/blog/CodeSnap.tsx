@@ -1,4 +1,4 @@
-import { bundledThemes, createHighlighter, type BundledLanguage, type Highlighter, type ThemeRegistration } from "shiki";
+import { bundledThemes, createHighlighter, type BundledLanguage, type Highlighter, type ShikiTransformer, type ThemeRegistration, type ThemedToken } from "shiki";
 
 const LANGS: BundledLanguage[] = ["ts", "tsx", "js", "jsx", "css", "html", "json", "bash", "csharp", "python", "sql", "yaml"];
 
@@ -15,6 +15,31 @@ async function theme(): Promise<ThemeRegistration> {
   };
 }
 
+// Python's grammar leaves imported and annotated class names as plain text (and calls
+// like Agent(...) as functions). By convention a CapWords name is a class, so Python
+// gets Dracula's class colour for those. ALL_CAPS constants don't match.
+const DEFAULT_FG = "#F8F8F2", CALL_GREEN = "#50FA7B", CLASS_CYAN = "#8BE9FD";
+const CAP_WORD = /\b[A-Z][A-Za-z0-9]*[a-z][A-Za-z0-9]*\b/g;
+const pythonClasses: ShikiTransformer = {
+  tokens(lines) {
+    for (const line of lines) {
+      const out: ThemedToken[] = [];
+      for (const t of line) {
+        const color = t.color?.toUpperCase();
+        if (color !== DEFAULT_FG && color !== CALL_GREEN) { out.push(t); continue; }
+        let at = 0;
+        for (const m of t.content.matchAll(CAP_WORD)) {
+          if (m.index > at) out.push({ ...t, content: t.content.slice(at, m.index), offset: t.offset + at });
+          out.push({ ...t, content: m[0], offset: t.offset + m.index, color: CLASS_CYAN });
+          at = m.index + m[0].length;
+        }
+        if (at < t.content.length) out.push({ ...t, content: t.content.slice(at), offset: t.offset + at });
+      }
+      line.splice(0, line.length, ...out);
+    }
+  },
+};
+
 // One highlighter for the whole build; every code card awaits the same instance.
 let highlighter: Promise<Highlighter> | undefined;
 
@@ -25,7 +50,7 @@ export async function highlight(code: string, lang: BundledLanguage): Promise<st
     lang,
     theme: THEME,
     // Drop Shiki's own background so the card's token value wins.
-    transformers: [{ pre(node) { delete node.properties.style; delete node.properties.tabindex; } }],
+    transformers: [...(lang === "python" ? [pythonClasses] : []), { pre(node) { delete node.properties.style; delete node.properties.tabindex; } }],
   });
 }
 
