@@ -72,6 +72,8 @@ a new heading.
 - Post titles: Title Case on every word, colons allowed ("AI Agents: From LLM Calls To Loops").
 - Headings inside a post: sentence case.
 - No em dashes. Use a colon, a full stop, a comma or brackets.
+- Use everyday expressions, not idioms he wouldn't say. "How it held up" became "how it went". If a phrase sounds
+  like it came from a magazine, say the plain version.
 - Avoid stock phrases that sound written for effect, like "the catch is...". Say it the way he would say it out loud
   ("but", "one thing to watch"), and don't lean on any single expression more than once or twice in a post.
 - His role is always "Software Engineer & Tech Educator", written exactly like that.

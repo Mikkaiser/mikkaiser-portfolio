@@ -27,7 +27,7 @@ export default function BlogIndex() {
           <div className="blog-hero__text">
             {posts.length ? <p className="post__meta">{span ? `${count} · ${span}` : count}</p> : null}
             <h1 className="blog-hero__title">Writing</h1>
-            <p className="blog-hero__intro">Notes on what I built, how it held up, and what I would do again. Plain words, real code.</p>
+            <p className="blog-hero__intro">Notes on what I built, how it went, and what I would do again. Plain words, real code.</p>
           </div>
           <KnowledgeField />
         </div>

@@ -23,7 +23,7 @@ export function Writing() {
         <div className="writing__side" data-anim>
           <div className="writing__top">
             <p className="lead writing__intro">
-              Notes on what I built, how it held up, and what I would do again. Plain words, real code.
+              Notes on what I built, how it went, and what I would do again. Plain words, real code.
             </p>
             {rows.length ? (
               <ol className="prows">
