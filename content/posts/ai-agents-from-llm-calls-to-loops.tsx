@@ -15,7 +15,7 @@ export const meta: PostMeta = {
   summary: "Building a corner store agent by hand in Python, TypeScript and C#, then rebuilding it with a framework.",
   lead: "An agent is just a model call inside a loop. Write that loop by hand once and every framework gets a lot less mysterious.",
   topic: "AI",
-  date: "2026-10-11",
+  date: "2026-10-15",
   minutes: 13,
   cover: "loop",
 };
