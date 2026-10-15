@@ -98,6 +98,14 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
 
     const pointer = { x: 0, y: 0, vx: 0, vy: 0, on: false, until: 0 };
 
+    // On a shape made of several strokes, each stroke carries its own pulse, started at a different
+    // point, so signals fire all over the drawing at once instead of one sweep going round.
+    const lit = (i: number, head: number) => {
+      const sd = f!.seeds[i];
+      if (sd.lo === undefined || sd.hi === undefined) return glow(us[i], head);
+      return glow((us[i] - sd.lo) / (sd.hi - sd.lo), (head + sd.lo * 7.31) % 1);
+    };
+
     const paint = (head: number, t: number, mix = 1) => {
       const ctx = cv.getContext("2d");
       if (!ctx || !f) return;
@@ -131,7 +139,7 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       ctx.fillStyle = ink;
       for (let i = 0; i < S; i++) {
         const s = f.seeds[i];
-        let a = s.tone + (glow(us[i], head) * mix + glow(us[i], STILL_HEAD) * (1 - mix)) * 0.6;
+        let a = s.tone + (lit(i, head) * mix + lit(i, STILL_HEAD) * (1 - mix)) * 0.6;
         let r = s.size;
         if (pointer.on) {
           const d = Math.hypot(px[i] - pointer.x, py[i] - pointer.y);

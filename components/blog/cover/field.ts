@@ -32,7 +32,7 @@ export const PULSE_MS = 4200;
 const TRAIL = 0.09;
 
 /** `ranges` splits a shape made of several strokes: a particle flows round its own stroke and never jumps to another. */
-type Path = { at: (u: number, off: number) => Pt; inside: (p: Pt) => boolean; perimeter: number; band: number; size: number; ranges?: [number, number][]; flow?: number };
+type Path = { at: (u: number, off: number) => Pt; inside: (p: Pt) => boolean; perimeter: number; band: number; size: number; ranges?: [number, number][]; flow?: number; tones?: number[] };
 
 /** The agent loop: an ellipse, clockwise on screen. */
 function loop(kind: CoverKind, w: number, h: number): Path {
@@ -66,7 +66,7 @@ function loop(kind: CoverKind, w: number, h: number): Path {
   return { at, inside, perimeter, band, size };
 }
 
-// ---- the brain: a side view in a 400 x 300 box, facing right, drawn as three strokes ----
+// ---- the brain: a side view, facing right, drawn as many strokes: outlines, fissures and folds ----
 
 type Poly = { pts: Pt[]; cum: number[]; len: number };
 
@@ -94,41 +94,107 @@ function stroke(start: Pt, segs: number[][]): Poly {
   return { pts, cum, len: cum[cum.length - 1] };
 }
 
-const BRAIN_OUTLINE = stroke({ x: 300, y: 205 }, [
-  [335, 205, 372, 180, 370, 135], [372, 90, 330, 45, 275, 45], [250, 18, 190, 15, 160, 42], [110, 32, 62, 68, 66, 112],
-  [40, 135, 48, 180, 85, 190], [80, 215, 110, 238, 145, 235], [165, 248, 195, 246, 208, 230], [212, 252],
-  [213, 262, 228, 262, 229, 252], [232, 226], [262, 232, 290, 222, 300, 205],
-]);
-const BRAIN_CENTRE: Pt = { x: 215, y: 128 };
+function within(pts: Pt[], x: number, y: number) {
+  let c = false;
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+    if ((pts[i].y > y) !== (pts[j].y > y) && x < ((pts[j].x - pts[i].x) * (y - pts[i].y)) / (pts[j].y - pts[i].y) + pts[i].x) c = !c;
+  }
+  return c;
+}
 
-/** Horizontal strokes across the inside of the outline, one per crossing, like the winding folds of the cortex. */
-function folds(outline: Poly, gap: number): Poly[] {
-  const out: Poly[] = [];
-  const pts = outline.pts;
-  for (let y = 40; y < 255; y += gap) {
-    const xs: number[] = [];
-    for (let i = 1; i < pts.length; i++) {
-      const a = pts[i - 1], b = pts[i];
-      if ((a.y <= y && b.y > y) || (b.y <= y && a.y > y)) xs.push(a.x + ((y - a.y) / (b.y - a.y)) * (b.x - a.x));
+/** One stroke of the drawing, with how much it wobbles and how bright its particles are. */
+type Part = { poly: Poly; amp: number; tone: number; centre?: Pt };
+const part = (amp: number, tone: number, start: [number, number], segs: number[][], centre?: Pt): Part =>
+  ({ poly: stroke({ x: start[0], y: start[1] }, segs), amp, tone, centre });
+
+// Facing right: the frontal lobe on the right, the cerebellum tucked under the back, the stem below.
+const CEREBRUM = part(2.2, 0.22, [380, 138], [
+  [378, 170, 356, 186, 322, 186], [308, 186, 300, 192, 298, 202], [296, 226, 268, 240, 236, 240],
+  [206, 240, 178, 232, 150, 228], [120, 224, 92, 214, 72, 198], [50, 182, 34, 160, 36, 134],
+  [38, 86, 76, 46, 132, 32], [170, 12, 250, 8, 300, 30], [346, 50, 384, 96, 380, 138],
+], { x: 210, y: 130 });
+const CEREBELLUM = part(1.2, 0.16, [98, 222], [
+  [88, 248, 118, 282, 160, 284], [196, 286, 220, 268, 216, 246], [214, 232, 196, 224, 176, 226], [150, 228, 120, 220, 98, 222],
+], { x: 158, y: 252 });
+
+const STEM = [
+  part(0.4, 0.06, [240, 238], [[242, 258, 240, 278, 236, 296]]),
+  part(0.4, 0.06, [214, 248], [[216, 266, 214, 282, 212, 296]]),
+];
+// The two big fissures: lateral (between the temporal lobe and the rest) and central.
+const FISSURES = [
+  part(1.6, 0.1, [300, 196], [[270, 184, 236, 176, 210, 170], [190, 166, 176, 150, 168, 138]]),
+  part(1.6, 0.1, [228, 12], [[222, 40, 236, 62, 226, 86], [216, 110, 232, 130, 224, 160]]),
+];
+// The fine, parallel folds of the cerebellum.
+const FOLIA = [
+  part(0.8, -0.04, [108, 234], [[132, 252, 176, 256, 210, 238]]),
+  part(0.8, -0.04, [102, 248], [[128, 270, 176, 274, 212, 254]]),
+  part(0.8, -0.04, [112, 264], [[134, 280, 172, 282, 204, 270]]),
+];
+
+function polyOf(pts: Pt[]): Poly {
+  const cum = [0];
+  for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y));
+  return { pts, cum, len: cum[cum.length - 1] };
+}
+
+/**
+ * The sulci: the winding grooves of the cortex. Seeded random walks start all over the
+ * cerebrum, bend smoothly as they go, and stop when they would leave it or come too close
+ * to another groove, the outline or a fissure, so together they fill it like a labyrinth.
+ */
+function sulci(): Part[] {
+  const r = rng(11);
+  const G = 7, COLS = 60, ROWS = 46;
+  const grid = new Int32Array(COLS * ROWS);
+  const cell = (x: number, y: number) => Math.floor(y / G) * COLS + Math.floor(x / G);
+  const mark = (x: number, y: number, id: number) => { const c = cell(x, y); if (c >= 0 && c < grid.length) grid[c] = id; };
+  for (const pt of [CEREBRUM, CEREBELLUM, ...FISSURES]) for (const q of pt.poly.pts) mark(q.x, q.y, -1);
+  const inside = (x: number, y: number) => within(CEREBRUM.poly.pts, x, y) && !within(CEREBELLUM.poly.pts, x, y);
+  // Free if no other groove is in this cell or the eight around it.
+  const free = (x: number, y: number, id: number) => {
+    const cx = Math.floor(x / G), cy = Math.floor(y / G);
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      const v = grid[(cy + dy) * COLS + cx + dx];
+      if (v !== 0 && v !== id) return false;
     }
-    xs.sort((m, n) => m - n);
-    for (let k = 0; k + 1 < xs.length; k += 2) {
-      if (xs[k + 1] - xs[k] > 30) out.push(stroke({ x: xs[k] + 7, y }, [[xs[k + 1] - 7, y]]));
+    return true;
+  };
+  const starts: Pt[] = [];
+  for (let gy = 1; gy < ROWS - 1; gy++) for (let gx = 1; gx < COLS - 1; gx++) starts.push({ x: (gx + 0.5) * G, y: (gy + 0.5) * G });
+  for (let i = starts.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [starts[i], starts[j]] = [starts[j], starts[i]]; }
+
+  const out: Part[] = [];
+  let id = 0;
+  for (const s0 of starts) {
+    if (!inside(s0.x, s0.y) || !free(s0.x, s0.y, -2)) continue;
+    id++;
+    let x = s0.x, y = s0.y, a = r() * 2 * Math.PI, k = 0;
+    const pts: Pt[] = [{ x, y }];
+    mark(x, y, id);
+    for (let step = 0; step < 34; step++) {
+      // The heading drifts smoothly, so the groove meanders instead of going straight.
+      k = Math.max(-0.22, Math.min(0.22, (k + (r() - 0.5) * 0.45) * 0.9));
+      a += k;
+      let moved = false;
+      for (const turn of [0, 0.8, -0.8, 1.6, -1.6]) {
+        const nx = x + Math.cos(a + turn) * 2.6, ny = y + Math.sin(a + turn) * 2.6;
+        if (inside(nx, ny) && free(nx, ny, id)) { a += turn; x = nx; y = ny; moved = true; break; }
+      }
+      if (!moved) break;
+      pts.push({ x, y });
+      mark(x, y, id);
     }
+    if (pts.length >= 6) out.push({ poly: polyOf(pts), amp: 0.6, tone: 0 });
   }
   return out;
 }
 
-// The outline, the folds inside it, and the central and lateral fissures: wavy strokes that together
-// read as the winding surface of a brain.
-const BRAIN_STROKES: Poly[] = [
-  BRAIN_OUTLINE,
-  ...folds(BRAIN_OUTLINE, 15),
-  stroke({ x: 215, y: 34 }, [[205, 80, 218, 110, 206, 142]]),
-  stroke({ x: 128, y: 168 }, [[180, 150, 235, 165, 290, 176]]),
-];
-const FOLDS_END = BRAIN_STROKES.length - 2;
-const BRAIN_TOTAL = BRAIN_STROKES.reduce((n, p) => n + p.len, 0);
+const BRAIN_PARTS: Part[] = [CEREBRUM, CEREBELLUM, ...STEM, ...FISSURES, ...sulci(), ...FOLIA];
+const BRAIN_TOTAL = BRAIN_PARTS.reduce((n, p) => n + p.poly.len, 0);
+// About 2,000 particles at the hero's size.
+const BRAIN_DENSITY = 0.44;
 
 function polyPoint(poly: Poly, s: number): { p: Pt; tx: number; ty: number } {
   let i = 1;
@@ -139,54 +205,56 @@ function polyPoint(poly: Poly, s: number): { p: Pt; tx: number; ty: number } {
   return { p: { x: a.x + dx * f, y: a.y + dy * f }, tx: dx / dl, ty: dy / dl };
 }
 
-/** The brain: right of the title on wide screens, above it on phones; centred on a card. */
+
+/** The brain: right of the title on wide screens, above it on phones, centred on a card. The drawing spans x 34 to 384, y 8 to 296. */
 function brain(kind: CoverKind, w: number, h: number): Path {
+  const CX = 208, CY = 152, HW = 178, HH = 290;
   let scale: number, ox: number, oy: number;
   if (kind === "card") {
-    scale = (w * 0.74) / 400; ox = w * 0.13; oy = h * 0.33 - 140 * scale;
+    scale = (w * 0.76) / (2 * HW); ox = w / 2 - CX * scale; oy = h * 0.36 - CY * scale;
   } else if (kind === "share") {
-    scale = (h * 0.62) / 300; ox = w * 0.72 - 215 * scale; oy = h * 0.4 - 140 * scale;
+    scale = (h * 0.64) / HH; ox = w * 0.72 - CX * scale; oy = h * 0.42 - CY * scale;
   } else if (w < 620) {
-    scale = Math.min((w * 0.78) / 400, 230 / 300); ox = w / 2 - 215 * scale; oy = 20;
+    scale = Math.min((w * 0.8) / (2 * HW), 240 / HH); ox = w / 2 - CX * scale; oy = 16 - 8 * scale;
   } else {
-    scale = Math.min((h * 0.84) / 300, (Math.min(w, 1180) * 0.38) / 400);
     const col = Math.min(w, 1180);
-    const cx = Math.min(w * 0.5 + col * 0.25, w - 200 * scale - Math.max(24, w * 0.03));
-    ox = cx - 215 * scale; oy = h / 2 - 140 * scale;
+    scale = Math.min((h * 0.86) / HH, (col * 0.38) / (2 * HW));
+    const cx = Math.min(w * 0.5 + col * 0.25, w - HW * scale - Math.max(24, w * 0.03));
+    ox = cx - CX * scale; oy = h / 2 - CY * scale;
   }
   // Each stroke gets a slice of u in proportion to its length, so particles are evenly spread.
   const ranges: [number, number][] = [];
   let acc = 0;
-  for (const p of BRAIN_STROKES) { ranges.push([acc / BRAIN_TOTAL, (acc + p.len) / BRAIN_TOTAL]); acc += p.len; }
+  for (const pt of BRAIN_PARTS) { ranges.push([acc / BRAIN_TOTAL, (acc + pt.poly.len) / BRAIN_TOTAL]); acc += pt.poly.len; }
   ranges[ranges.length - 1][1] = 1;
 
   const at = (u: number, off: number): Pt => {
     const gi = Math.max(0, ranges.findIndex(([, hi]) => u < hi));
     const [lo, hi] = ranges[gi];
-    const poly = BRAIN_STROKES[gi];
+    const { poly, amp, centre } = BRAIN_PARTS[gi];
     const along = ((u - lo) / (hi - lo)) * poly.len;
     const { p, tx, ty } = polyPoint(poly, along);
-    // Offset along the normal; on the outline, the side facing away from the middle is positive.
+    // Offset along the normal; on a closed outline, outward is positive.
     let nx = -ty, ny = tx;
-    if (gi === 0 && nx * (p.x - BRAIN_CENTRE.x) + ny * (p.y - BRAIN_CENTRE.y) < 0) { nx = -nx; ny = -ny; }
-    // The folds of the cortex: a slow, uneven wave along every stroke.
-    const amp = gi === 0 ? 5 : gi < FOLDS_END ? 4.2 : 2.2;
-    const wave = amp * (Math.sin(along * (gi === 0 ? 0.4 : 0.2) + gi * 1.7) + 0.55 * Math.sin(along * (gi === 0 ? 0.93 : 0.47) + 1.3 + gi)) / 1.55;
+    if (centre && nx * (p.x - centre.x) + ny * (p.y - centre.y) < 0) { nx = -nx; ny = -ny; }
+    // A slow, uneven wobble, so no line looks drawn with a ruler.
+    const wave = (amp * (Math.sin(along * 0.33 + gi * 1.7) + 0.55 * Math.sin(along * 0.77 + 1.3 + gi))) / 1.55;
     return { x: ox + (p.x + nx * wave) * scale + nx * off, y: oy + (p.y + ny * wave) * scale + ny * off };
   };
-  // Inside the outline, away from its band: where a click sets off a burst.
+  // Inside the cerebrum or the cerebellum: where a click sets off a burst.
   const inside = (q: Pt) => {
     const x = (q.x - ox) / scale, y = (q.y - oy) / scale;
-    const pts = BRAIN_OUTLINE.pts;
-    let c = false;
-    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
-      if ((pts[i].y > y) !== (pts[j].y > y) && x < ((pts[j].x - pts[i].x) * (y - pts[i].y)) / (pts[j].y - pts[i].y) + pts[i].x) c = !c;
-    }
-    return c;
+    return within(CEREBRUM.poly.pts, x, y) || within(CEREBELLUM.poly.pts, x, y);
   };
-  return { at, inside, perimeter: BRAIN_TOTAL * scale * 0.4, band: Math.max(1.6, scale * 2.4), size: kind === "card" ? 2 : 2.2, ranges,
+  return {
+    at, inside, ranges,
+    perimeter: BRAIN_TOTAL * scale * BRAIN_DENSITY,
+    band: Math.max(1.2, scale * 1.5),
+    size: kind === "card" ? 1.9 : 2.1,
+    tones: BRAIN_PARTS.map((pt) => pt.tone),
     // Every stroke shares one u scale, so the whole drawing is longer than a loop: slow it to a loop's pace along the line.
-    flow: Math.min(1, 950 / (BRAIN_TOTAL * scale)) };
+    flow: Math.min(1, 950 / (BRAIN_TOTAL * scale)),
+  };
 }
 
 const SHAPES: Record<CoverShape, (kind: CoverKind, w: number, h: number) => Path> = { loop, brain };
@@ -213,14 +281,15 @@ export function field(shape: CoverShape, kind: CoverKind, w: number, h: number):
     // Most particles hug the path; a few stray wider, for texture.
     const spread = r() < 0.06 ? 3.5 : 1;
     const u = r();
-    const range = path.ranges?.find(([lo, hi]) => u >= lo && u < hi);
+    const ri = path.ranges ? path.ranges.findIndex(([lo, hi]) => u >= lo && u < hi) : -1;
+    const range = ri >= 0 ? path.ranges![ri] : undefined;
     seeds.push({
       u,
       lo: range?.[0],
       hi: range?.[1],
       off: gauss() * path.band * spread,
       speed: (1 / LAP_S) * (path.flow ?? 1) * (0.75 + r() * 0.5),
-      tone: (kind === "card" ? 0.4 : 0.28) + r() * 0.45,
+      tone: (kind === "card" ? 0.4 : 0.28) + r() * 0.45 + (ri >= 0 ? path.tones?.[ri] ?? 0 : 0),
       size: path.size * (0.7 + r() * 0.45),
     });
   }
