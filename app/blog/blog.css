@@ -35,19 +35,15 @@
 .blog-top > main { flex: 1 0 auto; }
 
 /* ---------- index ---------- */
-/* The page's hero: the post covers' particle field edge to edge, with the page title
-   big over its bottom left. It names the place, not a post, so the cards below are the
-   only place a post appears. */
-.cover.cover--index { height: clamp(400px, 34vw, 520px); margin-bottom: var(--space-12); border-top: var(--hairline) solid var(--rule); }
-.cover--index .cover__text { display: flex; flex-direction: column; align-items: flex-start; }
-.cover--index .post__meta { margin-bottom: var(--space-3); }
-.cover.cover--index .cover__page {
-  margin: 0; max-width: none; font-size: clamp(60px, 10vw, 140px); line-height: .88; letter-spacing: -0.055em;
+/* The page's hero: plain type, no field behind it. The title sits at the post title's scale. */
+.blog-hero { padding: var(--space-18) 0 var(--space-12); border-bottom: var(--hairline) solid var(--rule); }
+.blog-hero .post__meta { margin-bottom: var(--space-3); }
+.blog-hero__title {
+  margin: 0 0 var(--space-4); font-family: var(--font-display); font-weight: var(--weight-display);
+  font-size: clamp(36px, 4.6vw, 64px); line-height: var(--lh-page-title); letter-spacing: var(--ls-page-title); color: var(--ink);
 }
-.cover--index .cover__intro { margin: var(--space-4) 0 0; max-width: 30ch; text-wrap: pretty; font-size: var(--size-lead); line-height: var(--lh-lead); letter-spacing: var(--ls-lead); color: var(--ink-soft); }
-@media (max-width: 760px) {
-  .cover.cover--index { height: clamp(560px, 140vw, 640px); }
-}
+.blog-hero__intro { margin: 0; max-width: var(--measure-lead); text-wrap: pretty; font-size: var(--size-lead); line-height: var(--lh-lead); letter-spacing: var(--ls-lead); color: var(--ink-soft); }
+@media (max-width: 760px) { .blog-hero { padding: var(--space-12) 0 var(--space-8); } }
 
 .topics { display: flex; flex-wrap: wrap; gap: var(--space-2); border: 0; margin: 0 0 var(--space-6); padding: 0; min-width: 0; }
 .tag {

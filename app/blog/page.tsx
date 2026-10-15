@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { ParticleCover } from "@/components/blog/cover/ParticleCover";
 import { PostCard } from "@/components/blog/PostCard";
 import { TopicFilter } from "@/components/blog/TopicFilter";
 import { FEED_ALTERNATE, getPosts, getTopics, topicKey } from "@/lib/posts";
@@ -19,17 +18,14 @@ export default function BlogIndex() {
   const years = [...new Set(posts.map((p) => p.meta.date.slice(0, 4)))].sort();
   const span = years.length > 1 ? `${years[0]}–${years.at(-1)}` : years[0];
   const count = `${posts.length} ${posts.length === 1 ? "post" : "posts"}`;
-  // The hero borrows the newest post's particle field, so it looks like part of the posts.
-  const shape = posts.find((p) => p.meta.cover)?.meta.cover;
 
   return (
     <>
-      <header className="cover cover--index">
-        {shape ? <ParticleCover shape={shape} kind="cover" /> : null}
-        <div className="wrap cover__text">
+      <header className="blog-hero">
+        <div className="wrap">
           {posts.length ? <p className="post__meta">{span ? `${count} · ${span}` : count}</p> : null}
-          <h1 className="post__title cover__page">Writing</h1>
-          <p className="cover__intro">Notes on what I built, how it held up, and what I would do again. Plain words, real code.</p>
+          <h1 className="blog-hero__title">Writing</h1>
+          <p className="blog-hero__intro">Notes on what I built, how it held up, and what I would do again. Plain words, real code.</p>
         </div>
       </header>
 
