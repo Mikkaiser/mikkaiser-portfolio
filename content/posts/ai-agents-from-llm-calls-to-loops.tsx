@@ -16,7 +16,7 @@ export const meta: PostMeta = {
   lead: "An agent is just a model call inside a loop. Write that loop by hand once and every framework gets a lot less mysterious.",
   topic: "AI",
   date: "2026-10-11",
-  minutes: 12,
+  minutes: 13,
   cover: "loop",
   draft: true,
 };
@@ -197,6 +197,17 @@ export default function Post() {
         round is a paid request, so a model that keeps asking for tools could loop (and bill you) forever. The limit
         is a safety brake: after 10 rounds the loop gives up. It&rsquo;s the one safeguard I kept in the code.
       </p>
+      <p>
+        The other new thing is <Code>SYSTEM_PROMPT</Code>. It&rsquo;s the{" "}
+        <Term id="system-prompt" label="system prompt">
+          A message at the very start of the conversation with the rules for the model: who it is, how to talk and
+          what to do. The person chatting never sees it.
+        </Term>
+        , the first message the model reads, and it tells the model how to behave. Ours says: you work for a corner
+        store, keep answers short, and never state a price or a stock level from memory. That last rule matters. A
+        model that can guess a price will happily guess one, and the rule pushes it to call a tool instead. Since the
+        model remembers nothing between calls, the prompt goes at the top of the list every time.
+      </p>
       <CodeTabs {...CODE.a3} />
       <InPlainWords
         intro="This is the most important code in the post, and it's still fine to skip it. Here's the whole thing:"
@@ -352,11 +363,25 @@ export default function Post() {
 
       <H2 id="memory">Memory across turns</H2>
       <p>
-        A chat is the same loop run once per message, with everything said so far sent again. A follow-up like{" "}
-        <em>how much for 3 of them?</em> only works because the history carries the earlier tool results. The model
+        Remember, the model has no memory. So where does a chat get one? From your code. The &ldquo;memory&rdquo; is a
+        plain list of messages that you keep and send again on every call. Nothing more.
+      </p>
+      <p>
+        A chat is the same loop run once per message, with that list growing each time. A follow-up like{" "}
+        <em>how much for 3 of them?</em> only works because the list carries the earlier tool results. The model
         finds 7.00 AED in the conversation and doesn&rsquo;t need to ask again.
       </p>
       <CodeTabs {...CODE.b2} />
+      <InPlainWords
+        intro="Short and sweet, here's the memory trick:"
+        steps={[
+          { title: "Wait for a question.", text: <>Type <Code>exit</Code> to stop.</> },
+          { title: "Run the agent with the history.", text: <>The new question goes in with everything said before it, tool calls and results included.</> },
+          { title: "Print the answer.", text: <>Same as before.</> },
+          { title: "Keep the new history.", text: <>The run hands back the longer list, ready for the next question. That list is the memory.</> },
+        ]}
+        back={{ after: 4, to: 1 }}
+      />
       <p>
         Each framework hands the history back in its own way. In Python, <Code>to_input_list()</Code> returns every
         item of the run, tool calls and results included, and you add the next user message yourself. TypeScript does
@@ -368,6 +393,15 @@ export default function Post() {
           A small database that lives in a single file. No server to run, which is perfect for a corner store.
         </Term>{" "}
         version that survives a restart.
+      </p>
+      <p>
+        The catch is that the list only grows, and every call pays for all of it. Long chats get slower and cost more,
+        and one day the list no longer fits in the model&rsquo;s{" "}
+        <Term id="context-window" label="context window">
+          How much text the model can read in one call. Everything you send, the whole history included, has to fit
+          inside it.
+        </Term>
+        . Real apps trim old messages or squash them into a summary. A corner store chat never gets that long.
       </p>
 
       <H2 id="streaming">Streaming and tracing</H2>
