@@ -1,8 +1,10 @@
 // Single source of truth for the CV. Kept in sync with the site copy and lib/bio.ts.
-// Where the old resume and the site disagreed, the stronger claim was kept:
-// 6+ years (not 5+) and 500+ trained (not 400+). The ACTVET role is titled
+// Where the old resume and the site disagreed, the stronger claim was kept: 500+ trained
+// (not 400+). The years of experience count from lib/experience.ts. The ACTVET role is titled
 // "Software Engineer & Tech Educator"; "Software Development Expert" is the EmiratesSkills
 // designation and is carried in the headline and the awards section instead.
+import { yearsCoding } from "../lib/experience.ts";
+
 export const cv = {
   name: "Mikael Ribeiro Simoes",
   title: "Software Engineer & Tech Educator · Software Development Expert",
@@ -15,7 +17,7 @@ export const cv = {
     "github.com/Mikkaiser",
   ],
   summary:
-    "Full stack software developer with 6+ years across backend architecture, enterprise systems and the front ends on top of them. Deep expertise in .NET, ASP.NET Core and Node.js, shipping production APIs, microservices and CI/CD pipelines. Contributed to platforms serving 780,000+ users, trained 500+ students and professionals, and won two WorldSkills gold medals in Software Applications Development. Chief Expert for the United Arab Emirates in the same skill.",
+    `Full stack software developer with ${yearsCoding()}+ years across backend architecture, enterprise systems and the front ends that talk to them. Deep expertise in .NET, ASP.NET Core and Node.js, shipping production APIs, microservices and CI/CD pipelines. Contributed to platforms serving 780,000+ users, trained 500+ students and professionals, and won two WorldSkills gold medals in Software Applications Development. Chief Expert for the United Arab Emirates in the same skill.`,
   stack: [
     ["Backend", "C# · .NET / ASP.NET Core · ASP.NET MVC · Node.js · NestJS · REST · GraphQL · JWT"],
     ["Frontend", "Angular · TypeScript · React · Next.js · SASS · HTML/CSS · Apollo"],

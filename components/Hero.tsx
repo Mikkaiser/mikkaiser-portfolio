@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Popover } from "./Popover";
 import { GameButton } from "./GameButton";
 import { GitHub, LinkedIn } from "./icons";
+import { yearsCoding, yearsCodingWordCap } from "@/lib/experience";
 
 export function Hero() {
   return (
@@ -40,7 +41,7 @@ export function Hero() {
             !
           </h1>
           <p className="lead hero__lead" data-hero style={{ animationDelay: ".2s" }}>
-            Six years across .NET, Node and the front ends on top of them. I build the internal platforms a government training authority runs on, end to end, and I train the people who inherit them.
+            {yearsCodingWordCap()} years across .NET, Node and the front ends that talk to them. I build the internal platforms a government training authority runs on, end to end, and I train the people who take them over.
           </p>
           <p className="body hero__body" data-hero style={{ animationDelay: ".26s" }}>
             Brazilian, based in Abu Dhabi. Two golds in software applications development, one platform with 780,000 users running code written by me, and a preference for software that stays simple as it grows.
@@ -80,7 +81,7 @@ export function Hero() {
       </div>
 
       <div className="stats" data-hero style={{ animationDelay: ".4s" }}>
-        <div className="stat"><div className="stat__n">6+</div><div className="stat__l">Years of software<br />development</div></div>
+        <div className="stat"><div className="stat__n">{yearsCoding()}+</div><div className="stat__l">Years of software<br />development</div></div>
         <div className="stat"><div className="stat__n">780K</div><div className="stat__l">Users on SENAI Play,<br />my largest platform</div></div>
         <div className="stat"><div className="stat__n">500+</div><div className="stat__l">People trained to write<br />production-grade software</div></div>
         <div className="stat"><div className="stat__n stat__n--gold">2</div><div className="stat__l">Gold medals in software development competitions</div></div>

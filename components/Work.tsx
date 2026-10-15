@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { BrandLogo } from "./BrandLogo";
 import { CHIPS, Chips, type ChipSpec } from "./Chip";
+import { yearsCodingWordCap } from "@/lib/experience";
 
 type Card = {
   id: string;
@@ -106,7 +107,7 @@ export function Work() {
         ))}
       </div>
       <p className="small work__note" data-anim>
-        A sample, not the list. Six years of work adds up to a lot more: internal tools, competition platforms, WordPress sites, mobile apps, packages and libraries. The rest lives in{" "}
+        A sample, not the list. {yearsCodingWordCap()} years of work adds up to a lot more: internal tools, competition platforms, WordPress sites, mobile apps, packages and libraries. The rest lives in{" "}
         <a href="#experience" className="u">experience</a> and on{" "}
         <a href="https://github.com/Mikkaiser" target="_blank" rel="noopener" className="u">GitHub ↗</a>.
       </p>

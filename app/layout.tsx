@@ -3,6 +3,7 @@ import { Bricolage_Grotesque, JetBrains_Mono, Poppins, Roboto } from "next/font/
 import { ThemeProvider, themeInitScript } from "@/components/ThemeProvider";
 import "./tokens.css";
 import "./globals.css";
+import { yearsCodingWordCap } from "@/lib/experience";
 
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -25,8 +26,10 @@ const SITE = "https://mikkaiser.com";
 // and what it uses to rewrite the displayed title for a name query.
 const TITLE = "Mikkaiser | Software Engineer & Tech Educator, Abu Dhabi";
 const FULL_NAME = "Mikael Ribeiro Simoes";
-const DESCRIPTION =
-  "Mikael Ribeiro Simoes, known as Mikkaiser, is a full stack software developer in Abu Dhabi. Six years across .NET, Node, Angular and Next.js building enterprise platforms, one serving 780,000 users, and two gold medals in software applications development.";
+const DESCRIPTION = `Mikael Ribeiro Simoes, known as Mikkaiser, is a full stack software developer in Abu Dhabi. ${yearsCodingWordCap()} years across .NET, Node, Angular and Next.js building enterprise platforms, one serving 780,000 users, and two gold medals in software applications development.`;
+
+// Pages are prerendered, so the years above would only change on a deploy. Re-render daily and they follow the calendar.
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),

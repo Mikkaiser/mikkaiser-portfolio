@@ -124,7 +124,7 @@ li::before{content:"";position:absolute;left:1px;top:.52em;width:3px;height:3px;
   <div class="contact">${cv.contact.map((c) => `<span>${esc(c)}</span>`).join("")}</div>
   <hr class="rule">
   <p class="summary">${esc(cv.summary)
-    .replace(/(6\+ years|780,000\+ users|500\+ students and professionals|two WorldSkills gold medals|Chief Expert for the United Arab Emirates)/g, "<b>$1</b>")}</p>
+    .replace(/(\d+\+ years|780,000\+ users|500\+ students and professionals|two WorldSkills gold medals|Chief Expert for the United Arab Emirates)/g, "<b>$1</b>")}</p>
 </header>
 
 <section class="sec">
