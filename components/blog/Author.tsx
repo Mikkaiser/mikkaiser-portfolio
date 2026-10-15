@@ -38,8 +38,8 @@ export function AuthorCard() {
         <p className="author__bio">
           I build internal platforms at ACTVET in Abu Dhabi and coach the UAE&rsquo;s software competitors for
           EmiratesSkills and WorldSkills. Before that I won gold at WorldSkills Americas, so now I get to be the one
-          writing the hard tasks. Outside work: desert camping, the gym, and an orange cat who reviews my code by
-          sitting on it.
+          writing the hard tasks. Outside work you&rsquo;ll find me camping in the desert, at the gym, or at home
+          with my orange cat.
         </p>
         <div className="author__links">
           <Link href="/" className="btn btn--primary">See my work</Link>
