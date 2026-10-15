@@ -44,7 +44,7 @@ export default function Post() {
           nothing about your shop.
         </Term>
         , agent and tool (the AI kind, not the one in your garage) are everywhere. The models got good enough to
-        pick the right function to call, so they can take a few steps on their own. The catch: everyone means
+        pick the right function to call, so they can take a few steps on their own. But everyone means
         something a bit different by &ldquo;agent&rdquo;. So let&rsquo;s pin it down.
       </p>
       <p>
@@ -395,7 +395,7 @@ export default function Post() {
         version that survives a restart.
       </p>
       <p>
-        The catch is that the list only grows, and every call pays for all of it. Long chats get slower and cost more,
+        One thing to watch: the list only grows, and every call pays for all of it. Long chats get slower and cost more,
         and one day the list no longer fits in the model&rsquo;s{" "}
         <Term id="context-window" label="context window">
           How much text the model can read in one call. Everything you send, the whole history included, has to fit

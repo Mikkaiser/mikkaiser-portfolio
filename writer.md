@@ -68,6 +68,8 @@ a new heading.
 - Post titles: Title Case on every word, colons allowed ("AI Agents: From LLM Calls To Loops").
 - Headings inside a post: sentence case.
 - No em dashes. Use a colon, a full stop, a comma or brackets.
+- Avoid stock phrases that sound written for effect, like "the catch is...". Say it the way he would say it out loud
+  ("but", "one thing to watch"), and don't lean on any single expression more than once or twice in a post.
 - His role is always "Software Engineer & Tech Educator", written exactly like that.
 - Numbers and units are exact. Prices, limits and versions are checked, never guessed.
 - Text is sized to be comfortable to read, not to match a spec. Body text is 17px, a step above Acta. If
