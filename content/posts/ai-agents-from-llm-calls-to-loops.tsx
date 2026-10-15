@@ -162,9 +162,7 @@ export default function Post() {
           required. Here it tells the model what arguments a tool takes.
         </Term>{" "}
         are all the model ever sees of your function, so write them
-        like documentation. Both tools take one product name, so a small helper builds both schemas. Setting{" "}
-        <Code>strict</Code> to true makes the API guarantee the arguments match the schema. The catch: every property
-        has to be in <Code>required</Code> and <Code>additionalProperties</Code> has to be false.
+        like documentation. Both tools take one product name, so a small helper builds both schemas.
       </p>
       <p>
         The map from tool name to function is the{" "}
@@ -173,8 +171,11 @@ export default function Post() {
           function by its name and calls it.
         </Term>
         . When the model asks for <Code>get_price</Code>, the
-        loop looks the name up there. The lookups ignore case, because models send &ldquo;Milk&rdquo; as often as
-        &ldquo;milk&rdquo;.
+        loop looks the name up there.
+      </p>
+      <p>
+        To keep the code short, this post follows the happy path: the product always exists and the arguments are
+        always right. A real shop would check both.
       </p>
 
       <H2 id="loop">The loop</H2>
@@ -198,7 +199,7 @@ export default function Post() {
           { title: "Start the conversation.", text: <>The rules for the model, and the customer&rsquo;s question.</> },
           { title: "Ask the model.", text: <>Send the whole conversation, plus the menu of tools.</> },
           { title: "Got plain text back?", text: <>That&rsquo;s the answer. Return it, we&rsquo;re done.</> },
-          { title: "Got tool calls back?", text: <>Save the model&rsquo;s message, run each function it asked for, and add every result to the conversation. Errors get added too, as text.</> },
+          { title: "Got tool calls back?", text: <>Save the model&rsquo;s message, run each function it asked for, and add every result to the conversation.</> },
           { title: "Still going after 10 rounds?", text: <>Stop and give up. That&rsquo;s the brake.</> },
         ]}
         back={{ after: 4, to: 2 }}
@@ -264,7 +265,8 @@ export default function Post() {
           <strong>One reply can have several calls.</strong> Run all of them before you call the model again.
         </li>
         <li>
-          <strong>Errors are results too.</strong> An unknown tool, bad arguments, an{" "}
+          <strong>Errors are results too.</strong> The code above skips this to stay short, but a real loop wraps each
+          tool call. An unknown tool, bad arguments, an{" "}
           <Term id="exception" label="exception">
             The error a function throws when something goes wrong. If nobody catches it, the program stops.
           </Term>{" "}
@@ -283,8 +285,8 @@ export default function Post() {
           A plain text format for data: curly braces, keys in quotes, values after colons. Every language can read it,
           which is why APIs love it.
         </Term>{" "}
-        string, so they need parsing before the function sees them. That&rsquo;s
-        why every version parses them inside the <Code>try</Code>.
+        string, so they need parsing before the function sees them. That&rsquo;s the <Code>json.loads</Code> in the
+        loop, and the same step in the other two languages.
       </p>
 
       <H2 id="framework">The same agent with a framework</H2>
@@ -427,8 +429,8 @@ export default function Post() {
         <li>
           <strong>Unknown tools.</strong> Both Agents SDKs stop with an error by default. Setting{" "}
           <Code>tool_not_found_behavior</Code> in Python or <Code>toolNotFoundBehavior</Code> in TypeScript to{" "}
-          <Code>&quot;return_error_to_model&quot;</Code> gives you the behaviour of the hand-written loop. Agent
-          Framework already sends the error back to the model.
+          <Code>&quot;return_error_to_model&quot;</Code> sends the error back to the model instead. Agent
+          Framework already does that.
         </li>
         <li>
           <strong>Exceptions.</strong> The frameworks send the model a generic error message and keep the details to

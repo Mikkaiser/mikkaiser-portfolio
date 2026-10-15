@@ -7,6 +7,7 @@ export const CODE = {
 
 client = OpenAI()
 
+# One request: a list of messages goes in, one message comes back.
 response = client.chat.completions.create(
     model="gpt-5.4-mini",
     messages=[{"role": "user", "content": "Do you have milk, and how much is a bottle?"}],
@@ -16,6 +17,7 @@ print(response.choices[0].message.content)`,
 
 const client = new OpenAI();
 
+// One request: a list of messages goes in, one message comes back.
 const response = await client.chat.completions.create({
   model: "gpt-5.4-mini",
   messages: [{ role: "user", content: "Do you have milk, and how much is a bottle?" }],
@@ -25,13 +27,12 @@ console.log(response.choices[0].message.content);`,
 
 ChatClient client = new("gpt-5.4-mini", Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
 
+// One request: a list of messages goes in, one message comes back.
 ChatCompletion completion = client.CompleteChat("Do you have milk, and how much is a bottle?");
 Console.WriteLine(completion.Content[0].Text);`,
   },
   a2: {
-    py: `from openai.types.chat import ChatCompletionToolParam
-
-INVENTORY = {
+    py: `INVENTORY = {
     "milk": {"price": 7.00, "stock": 12},
     "bread": {"price": 4.50, "stock": 0},
     "eggs": {"price": 12.00, "stock": 8},
@@ -40,20 +41,21 @@ INVENTORY = {
 }
 
 
+# The tools are normal functions. No AI in here.
 def check_stock(product_name: str) -> str:
-    item = INVENTORY.get(product_name.lower())
-    return f"{item['stock']} units in stock" if item else "Product not found"
+    return f"{INVENTORY[product_name]['stock']} units in stock"
 
 
 def get_price(product_name: str) -> str:
-    item = INVENTORY.get(product_name.lower())
-    return f"{item['price']:.2f} AED" if item else "Product not found"
+    return f"{INVENTORY[product_name]['price']:.2f} AED"
 
 
+# Lets the loop find a function from the name the model sends.
 TOOL_FUNCTIONS = {"check_stock": check_stock, "get_price": get_price}
 
 
-def product_tool(name: str, description: str) -> ChatCompletionToolParam:
+# The name and description are what the model reads.
+def product_tool(name: str, description: str) -> dict:
     return {
         "type": "function",
         "function": {
@@ -63,9 +65,7 @@ def product_tool(name: str, description: str) -> ChatCompletionToolParam:
                 "type": "object",
                 "properties": {"product_name": {"type": "string", "description": "e.g. 'milk'"}},
                 "required": ["product_name"],
-                "additionalProperties": False,
             },
-            "strict": True,
         },
     }
 
@@ -76,29 +76,30 @@ TOOLS = [
 ]`,
     ts: `import OpenAI from "openai";
 
-const INVENTORY = new Map([
-  ["milk", { price: 7.0, stock: 12 }],
-  ["bread", { price: 4.5, stock: 0 }],
-  ["eggs", { price: 12.0, stock: 8 }],
-  ["apples", { price: 3.0, stock: 30 }],
-  ["coffee", { price: 25.0, stock: 5 }],
-]);
+const INVENTORY: Record<string, { price: number; stock: number }> = {
+  milk: { price: 7.0, stock: 12 },
+  bread: { price: 4.5, stock: 0 },
+  eggs: { price: 12.0, stock: 8 },
+  apples: { price: 3.0, stock: 30 },
+  coffee: { price: 25.0, stock: 5 },
+};
 
+// The tools are normal functions. No AI in here.
 function checkStock(productName: string): string {
-  const item = INVENTORY.get(productName.toLowerCase());
-  return item ? \`\${item.stock} units in stock\` : "Product not found";
+  return \`\${INVENTORY[productName].stock} units in stock\`;
 }
 
 function getPrice(productName: string): string {
-  const item = INVENTORY.get(productName.toLowerCase());
-  return item ? \`\${item.price.toFixed(2)} AED\` : "Product not found";
+  return \`\${INVENTORY[productName].price.toFixed(2)} AED\`;
 }
 
+// Lets the loop find a function from the name the model sends.
 const toolFunctions: Record<string, (args: { product_name: string }) => string> = {
   check_stock: ({ product_name }) => checkStock(product_name),
   get_price: ({ product_name }) => getPrice(product_name),
 };
 
+// The name and description are what the model reads.
 function productTool(name: string, description: string): OpenAI.ChatCompletionTool {
   return {
     type: "function",
@@ -109,9 +110,7 @@ function productTool(name: string, description: string): OpenAI.ChatCompletionTo
         type: "object",
         properties: { product_name: { type: "string", description: "e.g. 'milk'" } },
         required: ["product_name"],
-        additionalProperties: false,
       },
-      strict: true,
     },
   };
 }
@@ -120,11 +119,10 @@ const tools = [
   productTool("check_stock", "Check how many units of a product are in stock."),
   productTool("get_price", "Get the unit price of a product, in AED."),
 ];`,
-    cs: `using System.Globalization;
-using System.Text.Json;
+    cs: `using System.Text.Json;
 using OpenAI.Chat;
 
-Dictionary<string, (decimal Price, int Stock)> inventory = new(StringComparer.OrdinalIgnoreCase)
+Dictionary<string, (decimal Price, int Stock)> inventory = new()
 {
     ["milk"] = (7.00m, 12),
     ["bread"] = (4.50m, 0),
@@ -133,20 +131,19 @@ Dictionary<string, (decimal Price, int Stock)> inventory = new(StringComparer.Or
     ["coffee"] = (25.00m, 5),
 };
 
-string CheckStock(string productName) =>
-    inventory.TryGetValue(productName, out var item) ? $"{item.Stock} units in stock" : "Product not found";
+// The tools are normal functions. No AI in here.
+string CheckStock(string productName) => $"{inventory[productName].Stock} units in stock";
 
-string GetPrice(string productName) =>
-    inventory.TryGetValue(productName, out var item)
-        ? string.Create(CultureInfo.InvariantCulture, $"{item.Price:F2} AED")
-        : "Product not found";
+string GetPrice(string productName) => $"{inventory[productName].Price:F2} AED";
 
+// Lets the loop find a function from the name the model sends.
 Dictionary<string, Func<JsonElement, string>> toolFunctions = new()
 {
     ["check_stock"] = args => CheckStock(args.GetProperty("product_name").GetString()!),
     ["get_price"] = args => GetPrice(args.GetProperty("product_name").GetString()!),
 };
 
+// The name and description are what the model reads.
 static ChatTool ProductTool(string name, string description) => ChatTool.CreateFunctionTool(
     functionName: name,
     functionDescription: description,
@@ -154,11 +151,9 @@ static ChatTool ProductTool(string name, string description) => ChatTool.CreateF
         {
           "type": "object",
           "properties": { "product_name": { "type": "string", "description": "e.g. 'milk'" } },
-          "required": ["product_name"],
-          "additionalProperties": false
+          "required": ["product_name"]
         }
-        """),
-    functionSchemaIsStrict: true);
+        """));
 
 ChatCompletionOptions options = new()
 {
@@ -180,23 +175,21 @@ MAX_STEPS = 10
 
 
 def run(question: str) -> str:
-    messages: list = [
+    messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": question},
     ]
+    # The brake: give up after MAX_STEPS rounds.
     for _ in range(MAX_STEPS):
         response = client.chat.completions.create(model="gpt-5.4-mini", messages=messages, tools=TOOLS)
         message = response.choices[0].message
+        # No tool calls means plain text: that is the answer.
         if not message.tool_calls:
-            return message.content or ""
+            return message.content
         messages.append(message)
+        # Run each tool the model asked for and add its result.
         for call in message.tool_calls:
-            try:
-                if call.type != "function":
-                    raise ValueError(f"Unsupported tool type: {call.type}")
-                result = TOOL_FUNCTIONS[call.function.name](**json.loads(call.function.arguments))
-            except Exception as e:
-                result = f"Error: {e!r}"
+            result = TOOL_FUNCTIONS[call.function.name](**json.loads(call.function.arguments))
             messages.append({"role": "tool", "tool_call_id": call.id, "content": result})
     return f"Stopped after {MAX_STEPS} steps."
 
@@ -207,26 +200,22 @@ print(run("Do you have milk, and how much is a bottle?"))`,
   "Never state a price or a stock level from memory: use the tools.";
 const MAX_STEPS = 10;
 
-async function run(question: string): Promise<string> {
+async function run(question: string) {
   const messages: OpenAI.ChatCompletionMessageParam[] = [
     { role: "system", content: SYSTEM_PROMPT },
     { role: "user", content: question },
   ];
+  // The brake: give up after MAX_STEPS rounds.
   for (let step = 0; step < MAX_STEPS; step++) {
     const response = await client.chat.completions.create({ model: "gpt-5.4-mini", messages, tools });
     const message = response.choices[0].message;
-    if (!message.tool_calls?.length) return message.content ?? "";
+    // No tool calls means plain text: that is the answer.
+    if (!message.tool_calls) return message.content;
     messages.push(message);
+    // Run each tool the model asked for and add its result.
     for (const call of message.tool_calls) {
-      let result: string;
-      try {
-        if (call.type !== "function") throw new Error(\`Unsupported tool type: \${call.type}\`);
-        const fn = toolFunctions[call.function.name];
-        if (!fn) throw new Error(\`Unknown tool: \${call.function.name}\`);
-        result = fn(JSON.parse(call.function.arguments));
-      } catch (err) {
-        result = String(err);
-      }
+      if (call.type !== "function") continue;
+      const result = toolFunctions[call.function.name](JSON.parse(call.function.arguments));
       messages.push({ role: "tool", tool_call_id: call.id, content: result });
     }
   }
@@ -242,23 +231,18 @@ const int MaxSteps = 10;
 async Task<string> RunAsync(string question)
 {
     List<ChatMessage> messages = [new SystemChatMessage(SystemPrompt), new UserChatMessage(question)];
+    // The brake: give up after MaxSteps rounds.
     for (int step = 0; step < MaxSteps; step++)
     {
         ChatCompletion completion = await client.CompleteChatAsync(messages, options);
+        // No tool calls means plain text: that is the answer.
         if (completion.ToolCalls.Count == 0) return completion.Content[0].Text;
         messages.Add(new AssistantChatMessage(completion));
+        // Run each tool the model asked for and add its result.
         foreach (ChatToolCall call in completion.ToolCalls)
         {
-            string result;
-            try
-            {
-                using JsonDocument args = JsonDocument.Parse(call.FunctionArguments);
-                result = toolFunctions[call.FunctionName](args.RootElement);
-            }
-            catch (Exception e)
-            {
-                result = $"Error: {e.Message}";
-            }
+            using JsonDocument args = JsonDocument.Parse(call.FunctionArguments);
+            string result = toolFunctions[call.FunctionName](args.RootElement);
             messages.Add(new ToolChatMessage(call.Id, result));
         }
     }
@@ -279,18 +263,17 @@ INVENTORY = {
 }
 
 
+# The decorator turns a plain function into a tool.
 @function_tool
 def check_stock(product_name: str) -> str:
     """Check how many units of a product are in stock."""
-    item = INVENTORY.get(product_name.lower())
-    return f"{item['stock']} units in stock" if item else "Product not found"
+    return f"{INVENTORY[product_name]['stock']} units in stock"
 
 
 @function_tool
 def get_price(product_name: str) -> str:
     """Get the unit price of a product, in AED."""
-    item = INVENTORY.get(product_name.lower())
-    return f"{item['price']:.2f} AED" if item else "Product not found"
+    return f"{INVENTORY[product_name]['price']:.2f} AED"
 
 
 agent = Agent(
@@ -303,26 +286,27 @@ agent = Agent(
     tools=[check_stock, get_price],
 )
 
+# The framework runs the whole loop.
 result = Runner.run_sync(agent, "Do you have milk, and how much is a bottle?", max_turns=10)
 print(result.final_output)`,
     ts: `import { Agent, run, tool } from "@openai/agents";
 import { z } from "zod";
 
-const INVENTORY = new Map([
-  ["milk", { price: 7.0, stock: 12 }],
-  ["bread", { price: 4.5, stock: 0 }],
-  ["eggs", { price: 12.0, stock: 8 }],
-  ["apples", { price: 3.0, stock: 30 }],
-  ["coffee", { price: 25.0, stock: 5 }],
-]);
+const INVENTORY: Record<string, { price: number; stock: number }> = {
+  milk: { price: 7.0, stock: 12 },
+  bread: { price: 4.5, stock: 0 },
+  eggs: { price: 12.0, stock: 8 },
+  apples: { price: 3.0, stock: 30 },
+  coffee: { price: 25.0, stock: 5 },
+};
 
+// tool() turns a function into a tool, schema included.
 const checkStock = tool({
   name: "check_stock",
   description: "Check how many units of a product are in stock.",
   parameters: z.object({ product_name: z.string() }),
   execute: ({ product_name }) => {
-    const item = INVENTORY.get(product_name.toLowerCase());
-    return item ? \`\${item.stock} units in stock\` : "Product not found";
+    return \`\${INVENTORY[product_name].stock} units in stock\`;
   },
 });
 
@@ -331,8 +315,7 @@ const getPrice = tool({
   description: "Get the unit price of a product, in AED.",
   parameters: z.object({ product_name: z.string() }),
   execute: ({ product_name }) => {
-    const item = INVENTORY.get(product_name.toLowerCase());
-    return item ? \`\${item.price.toFixed(2)} AED\` : "Product not found";
+    return \`\${INVENTORY[product_name].price.toFixed(2)} AED\`;
   },
 });
 
@@ -345,15 +328,15 @@ const agent = new Agent({
   tools: [checkStock, getPrice],
 });
 
+// The framework runs the whole loop.
 const result = await run(agent, "Do you have milk, and how much is a bottle?", { maxTurns: 10 });
 console.log(result.finalOutput);`,
     cs: `using System.ComponentModel;
-using System.Globalization;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using OpenAI.Chat;
 
-Dictionary<string, (decimal Price, int Stock)> inventory = new(StringComparer.OrdinalIgnoreCase)
+Dictionary<string, (decimal Price, int Stock)> inventory = new()
 {
     ["milk"] = (7.00m, 12),
     ["bread"] = (4.50m, 0),
@@ -362,15 +345,12 @@ Dictionary<string, (decimal Price, int Stock)> inventory = new(StringComparer.Or
     ["coffee"] = (25.00m, 5),
 };
 
+// The attribute and the signature become the tool's description and schema.
 [Description("Check how many units of a product are in stock.")]
-string CheckStock(string productName) =>
-    inventory.TryGetValue(productName, out var item) ? $"{item.Stock} units in stock" : "Product not found";
+string CheckStock(string productName) => $"{inventory[productName].Stock} units in stock";
 
 [Description("Get the unit price of a product, in AED.")]
-string GetPrice(string productName) =>
-    inventory.TryGetValue(productName, out var item)
-        ? string.Create(CultureInfo.InvariantCulture, $"{item.Price:F2} AED")
-        : "Product not found";
+string GetPrice(string productName) => $"{inventory[productName].Price:F2} AED";
 
 AIAgent agent = new ChatClient("gpt-5.4-mini", Environment.GetEnvironmentVariable("OPENAI_API_KEY"))
     .AsAIAgent(
@@ -386,6 +366,7 @@ AIAgent agent = new ChatClient("gpt-5.4-mini", Environment.GetEnvironmentVariabl
             .UseFunctionInvocation(configure: f => f.MaximumIterationsPerRequest = 10)
             .Build());
 
+// The framework runs the whole loop.
 Console.WriteLine(await agent.RunAsync("Do you have milk, and how much is a bottle?"));`,
   },
   b2: {
@@ -396,6 +377,7 @@ while (question := input("You: ")) != "exit":
     history.append({"role": "user", "content": question})
     result = Runner.run_sync(agent, history, max_turns=10)
     print(f"Agent: {result.final_output}")
+    # The result carries the whole conversation, ready for the next question.
     history = result.to_input_list()`,
     ts: `import { run, user, type AgentInputItem } from "@openai/agents";
 import { createInterface } from "node:readline/promises";
@@ -407,11 +389,13 @@ for await (const question of rl) {
   if (question === "exit") break;
   const result = await run(agent, [...history, user(question)], { maxTurns: 10 });
   console.log(\`Agent: \${result.finalOutput}\`);
+  // The result carries the whole conversation, ready for the next question.
   history = result.history;
   process.stdout.write("You: ");
 }`,
     cs: `using Microsoft.Agents.AI;
 
+// The session remembers the conversation between questions.
 AgentSession session = await agent.CreateSessionAsync();
 while (true)
 {
