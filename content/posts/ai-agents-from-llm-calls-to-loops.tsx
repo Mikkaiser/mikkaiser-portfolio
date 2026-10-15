@@ -18,7 +18,6 @@ export const meta: PostMeta = {
   date: "2026-10-11",
   minutes: 13,
   cover: "loop",
-  draft: true,
 };
 
 export const toc: TocItem[] = [
