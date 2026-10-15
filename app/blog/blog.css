@@ -225,7 +225,12 @@
 .code--tabs:has(input[value="py"]:checked) .code__body:not([data-lang="py"]),
 .code--tabs:has(input[value="ts"]:checked) .code__body:not([data-lang="ts"]),
 .code--tabs:has(input[value="cs"]:checked) .code__body:not([data-lang="cs"]) { display: none; }
-.code__body { overflow-x: auto; padding: 4px 20px 22px; }
+.code__body {
+  overflow-x: auto; padding: 4px 20px 22px;
+  --sb-thumb: var(--code-scroll-thumb); --sb-thumb-hover: var(--code-scroll-thumb-hover);
+}
+/* Keep the thumb clear of the card's rounded corners. */
+.code__body::-webkit-scrollbar-track { margin-inline: var(--radius-card); }
 .code__body:focus-visible { outline: 2px solid var(--code-fg); outline-offset: -2px; }
 .code__body pre {
   margin: 0; min-width: max-content; background: none; color: var(--code-fg);
