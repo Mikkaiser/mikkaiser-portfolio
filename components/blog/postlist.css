@@ -52,8 +52,5 @@
 .writing__side { display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-8); min-width: 0; }
 .writing__top { display: flex; flex-direction: column; gap: var(--space-8); }
 .writing__intro { max-width: 32ch; }
-.writing__note { max-width: 44ch; margin: 0; padding-top: var(--space-4); border-top: var(--hairline) solid var(--rule); }
-.writing__note a { color: var(--ink); border-bottom: var(--hairline) solid var(--faint); }
-.writing__note a:hover { border-bottom-color: var(--ink); }
 .writing__all { align-self: flex-start; }
 @media (max-width: 920px) { .writing { grid-template-columns: minmax(0, 1fr); gap: var(--space-8); } .writing__poster { max-width: 420px; } }

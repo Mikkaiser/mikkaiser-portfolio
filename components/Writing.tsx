@@ -31,12 +31,7 @@ export function Writing() {
                   <li key={p.meta.slug}><PostRow post={p.meta} /></li>
                 ))}
               </ol>
-            ) : (
-              <p className="small writing__note">
-                That is the only one so far. The next is on its way, and the <Link href="/blog/feed.xml">RSS feed</Link> will
-                tell you when it lands.
-              </p>
-            )}
+            ) : null}
           </div>
           <Link href="/blog" className="btn btn--ghost writing__all">Read the blog</Link>
         </div>
