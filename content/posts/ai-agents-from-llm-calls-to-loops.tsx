@@ -15,7 +15,7 @@ export const meta: PostMeta = {
   lead: "An agent is just a model call inside a loop. Write that loop by hand once and every framework gets a lot less mysterious.",
   topic: "AI",
   date: "2026-10-11",
-  minutes: 13,
+  minutes: 12,
   cover: "loop",
   draft: true,
 };
@@ -37,63 +37,44 @@ export default function Post() {
   return (
     <>
       <p>
-        A couple of years ago, if you said &ldquo;agent&rdquo; at dinner, people pictured a spy in sunglasses.
-        Words like{" "}
+        A couple of years ago, if you said &ldquo;agent&rdquo; at dinner, people pictured a spy in sunglasses. Now{" "}
         <Term id="llm" label="LLM" title="Large language model">
           You send it text, it sends text back. It&rsquo;s great at writing and knows a lot about the world, but
           nothing about your shop.
         </Term>
-        , agent and tool (the AI kind, not the one in your garage) mostly lived in research papers. Now
-        they&rsquo;re everywhere: product launches, job posts, conference talks, the group chat. Everyone is
-        building agents.
+        , agent and tool (the AI kind, not the one in your garage) are everywhere. The models got good enough to
+        pick the right function to call, so they can take a few steps on their own. The catch: everyone means
+        something a bit different by &ldquo;agent&rdquo;. So let&rsquo;s pin it down.
       </p>
       <p>
-        So what changed? The models got good at two things. They understand what you ask in normal words, and they
-        can pick the right function to call, with the right inputs. Once a model can do that, you can let it take a
-        few steps on its own instead of answering once. That&rsquo;s where agents come from.
-      </p>
-      <p>
-        The problem is that everyone uses the word a bit differently. For one person an agent is any chatbot. For
-        another it&rsquo;s a script that calls a model once. For someone else it&rsquo;s anything with AI in the
-        name. Same word, lots of meanings, and nobody stops to agree on one. So before we build anything,
-        let&rsquo;s pin it down.
-      </p>
-      <p>
-        Here&rsquo;s the meaning I&rsquo;ll use. An{" "}
+        An{" "}
         <Term id="agent" label="agent">
           LLM calls in a loop, working toward a goal. The model decides what to do next; your code does it and keeps
           the loop going.
         </Term>{" "}
-        is LLM calls inside a loop, working toward a goal. And reaching that goal usually means the model has to do
-        things on its own: check a database, look up a price, send an email.
-      </p>
-      <p>
-        This is where a lot of people get the wrong idea. They picture the model with some kind of superpower,
-        reaching into your software and pressing buttons. It can&rsquo;t. An LLM can&rsquo;t click, can&rsquo;t run
-        code and can&rsquo;t touch your database. All it does is take text in and give text back. It reads your
-        message as{" "}
+        is LLM calls inside a loop, working toward a goal, and that goal usually means doing things: checking a
+        database, looking up a price. But the model has no superpower to press buttons in your software. It reads
+        text as{" "}
         <Term id="token" label="tokens">
           Small chunks of text, usually a word or a piece of one. Models read and write in tokens, and you pay per
           token too.
         </Term>{" "}
-        and writes its reply one token at a time, each one picked based on everything before it. Text in, text out.
-        That&rsquo;s the whole trick.
+        and writes text back, one token at a time. That&rsquo;s all it can do.
       </p>
       <p>
-        So who does the actual work? Your code. You write normal functions, like &ldquo;check the stock&rdquo; or
-        &ldquo;get the price&rdquo;, and tell the model they exist. When the model needs one, it writes back a little
-        note: &ldquo;please run this one, with these inputs&rdquo;. Your code runs it and hands the result back, as
-        more text. Those functions are what we call{" "}
+        The doing happens in your code. You write normal functions and tell the model they exist. When it needs
+        one, it replies &ldquo;please run this, with these inputs&rdquo;, and your code runs it and sends back the
+        result. Those functions are{" "}
         <Term id="tool" label="tools">
           Normal functions in your code that the model is allowed to ask for, like <Code>check_stock</Code>. The
           model never sees the code, only the name, a description and the arguments it takes.
         </Term>
-        . The model decides, your software acts. Less superhero, more very smart pen pal.
+        . Less superhero, more very smart pen pal.
       </p>
       <p>
-        So an agent isn&rsquo;t some brand new kind of software. It&rsquo;s an LLM call inside a loop, plus a short
-        list of tools. To see that loop from the inside, I built a <A href={REPO}>corner store assistant</A>: a terminal chat for a small shop that answers
-        questions about stock and prices. In this post I rebuild it by hand, starting from one{" "}
+        To see that loop from the inside, I built a <A href={REPO}>corner store assistant</A>: a terminal chat for a
+        small shop that answers questions about stock and prices. In this post I rebuild it by hand, starting from
+        one{" "}
         <Term id="api-call" label="API call">
           One request to the model over the internet. One request in, one reply out, and each one costs a little.
         </Term>
