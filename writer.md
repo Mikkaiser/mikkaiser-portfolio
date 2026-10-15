@@ -58,6 +58,10 @@ a new heading.
   version would check this" in one sentence.
 - Keep what the concept needs, even if it isn't pure happy path (the step limit stays, because every agent loop
   needs a brake), and explain why it's there.
+- **Simple is not short.** Shorter code is not simpler code. Prefer plain, obvious lines over clever compact
+  ones: no walrus operators, nested one-liners or long `and` chains. One step per line, a name for each
+  in-between value, and no line that runs off the card. Cut a concept the section doesn't need (an id map, a
+  type check) before squeezing it into fewer lines.
 - **Comments help, a few of them.** Two or three one-line comments per sample, placed where a new reader would
   ask "what is this for?". Say what a step is for, not what the syntax does. Never comment every line.
 - Short, real, and runnable. Use the same names across Python, TypeScript and C#, with a real filename in each

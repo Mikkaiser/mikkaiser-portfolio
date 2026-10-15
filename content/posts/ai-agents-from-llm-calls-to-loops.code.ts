@@ -175,21 +175,30 @@ MAX_STEPS = 10
 
 
 def run(question: str) -> str:
+    # The conversation so far: the rules first, then the question.
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": question},
     ]
     # The brake: give up after MAX_STEPS rounds.
     for _ in range(MAX_STEPS):
-        response = client.chat.completions.create(model="gpt-5.4-mini", messages=messages, tools=TOOLS)
+        response = client.chat.completions.create(
+            model="gpt-5.4-mini",
+            messages=messages,
+            tools=TOOLS,
+        )
         message = response.choices[0].message
         # No tool calls means plain text: that is the answer.
         if not message.tool_calls:
             return message.content
+        # Keep the model's request in the history, before the results.
         messages.append(message)
         # Run each tool the model asked for and add its result.
         for call in message.tool_calls:
-            result = TOOL_FUNCTIONS[call.function.name](**json.loads(call.function.arguments))
+            name = call.function.name
+            arguments = json.loads(call.function.arguments)
+            result = TOOL_FUNCTIONS[name](**arguments)
+            # The id tells the model which request this result answers.
             messages.append({"role": "tool", "tool_call_id": call.id, "content": result})
     return f"Stopped after {MAX_STEPS} steps."
 
@@ -201,21 +210,30 @@ print(run("Do you have milk, and how much is a bottle?"))`,
 const MAX_STEPS = 10;
 
 async function run(question: string) {
+  // The conversation so far: the rules first, then the question.
   const messages: OpenAI.ChatCompletionMessageParam[] = [
     { role: "system", content: SYSTEM_PROMPT },
     { role: "user", content: question },
   ];
   // The brake: give up after MAX_STEPS rounds.
   for (let step = 0; step < MAX_STEPS; step++) {
-    const response = await client.chat.completions.create({ model: "gpt-5.4-mini", messages, tools });
+    const response = await client.chat.completions.create({
+      model: "gpt-5.4-mini",
+      messages,
+      tools,
+    });
     const message = response.choices[0].message;
     // No tool calls means plain text: that is the answer.
     if (!message.tool_calls) return message.content;
+    // Keep the model's request in the history, before the results.
     messages.push(message);
     // Run each tool the model asked for and add its result.
     for (const call of message.tool_calls) {
       if (call.type !== "function") continue;
-      const result = toolFunctions[call.function.name](JSON.parse(call.function.arguments));
+      const name = call.function.name;
+      const args = JSON.parse(call.function.arguments);
+      const result = toolFunctions[name](args);
+      // The id tells the model which request this result answers.
       messages.push({ role: "tool", tool_call_id: call.id, content: result });
     }
   }
@@ -230,6 +248,7 @@ const int MaxSteps = 10;
 
 async Task<string> RunAsync(string question)
 {
+    // The conversation so far: the rules first, then the question.
     List<ChatMessage> messages = [new SystemChatMessage(SystemPrompt), new UserChatMessage(question)];
     // The brake: give up after MaxSteps rounds.
     for (int step = 0; step < MaxSteps; step++)
@@ -237,12 +256,14 @@ async Task<string> RunAsync(string question)
         ChatCompletion completion = await client.CompleteChatAsync(messages, options);
         // No tool calls means plain text: that is the answer.
         if (completion.ToolCalls.Count == 0) return completion.Content[0].Text;
+        // Keep the model's request in the history, before the results.
         messages.Add(new AssistantChatMessage(completion));
         // Run each tool the model asked for and add its result.
         foreach (ChatToolCall call in completion.ToolCalls)
         {
             using JsonDocument args = JsonDocument.Parse(call.FunctionArguments);
             string result = toolFunctions[call.FunctionName](args.RootElement);
+            // The id tells the model which request this result answers.
             messages.Add(new ToolChatMessage(call.Id, result));
         }
     }
@@ -276,6 +297,7 @@ def get_price(product_name: str) -> str:
     return f"{INVENTORY[product_name]['price']:.2f} AED"
 
 
+# The agent: its rules, its model and its tools.
 agent = Agent(
     name="Corner Store Assistant",
     instructions=(
@@ -286,7 +308,7 @@ agent = Agent(
     tools=[check_stock, get_price],
 )
 
-# The framework runs the whole loop.
+# The framework runs the whole loop, with the same 10-round brake.
 result = Runner.run_sync(agent, "Do you have milk, and how much is a bottle?", max_turns=10)
 print(result.final_output)`,
     ts: `import { Agent, run, tool } from "@openai/agents";
@@ -319,6 +341,7 @@ const getPrice = tool({
   },
 });
 
+// The agent: its rules, its model and its tools.
 const agent = new Agent({
   name: "Corner Store Assistant",
   instructions:
@@ -328,7 +351,7 @@ const agent = new Agent({
   tools: [checkStock, getPrice],
 });
 
-// The framework runs the whole loop.
+// The framework runs the whole loop, with the same 10-round brake.
 const result = await run(agent, "Do you have milk, and how much is a bottle?", { maxTurns: 10 });
 console.log(result.finalOutput);`,
     cs: `using System.ComponentModel;
@@ -352,6 +375,7 @@ string CheckStock(string productName) => $"{inventory[productName].Stock} units 
 [Description("Get the unit price of a product, in AED.")]
 string GetPrice(string productName) => $"{inventory[productName].Price:F2} AED";
 
+// The agent: its rules, its model and its tools.
 AIAgent agent = new ChatClient("gpt-5.4-mini", Environment.GetEnvironmentVariable("OPENAI_API_KEY"))
     .AsAIAgent(
         name: "Corner Store Assistant",
@@ -366,127 +390,147 @@ AIAgent agent = new ChatClient("gpt-5.4-mini", Environment.GetEnvironmentVariabl
             .UseFunctionInvocation(configure: f => f.MaximumIterationsPerRequest = 10)
             .Build());
 
-// The framework runs the whole loop.
+// The framework runs the whole loop, with the same 10-round brake.
 Console.WriteLine(await agent.RunAsync("Do you have milk, and how much is a bottle?"));`,
   },
   b2: {
-    py: `from agents import Runner, TResponseInputItem
+    py: `from agents import Runner
 
-history: list[TResponseInputItem] = []
-while (question := input("You: ")) != "exit":
+history = []
+while True:
+    question = input("You: ")
+    if question == "exit":
+        break
+
     history.append({"role": "user", "content": question})
-    result = Runner.run_sync(agent, history, max_turns=10)
-    print(f"Agent: {result.final_output}")
+    result = Runner.run_sync(agent, history)
+    print("Agent:", result.final_output)
+
     # The result carries the whole conversation, ready for the next question.
     history = result.to_input_list()`,
     ts: `import { run, user, type AgentInputItem } from "@openai/agents";
 import { createInterface } from "node:readline/promises";
 
-const rl = createInterface({ input: process.stdin });
+const rl = createInterface({ input: process.stdin, output: process.stdout });
 let history: AgentInputItem[] = [];
-process.stdout.write("You: ");
-for await (const question of rl) {
+
+while (true) {
+  const question = await rl.question("You: ");
   if (question === "exit") break;
-  const result = await run(agent, [...history, user(question)], { maxTurns: 10 });
-  console.log(\`Agent: \${result.finalOutput}\`);
+
+  const result = await run(agent, [...history, user(question)]);
+  console.log("Agent:", result.finalOutput);
+
   // The result carries the whole conversation, ready for the next question.
   history = result.history;
-  process.stdout.write("You: ");
 }`,
     cs: `using Microsoft.Agents.AI;
 
 // The session remembers the conversation between questions.
 AgentSession session = await agent.CreateSessionAsync();
+
 while (true)
 {
     Console.Write("You: ");
     string? question = Console.ReadLine();
     if (question is null or "exit") break;
-    Console.WriteLine($"Agent: {await agent.RunAsync(question, session)}");
+
+    var response = await agent.RunAsync(question, session);
+    Console.WriteLine($"Agent: {response}");
 }`,
   },
   b3: {
     py: `import asyncio
-import uuid
+from agents import Runner, trace
 
-from agents import Runner, TResponseInputItem, trace
-from openai.types.responses import ResponseFunctionToolCall, ResponseTextDeltaEvent
+async def main():
+    history = []
+    while True:
+        question = input("You: ")
+        if question == "exit":
+            break
 
-
-async def main() -> None:
-    session_id = str(uuid.uuid4())
-    history: list[TResponseInputItem] = []
-    while (question := input("You: ")) != "exit":
         history.append({"role": "user", "content": question})
-        calls: dict[str, ResponseFunctionToolCall] = {}
-        with trace("Corner Store Assistant", group_id=session_id):
-            result = Runner.run_streamed(agent, history, max_turns=10)
+
+        # trace() groups everything this turn does in the OpenAI dashboard.
+        with trace("Corner Store Assistant"):
+            result = Runner.run_streamed(agent, history)
+
             async for event in result.stream_events():
-                if event.type == "raw_response_event" and isinstance(event.data, ResponseTextDeltaEvent):
-                    print(event.data.delta, end="", flush=True)
+                if event.type == "raw_response_event":
+                    # A piece of the answer: print it right away.
+                    if event.data.type == "response.output_text.delta":
+                        print(event.data.delta, end="", flush=True)
+
                 elif event.type == "run_item_stream_event":
-                    item = event.item
-                    if item.type == "tool_call_item" and isinstance(item.raw_item, ResponseFunctionToolCall):
-                        calls[item.raw_item.call_id] = item.raw_item
-                    elif item.type == "tool_call_output_item" and (call := calls.pop(item.call_id or "", None)):
-                        print(f"[tool] {call.name}({call.arguments}) ... done")
+                    # The model asked for a tool: show which one.
+                    if event.item.type == "tool_call_item":
+                        print(f"\\n[tool] {event.item.raw_item.name}")
+
         print()
         history = result.to_input_list()
 
-
 asyncio.run(main())`,
     ts: `import { run, user, withTrace, type AgentInputItem } from "@openai/agents";
-import { randomUUID } from "node:crypto";
 import { createInterface } from "node:readline/promises";
 
-const sessionId = randomUUID();
-const rl = createInterface({ input: process.stdin });
+const rl = createInterface({ input: process.stdin, output: process.stdout });
 let history: AgentInputItem[] = [];
-process.stdout.write("You: ");
-for await (const question of rl) {
+
+while (true) {
+  const question = await rl.question("You: ");
   if (question === "exit") break;
+
+  // withTrace() groups everything this turn does in the OpenAI dashboard.
   await withTrace("Corner Store Assistant", async () => {
-    const stream = await run(agent, [...history, user(question)], { stream: true, maxTurns: 10 });
-    const calls = new Map<string, string>();
+    const stream = await run(agent, [...history, user(question)], { stream: true });
+
     for await (const event of stream) {
-      if (event.type === "raw_model_stream_event" && event.data.type === "output_text_delta") {
-        process.stdout.write(event.data.delta);
-      } else if (event.type === "run_item_stream_event") {
-        const { item } = event;
-        if (item.type === "tool_call_item" && item.rawItem.type === "function_call") {
-          calls.set(item.rawItem.callId, \`\${item.rawItem.name}(\${item.rawItem.arguments})\`);
-        } else if (item.type === "tool_call_output_item" && item.rawItem.type === "function_call_result") {
-          console.log(\`[tool] \${calls.get(item.rawItem.callId)} ... done\`);
+      if (event.type === "raw_model_stream_event") {
+        // A piece of the answer: print it right away.
+        if (event.data.type === "output_text_delta") {
+          process.stdout.write(event.data.delta);
+        }
+      }
+
+      if (event.type === "run_item_stream_event") {
+        // The model asked for a tool: show which one.
+        const call = event.item.rawItem;
+        if (event.item.type === "tool_call_item" && call.type === "function_call") {
+          console.log(\`\\n[tool] \${call.name}\`);
         }
       }
     }
+
     await stream.completed;
     console.log();
     history = stream.history;
-  }, { groupId: sessionId });
-  process.stdout.write("You: ");
+  });
 }`,
-    cs: `using System.Text.Json;
-using Microsoft.Agents.AI;
+    cs: `using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 
 AgentSession session = await agent.CreateSessionAsync();
+
 while (true)
 {
     Console.Write("You: ");
     string? question = Console.ReadLine();
     if (question is null or "exit") break;
-    Dictionary<string, FunctionCallContent> calls = [];
+
     await foreach (AgentResponseUpdate update in agent.RunStreamingAsync(question, session))
     {
+        // A piece of the answer: print it right away.
         Console.Write(update.Text);
+
+        // The model asked for a tool: show which one.
         foreach (AIContent content in update.Contents)
         {
-            if (content is FunctionCallContent call) calls[call.CallId] = call;
-            else if (content is FunctionResultContent result && calls.Remove(result.CallId, out var done))
-                Console.WriteLine($"[tool] {done.Name}({JsonSerializer.Serialize(done.Arguments)}) ... done");
+            if (content is FunctionCallContent call)
+                Console.WriteLine($"\\n[tool] {call.Name}");
         }
     }
+
     Console.WriteLine();
 }`,
   },

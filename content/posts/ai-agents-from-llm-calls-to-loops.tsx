@@ -412,17 +412,17 @@ export default function Post() {
           Sending the answer in small pieces as the model writes it, instead of all at once when it&rsquo;s done.
           It&rsquo;s why chat apps look like they&rsquo;re typing.
         </Term>
-        : the answer shows up word by word, and a <Code>[tool]</Code> line appears for each call as it
-        finishes.
+        : the answer shows up word by word, and a <Code>[tool]</Code> line appears each time the
+        model asks for a tool.
       </p>
       <CodeTabs {...CODE.b3} />
       <InPlainWords
         intro="Skipping the code? Fair. Here's what happens on every message:"
         steps={[
           { title: "Wait for a question.", text: <>The chat keeps going until you type <Code>exit</Code>.</> },
-          { title: "Run the agent with the whole history.", text: <>Every earlier message and tool result goes along. In Python and TypeScript it runs inside a trace, so the whole chat shows up together in the dashboard.</> },
+          { title: "Run the agent with the whole history.", text: <>Every earlier message and tool result goes along. In Python and TypeScript it runs inside a trace, so each turn shows up in the dashboard.</> },
           { title: "Print the answer as it arrives.", text: <>Each small piece of text goes straight to the screen.</> },
-          { title: "Print a [tool] line.", text: <>When a tool finishes, match the result to its call and show what ran.</> },
+          { title: "Print a [tool] line.", text: <>Whenever the model asks for a tool, show which one.</> },
           { title: "Keep the history for next time.", text: <>The messages from this run become the history for the next question. In C#, the session does this for you.</> },
         ]}
         back={{ after: 5, to: 1 }}
@@ -437,9 +437,7 @@ export default function Post() {
           The Agents SDK&rsquo;s name for everything that happens during a run besides the text: tool calls, tool
           results, handoffs.
         </Term>{" "}
-        are the tool activity, and all
-        the calls of a turn arrive before their results, which is why each version keeps a map by call id to match
-        them up.
+        are the tool activity, like the model asking for a tool.
       </p>
       <p>
         The trace block is the other half. Each turn becomes a{" "}
@@ -447,9 +445,8 @@ export default function Post() {
           A record of everything one run did, in order and with timings: each model call, each tool call, what went
           in and what came out. Great for finding out why the agent did something weird.
         </Term>{" "}
-        in the OpenAI dashboard, and the shared group id
-        ties all the turns of one chat together, so you can open a follow-up and see the earlier messages in the
-        model&rsquo;s input. Agent Framework traces through{" "}
+        in the OpenAI dashboard, so you can open one and see
+        every model call and tool call it made. Agent Framework traces through{" "}
         <Term id="otel" label="OpenTelemetry" href="https://opentelemetry.io/">
           An open standard for traces, metrics and logs. Your app reports what it did as spans, little timed blocks
           of work, and any compatible tool can show them.
