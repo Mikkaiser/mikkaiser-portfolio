@@ -6,25 +6,26 @@
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-/* Fluid type for the blog. Every size holds its Acta value up to a 1366px
-   wide window, then grows in a straight line to its cap at 1920px, so text on a
-   full HD screen stops looking small while laptops and phones are unchanged.
-   Scoped to main, so the header and footer match the home page. */
+/* Fluid type for the blog. The reading sizes sit a step above Acta's, because
+   15px body text read small on a laptop. Every size holds its floor up to a 1366px
+   wide window, then grows in a straight line to its cap at 1920px. Labels, dates
+   and cards keep Acta's values. Scoped to main, so the header and footer match the
+   home page. */
 .blog-top > main {
-  --size-body: clamp(15px, 10.07px + 0.361vw, 17px);
+  --size-body: clamp(17px, 12.07px + 0.361vw, 19px);
   --size-small: clamp(13px, 9.3px + 0.271vw, 14.5px);
-  --size-lead: clamp(20px, 13.84px + 0.451vw, 22.5px);
-  --size-heading: clamp(24px, 14.14px + 0.722vw, 28px);
-  --size-h3: clamp(21px, 13.6px + 0.542vw, 24px);
+  --size-lead: clamp(21px, 13.6px + 0.542vw, 24px);
+  --size-heading: clamp(26px, 16.14px + 0.722vw, 30px);
+  --size-h3: clamp(22.5px, 15.1px + 0.542vw, 25.5px);
   --size-entry-title: clamp(20px, 15.07px + 0.361vw, 22px);
-  --size-code: clamp(13px, 9.3px + 0.271vw, 14.5px);
+  --size-code: clamp(14px, 10.3px + 0.271vw, 15.5px);
   --size-meta: clamp(11px, 8.53px + 0.181vw, 12px);
   --size-micro: clamp(10px, 7.53px + 0.181vw, 11px);
   /* Sizes the blog set by hand, on the same ramp. */
-  --size-label: clamp(12px, 9.53px + 0.181vw, 13px);
-  --size-quote: clamp(19px, 14.07px + 0.361vw, 21px);
-  --size-step: clamp(14px, 10.3px + 0.271vw, 15.5px);
-  --size-term: clamp(16px, 11.07px + 0.361vw, 18px);
+  --size-label: clamp(13px, 9.3px + 0.271vw, 14.5px);
+  --size-quote: clamp(21px, 16.07px + 0.361vw, 23px);
+  --size-step: clamp(16px, 12.3px + 0.271vw, 17.5px);
+  --size-term: clamp(17px, 12.07px + 0.361vw, 19px);
 }
 
 /* Like .top on the home page, but clip instead of hidden: hidden makes a scroll
