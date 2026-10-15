@@ -35,23 +35,24 @@
 .blog-top > main { flex: 1 0 auto; }
 
 /* ---------- index ---------- */
-/* The page's hero: the title and intro on the left, a small neural network in the
-   outline of a brain on the right (components/blog/KnowledgeField.tsx). The title sits
-   at the post title's scale. */
-.blog-hero { padding: var(--space-12) 0; border-bottom: var(--hairline) solid var(--rule); }
-.blog-hero__in { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 440px); gap: var(--space-12); align-items: center; }
+/* The page's hero: the title and intro over a brain drawn in the posts' particles
+   (the same field as the covers, with a brain for its shape), filling the width. The
+   title sits at the post title's scale. */
+.blog-hero {
+  position: relative; display: flex; align-items: center; overflow: hidden; touch-action: pan-y;
+  min-height: clamp(380px, 32vw, 460px); padding: var(--space-12) 0; border-bottom: var(--hairline) solid var(--rule);
+}
+.blog-hero__text { position: relative; width: 100%; }
+.blog-hero__text > * { max-width: min(560px, 100%); }
 .blog-hero .post__meta { margin-bottom: var(--space-3); }
 .blog-hero__title {
   margin: 0 0 var(--space-4); font-family: var(--font-display); font-weight: var(--weight-display);
   font-size: clamp(36px, 4.6vw, 64px); line-height: var(--lh-page-title); letter-spacing: var(--ls-page-title); color: var(--ink);
 }
-.blog-hero__intro { margin: 0; max-width: var(--measure-lead); text-wrap: pretty; font-size: var(--size-lead); line-height: var(--lh-lead); letter-spacing: var(--ls-lead); color: var(--ink-soft); }
-.blog-hero__art { aspect-ratio: 4 / 3; width: 100%; }
-.blog-hero__art canvas { display: block; width: 100%; height: 100%; }
-@media (max-width: 760px) {
-  .blog-hero { padding: var(--space-8) 0; }
-  .blog-hero__in { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
-  .blog-hero__art { order: -1; max-width: 320px; }
+.blog-hero__intro { margin: 0; text-wrap: pretty; font-size: var(--size-lead); line-height: var(--lh-lead); letter-spacing: var(--ls-lead); color: var(--ink-soft); }
+@media (max-width: 620px) {
+  /* The brain sits above the text on a phone. */
+  .blog-hero { align-items: flex-end; min-height: 0; padding: 280px 0 var(--space-8); }
 }
 
 .topics { display: flex; flex-wrap: wrap; gap: var(--space-2); border: 0; margin: 0 0 var(--space-6); padding: 0; min-width: 0; }

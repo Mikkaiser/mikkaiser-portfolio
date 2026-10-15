@@ -5,13 +5,13 @@
  * so the same post draws the same field everywhere.
  */
 
-export type CoverShape = "loop";
+export type CoverShape = "loop" | "brain";
 /** Where the field is drawn: the post's hero, its poster card on the index, or the share image. */
 export type CoverKind = "cover" | "card" | "share";
 export type Pt = { x: number; y: number };
 
 /** One particle: where it sits on the path (0 to 1), how far off it, how fast it flows, how bright and big. */
-export type Seed = { u: number; off: number; speed: number; tone: number; size: number };
+export type Seed = { u: number; off: number; speed: number; tone: number; size: number; lo?: number; hi?: number };
 /**
  * A background star: a fixed spot (0 to 1 of the canvas), a tint, how bright and
  * big, and how it twinkles. Stars sit behind the path and never move.
@@ -31,7 +31,8 @@ const LAP_S = 24;
 export const PULSE_MS = 4200;
 const TRAIL = 0.09;
 
-type Path = { at: (u: number, off: number) => Pt; inside: (p: Pt) => boolean; perimeter: number; band: number; size: number };
+/** `ranges` splits a shape made of several strokes: a particle flows round its own stroke and never jumps to another. */
+type Path = { at: (u: number, off: number) => Pt; inside: (p: Pt) => boolean; perimeter: number; band: number; size: number; ranges?: [number, number][]; flow?: number };
 
 /** The agent loop: an ellipse, clockwise on screen. */
 function loop(kind: CoverKind, w: number, h: number): Path {
@@ -65,7 +66,130 @@ function loop(kind: CoverKind, w: number, h: number): Path {
   return { at, inside, perimeter, band, size };
 }
 
-const SHAPES: Record<CoverShape, (kind: CoverKind, w: number, h: number) => Path> = { loop };
+// ---- the brain: a side view in a 400 x 300 box, facing right, drawn as three strokes ----
+
+type Poly = { pts: Pt[]; cum: number[]; len: number };
+
+function cubic(a: Pt, b: Pt, c: Pt, d: Pt, t: number): Pt {
+  const k = 1 - t;
+  return {
+    x: k * k * k * a.x + 3 * k * k * t * b.x + 3 * k * t * t * c.x + t * t * t * d.x,
+    y: k * k * k * a.y + 3 * k * k * t * b.y + 3 * k * t * t * c.y + t * t * t * d.y,
+  };
+}
+
+/** A stroke as a run of cubic Béziers (and straight lines, as flat ones) sampled into a polyline. */
+function stroke(start: Pt, segs: number[][]): Poly {
+  const pts: Pt[] = [start];
+  let cur = start;
+  for (const g of segs) {
+    const c = g.length === 6
+      ? [{ x: g[0], y: g[1] }, { x: g[2], y: g[3] }, { x: g[4], y: g[5] }]
+      : [{ x: cur.x + (g[0] - cur.x) / 3, y: cur.y + (g[1] - cur.y) / 3 }, { x: cur.x + ((g[0] - cur.x) * 2) / 3, y: cur.y + ((g[1] - cur.y) * 2) / 3 }, { x: g[0], y: g[1] }];
+    for (let i = 1; i <= 24; i++) pts.push(cubic(cur, c[0], c[1], c[2], i / 24));
+    cur = c[2];
+  }
+  const cum = [0];
+  for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y));
+  return { pts, cum, len: cum[cum.length - 1] };
+}
+
+const BRAIN_OUTLINE = stroke({ x: 300, y: 205 }, [
+  [335, 205, 372, 180, 370, 135], [372, 90, 330, 45, 275, 45], [250, 18, 190, 15, 160, 42], [110, 32, 62, 68, 66, 112],
+  [40, 135, 48, 180, 85, 190], [80, 215, 110, 238, 145, 235], [165, 248, 195, 246, 208, 230], [212, 252],
+  [213, 262, 228, 262, 229, 252], [232, 226], [262, 232, 290, 222, 300, 205],
+]);
+const BRAIN_CENTRE: Pt = { x: 215, y: 128 };
+
+/** Horizontal strokes across the inside of the outline, one per crossing, like the winding folds of the cortex. */
+function folds(outline: Poly, gap: number): Poly[] {
+  const out: Poly[] = [];
+  const pts = outline.pts;
+  for (let y = 40; y < 255; y += gap) {
+    const xs: number[] = [];
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1], b = pts[i];
+      if ((a.y <= y && b.y > y) || (b.y <= y && a.y > y)) xs.push(a.x + ((y - a.y) / (b.y - a.y)) * (b.x - a.x));
+    }
+    xs.sort((m, n) => m - n);
+    for (let k = 0; k + 1 < xs.length; k += 2) {
+      if (xs[k + 1] - xs[k] > 30) out.push(stroke({ x: xs[k] + 7, y }, [[xs[k + 1] - 7, y]]));
+    }
+  }
+  return out;
+}
+
+// The outline, the folds inside it, and the central and lateral fissures: wavy strokes that together
+// read as the winding surface of a brain.
+const BRAIN_STROKES: Poly[] = [
+  BRAIN_OUTLINE,
+  ...folds(BRAIN_OUTLINE, 15),
+  stroke({ x: 215, y: 34 }, [[205, 80, 218, 110, 206, 142]]),
+  stroke({ x: 128, y: 168 }, [[180, 150, 235, 165, 290, 176]]),
+];
+const FOLDS_END = BRAIN_STROKES.length - 2;
+const BRAIN_TOTAL = BRAIN_STROKES.reduce((n, p) => n + p.len, 0);
+
+function polyPoint(poly: Poly, s: number): { p: Pt; tx: number; ty: number } {
+  let i = 1;
+  while (i < poly.cum.length - 1 && poly.cum[i] < s) i++;
+  const a = poly.pts[i - 1], b = poly.pts[i];
+  const f = (s - poly.cum[i - 1]) / (poly.cum[i] - poly.cum[i - 1] || 1);
+  const dx = b.x - a.x, dy = b.y - a.y, dl = Math.hypot(dx, dy) || 1;
+  return { p: { x: a.x + dx * f, y: a.y + dy * f }, tx: dx / dl, ty: dy / dl };
+}
+
+/** The brain: right of the title on wide screens, above it on phones; centred on a card. */
+function brain(kind: CoverKind, w: number, h: number): Path {
+  let scale: number, ox: number, oy: number;
+  if (kind === "card") {
+    scale = (w * 0.74) / 400; ox = w * 0.13; oy = h * 0.33 - 140 * scale;
+  } else if (kind === "share") {
+    scale = (h * 0.62) / 300; ox = w * 0.72 - 215 * scale; oy = h * 0.4 - 140 * scale;
+  } else if (w < 620) {
+    scale = Math.min((w * 0.78) / 400, 230 / 300); ox = w / 2 - 215 * scale; oy = 20;
+  } else {
+    scale = Math.min((h * 0.84) / 300, (Math.min(w, 1180) * 0.38) / 400);
+    const col = Math.min(w, 1180);
+    const cx = Math.min(w * 0.5 + col * 0.25, w - 200 * scale - Math.max(24, w * 0.03));
+    ox = cx - 215 * scale; oy = h / 2 - 140 * scale;
+  }
+  // Each stroke gets a slice of u in proportion to its length, so particles are evenly spread.
+  const ranges: [number, number][] = [];
+  let acc = 0;
+  for (const p of BRAIN_STROKES) { ranges.push([acc / BRAIN_TOTAL, (acc + p.len) / BRAIN_TOTAL]); acc += p.len; }
+  ranges[ranges.length - 1][1] = 1;
+
+  const at = (u: number, off: number): Pt => {
+    const gi = Math.max(0, ranges.findIndex(([, hi]) => u < hi));
+    const [lo, hi] = ranges[gi];
+    const poly = BRAIN_STROKES[gi];
+    const along = ((u - lo) / (hi - lo)) * poly.len;
+    const { p, tx, ty } = polyPoint(poly, along);
+    // Offset along the normal; on the outline, the side facing away from the middle is positive.
+    let nx = -ty, ny = tx;
+    if (gi === 0 && nx * (p.x - BRAIN_CENTRE.x) + ny * (p.y - BRAIN_CENTRE.y) < 0) { nx = -nx; ny = -ny; }
+    // The folds of the cortex: a slow, uneven wave along every stroke.
+    const amp = gi === 0 ? 5 : gi < FOLDS_END ? 4.2 : 2.2;
+    const wave = amp * (Math.sin(along * (gi === 0 ? 0.4 : 0.2) + gi * 1.7) + 0.55 * Math.sin(along * (gi === 0 ? 0.93 : 0.47) + 1.3 + gi)) / 1.55;
+    return { x: ox + (p.x + nx * wave) * scale + nx * off, y: oy + (p.y + ny * wave) * scale + ny * off };
+  };
+  // Inside the outline, away from its band: where a click sets off a burst.
+  const inside = (q: Pt) => {
+    const x = (q.x - ox) / scale, y = (q.y - oy) / scale;
+    const pts = BRAIN_OUTLINE.pts;
+    let c = false;
+    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+      if ((pts[i].y > y) !== (pts[j].y > y) && x < ((pts[j].x - pts[i].x) * (y - pts[i].y)) / (pts[j].y - pts[i].y) + pts[i].x) c = !c;
+    }
+    return c;
+  };
+  return { at, inside, perimeter: BRAIN_TOTAL * scale * 0.4, band: Math.max(1.6, scale * 2.4), size: kind === "card" ? 2 : 2.2, ranges,
+    // Every stroke shares one u scale, so the whole drawing is longer than a loop: slow it to a loop's pace along the line.
+    flow: Math.min(1, 950 / (BRAIN_TOTAL * scale)) };
+}
+
+const SHAPES: Record<CoverShape, (kind: CoverKind, w: number, h: number) => Path> = { loop, brain };
 
 /** Mulberry32: a tiny seeded generator, so the server and the browser scatter the same field. */
 function rng(seed: number) {
@@ -88,10 +212,14 @@ export function field(shape: CoverShape, kind: CoverKind, w: number, h: number):
   for (let i = 0; i < n; i++) {
     // Most particles hug the path; a few stray wider, for texture.
     const spread = r() < 0.06 ? 3.5 : 1;
+    const u = r();
+    const range = path.ranges?.find(([lo, hi]) => u >= lo && u < hi);
     seeds.push({
-      u: r(),
+      u,
+      lo: range?.[0],
+      hi: range?.[1],
       off: gauss() * path.band * spread,
-      speed: (1 / LAP_S) * (0.75 + r() * 0.5),
+      speed: (1 / LAP_S) * (path.flow ?? 1) * (0.75 + r() * 0.5),
       tone: (kind === "card" ? 0.4 : 0.28) + r() * 0.45,
       size: path.size * (0.7 + r() * 0.45),
     });

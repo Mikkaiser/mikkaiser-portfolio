@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { KnowledgeField } from "@/components/blog/KnowledgeField";
+import { ParticleCover } from "@/components/blog/cover/ParticleCover";
 import { PostCard } from "@/components/blog/PostCard";
 import { TopicFilter } from "@/components/blog/TopicFilter";
 import { FEED_ALTERNATE, getPosts, getTopics, topicKey } from "@/lib/posts";
@@ -23,13 +23,11 @@ export default function BlogIndex() {
   return (
     <>
       <header className="blog-hero">
-        <div className="wrap blog-hero__in">
-          <div className="blog-hero__text">
-            {posts.length ? <p className="post__meta">{span ? `${count} · ${span}` : count}</p> : null}
-            <h1 className="blog-hero__title">Writing</h1>
-            <p className="blog-hero__intro">Notes on what I built, how it went, and what I would do again. Plain words, real code.</p>
-          </div>
-          <KnowledgeField />
+        <ParticleCover shape="brain" kind="cover" />
+        <div className="wrap blog-hero__text">
+          {posts.length ? <p className="post__meta">{span ? `${count} · ${span}` : count}</p> : null}
+          <h1 className="blog-hero__title">Writing</h1>
+          <p className="blog-hero__intro">Notes on what I built, how it went, and what I would do again. Plain words, real code.</p>
         </div>
       </header>
 

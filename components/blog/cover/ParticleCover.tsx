@@ -179,7 +179,11 @@ export function ParticleCover({ shape, kind }: { shape: CoverShape; kind: "cover
       const S = f.seeds.length;
       for (let i = 0; i < px.length; i++) {
         const star = i >= S;
-        if (!star) us[i] = (us[i] + f.seeds[i].speed * dt * (kind === "card" ? flow : 1)) % 1;
+        if (!star) {
+          // A particle wraps within its own stroke (the whole path unless the shape has several).
+          const sd = f.seeds[i], lo = sd.lo ?? 0, hi = sd.hi ?? 1;
+          us[i] = lo + ((us[i] + sd.speed * dt * (kind === "card" ? flow : 1) - lo) % (hi - lo));
+        }
         // Stars always spring home, even while the loop is scattered.
         const spring = star ? SPRING : loopSpring, damp = star ? DAMP : loopDamp;
         const t = target(i);
