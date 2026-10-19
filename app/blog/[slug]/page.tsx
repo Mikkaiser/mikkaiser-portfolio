@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { AuthorByline, AuthorCard } from "@/components/blog/Author";
 import { CodeLangSync } from "@/components/blog/CodeLangSync";
 import { ParticleCover } from "@/components/blog/cover/ParticleCover";
+import { Narration } from "@/components/blog/Narration";
 import { PlainHint } from "@/components/blog/PlainHint";
 import { TocList } from "@/components/blog/TocList";
 import { FEED_ALTERNATE, formatLongDate, getNextPost, getPost, getPosts } from "@/lib/posts";
@@ -91,6 +92,7 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
             {meta.cover ? null : <>{metaLine}{title}</>}
             <p className="post__lead">{meta.lead ?? meta.summary}</p>
             <AuthorByline />
+            {meta.narration ? <Narration slug={meta.slug} seconds={meta.narration.seconds} /> : null}
           </header>
           {showToc ? <aside className="post__toc"><TocList items={toc} minutes={meta.minutes} /></aside> : null}
           <div className="post__body">

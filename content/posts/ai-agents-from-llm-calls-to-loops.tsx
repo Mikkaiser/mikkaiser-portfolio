@@ -18,6 +18,7 @@ export const meta: PostMeta = {
   date: "2026-10-15",
   minutes: 13,
   cover: "loop",
+  narration: { seconds: 868 },
 };
 
 export const toc: TocItem[] = [

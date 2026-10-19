@@ -17,6 +17,8 @@ export type PostMeta = {
   minutes: number;
   /** The particle shape behind the title, on the index thumbnail and in the share image. */
   cover?: CoverShape;
+  /** The post read aloud: public/audio/<slug>.m4a, timed word by word in public/audio/<slug>.json. */
+  narration?: { seconds: number };
   /** Drafts render in `next dev` only. */
   draft?: boolean;
 };

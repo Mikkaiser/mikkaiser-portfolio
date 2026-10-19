@@ -301,6 +301,58 @@
 /* On a phone the question sits above the chip, so the padding evens out. */
 @media (max-width: 620px) { .plainhint { padding: 10px; } }
 
+/* ---------- narration: the post read aloud (components/blog/Narration.tsx) ----------
+   A player under the byline, and a copy that docks at the bottom of the screen
+   once that one scrolls away. The word being said is lit in ink, the same mark
+   in both themes, so it stays inside Acta's monochrome palette. */
+.listen--top { margin: calc(-1 * var(--space-3)) 0 var(--space-8); }
+.listen {
+  display: flex; align-items: center; gap: var(--space-3) var(--space-4); max-width: var(--measure-lead);
+  padding: var(--space-3); border: var(--hairline) solid var(--rule); border-radius: var(--radius-control);
+}
+.listen__play {
+  flex: none; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: var(--radius-round);
+  background: var(--ink); color: var(--on-ink); cursor: pointer; transition: background var(--dur-pointer) var(--ease);
+}
+.listen__play:hover { background: var(--ink-hover); }
+.listen__play svg { display: block; }
+.listen__main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.listen__title { font-family: var(--font-body-medium); font-weight: var(--weight-medium); font-size: var(--size-label); color: var(--ink); }
+.listen__track { display: flex; align-items: center; gap: var(--space-3); }
+.listen__time { flex: none; font-family: var(--font-mono); font-size: var(--size-meta); color: var(--faint); font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* A 2px rule that fills with ink as the narration plays. */
+.listen__seek { flex: 1; min-width: 0; height: 24px; margin: 0; background: transparent; cursor: pointer; appearance: none; -webkit-appearance: none; }
+.listen__seek::-webkit-slider-runnable-track { height: 2px; border-radius: 1px; background: linear-gradient(to right, var(--ink) var(--p), var(--rule) var(--p)); }
+.listen__seek::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; margin-top: -5px; border: 0; border-radius: var(--radius-round); background: var(--ink); }
+.listen__seek::-moz-range-track { height: 2px; border-radius: 1px; background: var(--rule); }
+.listen__seek::-moz-range-progress { height: 2px; border-radius: 1px; background: var(--ink); }
+.listen__seek::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: var(--radius-round); background: var(--ink); }
+.listen__rate {
+  flex: none; min-width: 44px; height: 44px; padding: 0 var(--space-2); border: var(--hairline) solid var(--rule); border-radius: var(--radius-control);
+  background: transparent; color: var(--ink); font-family: var(--font-mono); font-size: var(--size-meta); font-variant-numeric: tabular-nums; cursor: pointer;
+  transition: border-color var(--dur-pointer) var(--ease);
+}
+.listen__rate:hover { border-color: var(--ink); }
+.listen__follow {
+  flex: none; padding: 8px 12px; border: 0; border-radius: var(--radius-chip); background: var(--ink); color: var(--on-ink);
+  font-family: var(--font-body-medium); font-weight: var(--weight-medium); font-size: var(--size-small); white-space: nowrap; cursor: pointer;
+  transition: background var(--dur-pointer) var(--ease);
+}
+.listen__follow:hover { background: var(--ink-hover); }
+.listen button:focus-visible, .listen__seek:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.listen--dock {
+  position: fixed; z-index: 45; left: 50%; bottom: var(--space-6); width: min(600px, calc(100% - var(--space-8))); max-width: none;
+  flex-wrap: wrap; padding: var(--space-2); border-radius: var(--radius-card); background: var(--raised);
+  opacity: 0; visibility: hidden; pointer-events: none; transform: translate(-50%, 10px);
+  transition: opacity .2s linear, transform .3s cubic-bezier(.16,.84,.31,1), visibility 0s linear .3s;
+}
+.listen--dock[data-show] { opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 0); transition-delay: 0s; }
+:root[data-narrating] .plainhint { display: none; }
+::highlight(narration) { background-color: color-mix(in srgb, var(--ink) 24%, transparent); color: var(--ink); }
+@media (max-width: 620px) {
+  .listen--dock { bottom: var(--space-4); }
+}
+
 /* ---------- terms: a niche word with a reference popover (components/blog/Term.tsx) ---------- */
 .termwrap { position: relative; display: inline-block; }
 .term { color: var(--ink); border-bottom: var(--hairline) dashed var(--faint); cursor: help; transition: border-color var(--dur-pointer) var(--ease); }
@@ -347,7 +399,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .progress { display: none; }
-  .plainhint { transition: none; }
+  .plainhint, .listen--dock { transition: none; }
   .plainhint[data-show] .plainhint__arrow { animation: none; }
   .postcard__poster, .tag, .toc__link, .prose a, .code__tabs .code__tab { transition: none; }
 }
