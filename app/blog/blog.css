@@ -304,9 +304,11 @@
 
 /* ---------- narration: the post read aloud (components/blog/Narration.tsx) ----------
    A player under the byline, and a copy that docks at the bottom of the screen
-   once that one scrolls away. The sentence being said fills from left to right
-   like selected text, a solid block of ink with the words knocked out of it,
-   so it stays inside Acta's monochrome palette in both themes. */
+   once that one scrolls away. Everything already said is filled with mint like a
+   highlighter pen, dark text on a pale green, and the edge of the fill glides
+   along with the voice (components/blog/narration-fill.ts). The mint is the one
+   deliberate step outside Acta's palette, the same in both themes. */
+:root { --narration-fill: #CFF5D6; --narration-ink: #0A0A0A; }
 .listen--top { margin: calc(-1 * var(--space-3)) 0 var(--space-8); }
 .listen {
   display: flex; align-items: center; gap: var(--space-3) var(--space-4); max-width: var(--measure-lead);
@@ -350,7 +352,12 @@
 }
 .listen--dock[data-show] { opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 0); transition-delay: 0s; }
 :root[data-narrating] .plainhint { display: none; }
-::highlight(narration) { background-color: var(--ink); color: var(--on-ink); }
+::highlight(narration) { background-color: var(--narration-fill); color: var(--narration-ink); }
+/* The edge of the fill sits behind the text, so the article becomes its own
+   stacking context while it is there. */
+.prose:has(> .narration-edge) { position: relative; isolation: isolate; }
+.narration-edge { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.narration-edge > span { position: absolute; left: 0; top: 0; background: var(--narration-fill); }
 @media (max-width: 620px) {
   .listen--dock { bottom: var(--space-4); }
 }
