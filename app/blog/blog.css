@@ -108,8 +108,9 @@
 .cover .post__title { margin: 0; max-width: 16ch; font-size: clamp(34px, 4.6vw, 64px); }
 
 /* The article and its table of contents share the full width at 9:4, the
-   contents beside the whole article from 1180px, and between the lead and the
-   text below that. */
+   contents beside the whole article from 960px, and between the lead and the
+   text below that. Acta moves them at 1180px, but between the two the single
+   column hung off the left of a mostly empty page. */
 .post__grid {
   display: grid; grid-template-columns: minmax(0, 9fr) minmax(0, 4fr); column-gap: var(--space-12); align-items: start;
   grid-template-areas: "head toc" "body toc";
@@ -162,7 +163,7 @@
   font-family: var(--font-mono); font-size: var(--size-micro); line-height: 1.8; letter-spacing: 0.04em; text-transform: uppercase; color: var(--faint);
 }
 /* Beside the article the contents hang off the right edge, the rule mirrored with them. */
-@media (min-width: 1180px) {
+@media (min-width: 960px) {
   .toc { text-align: right; }
   .toc__link { padding: 7px 13px 7px 0; border-left: 0; border-right: var(--hairline) solid var(--rule); }
   .toc__link[aria-current="true"] { border-right-color: var(--ink); }
@@ -380,7 +381,7 @@
 }
 
 /* ---------- responsive ---------- */
-@media (max-width: 1179px) {
+@media (max-width: 959px) {
   .post__grid { grid-template-columns: minmax(0, var(--measure-body)); grid-template-areas: "head" "toc" "body"; }
   .post__grid--solo { grid-template-areas: "head" "body"; }
   .post__toc { position: static; margin-bottom: var(--space-8); }
