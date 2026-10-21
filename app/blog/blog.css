@@ -304,8 +304,9 @@
 
 /* ---------- narration: the post read aloud (components/blog/Narration.tsx) ----------
    A player under the byline, and a copy that docks at the bottom of the screen
-   once that one scrolls away. The word being said is lit in ink, the same mark
-   in both themes, so it stays inside Acta's monochrome palette. */
+   once that one scrolls away. The sentence being said fills from left to right
+   like selected text, a solid block of ink with the words knocked out of it,
+   so it stays inside Acta's monochrome palette in both themes. */
 .listen--top { margin: calc(-1 * var(--space-3)) 0 var(--space-8); }
 .listen {
   display: flex; align-items: center; gap: var(--space-3) var(--space-4); max-width: var(--measure-lead);
@@ -349,7 +350,7 @@
 }
 .listen--dock[data-show] { opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 0); transition-delay: 0s; }
 :root[data-narrating] .plainhint { display: none; }
-::highlight(narration) { background-color: color-mix(in srgb, var(--ink) 24%, transparent); color: var(--ink); }
+::highlight(narration) { background-color: var(--ink); color: var(--on-ink); }
 @media (max-width: 620px) {
   .listen--dock { bottom: var(--space-4); }
 }

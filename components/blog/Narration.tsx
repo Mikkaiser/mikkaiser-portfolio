@@ -1,16 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { narrationWords } from "./narration-words";
+import { narrationWords, type NarrationWord } from "./narration-words";
 
-/** A word on the page and when the narration says it, in seconds. */
-type Cue = { range: Range; start: number; end: number };
+/** A word on the page, when the narration says it in seconds, and the cue its sentence starts at. */
+type Cue = { range: Range; start: number; end: number; sentence: number };
 
 /** public/audio/<slug>.json, from scripts/narration-sync.mjs: [word index, word, start ms, end ms]. */
 type Timing = { words: [number, string, number, number][] };
 
 const RATES = [1, 1.25, 1.5, 0.75];
-/** How long a word stays lit after it is said, when nothing follows it (a pause, or a skipped label). */
+/** How long a sentence stays lit after its last word, when nothing follows it (a pause, or a skipped label). */
 const HOLD = 1.2;
 
 function clock(s: number) {
@@ -22,13 +22,37 @@ function spoken(s: number) {
   return `${m} minute${m === 1 ? "" : "s"} ${Math.floor(s % 60)} seconds`;
 }
 
+const BLOCK = "p, li, h2, h3, h4, blockquote, figcaption, td, th, dt, dd";
+
+/**
+ * Numbers the sentences on the page: a word starts a new one when the word
+ * before it ends in . ! or ?, or sits in another paragraph, heading or list item.
+ */
+function sentences(page: NarrationWord[]) {
+  const ids: number[] = [];
+  let id = 0;
+  page.forEach((w, k) => {
+    const prev = page[k - 1];
+    if (prev) {
+      const gap = new Range();
+      gap.setStart(prev.node, prev.end);
+      gap.setEnd(w.node, w.start);
+      const stop = /^[\s"'”’)\]]*[.!?]/.test(gap.toString());
+      if (stop || prev.node.parentElement?.closest(BLOCK) !== w.node.parentElement?.closest(BLOCK)) id++;
+    }
+    ids.push(id);
+  });
+  return ids;
+}
+
 /** Ties each timed word to its place on the page. If the post changed since the timing was made, a word is looked for a little further on. */
 function buildCues({ words }: Timing): Cue[] {
   const prose = document.querySelector(".prose");
   if (!prose) return [];
   const page = narrationWords(prose);
+  const ids = sentences(page);
   const cues: Cue[] = [];
-  let next = 0;
+  let next = 0, id = -1, first = 0;
   for (const [i, word, start, end] of words) {
     let k = i >= next && page[i]?.word === word ? i : -1;
     for (let j = next; k < 0 && j < Math.min(page.length, next + 40); j++) if (page[j].word === word) k = j;
@@ -36,7 +60,8 @@ function buildCues({ words }: Timing): Cue[] {
     const range = new Range();
     range.setStart(page[k].node, page[k].start);
     range.setEnd(page[k].node, page[k].end);
-    cues.push({ range, start: start / 1000, end: end / 1000 });
+    if (ids[k] !== id) { id = ids[k]; first = cues.length; }
+    cues.push({ range, start: start / 1000, end: end / 1000, sentence: first });
     next = k + 1;
   }
   return cues;
@@ -53,8 +78,9 @@ function cueAt(cues: Cue[], t: number) {
 }
 
 /**
- * The post read aloud, with the word being said lit up in the text. The page
- * scrolls to keep that word in view until the reader scrolls themselves; then
+ * The post read aloud. The sentence being said fills with ink from left to
+ * right, a letter at a time, in step with the voice. The page scrolls to keep
+ * the word being said in view until the reader scrolls themselves; then
  * "Follow the text" picks it back up. Once the player at the top is out of
  * view, a copy of it docks at the bottom of the screen.
  *
@@ -65,7 +91,7 @@ export function Narration({ slug, seconds }: { slug: string; seconds: number }) 
   const audio = useRef<HTMLAudioElement>(null);
   const inline = useRef<HTMLElement>(null);
   const cues = useRef<Cue[] | null>(null);
-  const lit = useRef(-1);
+  const lit = useRef("");
   const follow = useRef(true);
   const lastScroll = useRef(0);
   const [playing, setPlaying] = useState(false);
@@ -76,7 +102,7 @@ export function Narration({ slug, seconds }: { slug: string; seconds: number }) 
   const [following, setFollowing] = useState(true);
   const [docked, setDocked] = useState(false);
 
-  // Light the word being said, and scroll to it if the reader is following.
+  // Fill the sentence up to the letter being said, and scroll to it if the reader is following.
   const sync = useCallback(() => {
     const el = audio.current;
     const list = cues.current;
@@ -84,10 +110,21 @@ export function Narration({ slug, seconds }: { slug: string; seconds: number }) 
     const t = el.currentTime;
     const i = cueAt(list, t);
     const at = i >= 0 && t < list[i].end + HOLD ? i : -1;
-    if (at !== lit.current) {
-      lit.current = at;
-      if (at < 0) CSS.highlights.delete("narration");
-      else CSS.highlights.set("narration", new Highlight(list[at].range));
+    // The word being said fills in proportion to how much of it has been said.
+    const word = at < 0 ? null : list[at].range;
+    const said = !word ? 0 : Math.max(0, Math.min(1, (t - list[at].start) / (list[at].end - list[at].start || 1)));
+    const letters = !word ? 0 : Math.round(said * (word.endOffset - word.startOffset));
+    const key = `${at}:${letters}`;
+    if (key !== lit.current) {
+      lit.current = key;
+      if (!word) CSS.highlights.delete("narration");
+      else {
+        const fill = new Range();
+        const from = list[list[at].sentence].range;
+        fill.setStart(from.startContainer, from.startOffset);
+        fill.setEnd(word.startContainer, word.startOffset + letters);
+        CSS.highlights.set("narration", new Highlight(fill));
+      }
     }
     if (at < 0 || !follow.current || el.paused) return;
     // Keep the word in the upper middle of the screen. Leave a running scroll alone.
@@ -227,7 +264,7 @@ export function Narration({ slug, seconds }: { slug: string; seconds: number }) 
           onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)}
           onLoadedMetadata={(e) => setDuration(Math.round(e.currentTarget.duration))}
           onSeeked={sync}
-          onEnded={() => { lit.current = -1; CSS.highlights?.delete("narration"); }}
+          onEnded={() => { lit.current = ""; CSS.highlights?.delete("narration"); }}
         />
       </section>
       <div className="listen listen--dock" data-show={docked ? "" : undefined} inert={!docked}>
